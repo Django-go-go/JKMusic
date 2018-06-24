@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.jkingone.customviewlib.WaveView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@color/white"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <FrameLayout
+        android:layout_marginTop="32dp"
+        android:padding="6dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:padding="4dp"
+            android:textSize="20sp"
+            android:gravity="center_vertical"
+            android:textColor="@color/black"
+            android:layout_gravity="center_vertical"
+            android:text="选择你喜欢的分类"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <ImageView
+            android:padding="4dp"
+            android:id="@+id/iv_back"
+            android:layout_gravity="end|center_vertical"
+            android:src="@drawable/music"
+            android:foreground="@drawable/shadow_oval_widget"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </FrameLayout>
+
+    <android.support.v7.widget.RecyclerView
+        android:layout_margin="12dp"
+        android:layout_weight="1"
+        android:id="@+id/recycle_choose"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"/>
+
+</com.jkingone.customviewlib.WaveView>
