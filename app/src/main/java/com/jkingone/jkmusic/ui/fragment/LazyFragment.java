@@ -37,7 +37,7 @@ public class LazyFragment extends Fragment {
         }
     }
 
-    static Bundle setParams(String... params) {
+    protected static Bundle setParams(String... params) {
         Bundle args = new Bundle();
         if (params != null) {
             args.putInt(ARG_LEN, params.length);

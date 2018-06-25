@@ -7,7 +7,7 @@ import android.os.Parcelable;
  * Created by Administrator on 2017/9/11.
  */
 
-public class Song implements Parcelable{
+public class Song implements Parcelable {
     private String song_id;
     private String title;
     private String author;

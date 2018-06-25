@@ -70,6 +70,16 @@ public abstract class HeadAndFootRecycleAdapter extends RecyclerView.Adapter {
         return getItemContentCount() + 2;
     }
 
+    protected HeadOnClickListener mHeadOnClickListener;
+
+    public void setHeadOnClickListener(HeadOnClickListener headOnClickListener) {
+        mHeadOnClickListener = headOnClickListener;
+    }
+
+    public interface HeadOnClickListener{
+        void headOnClick(View view);
+    }
+
     private class HeadViewHolder extends RecyclerView.ViewHolder {
 
         HeadViewHolder(View itemView) {

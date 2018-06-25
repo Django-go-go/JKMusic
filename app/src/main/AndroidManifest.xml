@@ -11,7 +11,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/NoActionBar">
-
         <activity android:name=".ui.activity.MainActivity">
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -19,12 +18,15 @@
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
-
         <activity android:name=".ui.activity.PlaceholderActivity" />
+        <activity android:name=".ui.activity.ClassifySongListActivity" />
+        <activity android:name=".ui.activity.SongListActivity"/>
 
-        <activity android:name=".ui.activity.ClassifySongListActivity">
-
-        </activity>
+        <service
+            android:name=".service.MusicService"
+            android:process=":remote"
+            android:enabled="true"
+            android:exported="false"/>
     </application>
 
 </manifest>

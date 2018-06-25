@@ -15,6 +15,7 @@ import com.jkingone.commonlib.Utils.ScreenUtils;
 import com.jkingone.customviewlib.LoadView;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.data.entity.SongList;
+import com.jkingone.jkmusic.ui.activity.SongListActivity;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -167,16 +168,6 @@ public class SongListAdapter extends HeadAndFootRecycleAdapter {
         }
     }
 
-    private HeadOnClickListener mHeadOnClickListener;
-
-    public void setHeadOnClickListener(HeadOnClickListener headOnClickListener) {
-        mHeadOnClickListener = headOnClickListener;
-    }
-
-    public interface HeadOnClickListener{
-        void headOnClick(View view);
-    }
-
     private ContentOnClickListener mContentOnClickListener;
 
     public void setContentOnClickListener(ContentOnClickListener contentOnClickListener) {
@@ -197,6 +188,7 @@ public class SongListAdapter extends HeadAndFootRecycleAdapter {
             super(itemView);
             ButterKnife.bind(this, itemView);
             mTextView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, h));
+            mImageView.setLayoutParams(new LinearLayout.LayoutParams(w / 2, w / 2));
         }
     }
 }

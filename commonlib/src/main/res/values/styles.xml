@@ -15,6 +15,7 @@
     </style>
 
     <style name="toolbar" parent="Widget.AppCompat.ActionBar">
+        <item name="android:gravity">bottom</item>
         <item name="android:textColorPrimary">@color/white</item>
         <item name="android:actionMenuTextAppearance">@style/toolbarTextAppearance</item>
     </style>

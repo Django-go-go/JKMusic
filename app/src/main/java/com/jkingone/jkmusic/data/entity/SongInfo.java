@@ -1,5 +1,8 @@
 package com.jkingone.jkmusic.data.entity;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.jkingone.jkmusic.Constant;
 
 import java.util.List;
@@ -7,9 +10,8 @@ import java.util.List;
 /**
  * Created by Administrator on 2017/1/22.
  */
-public class Mp3Info {
-    private long id; // 歌曲ID 3
-    private String id_String;
+public class SongInfo implements Parcelable {
+    private String id; // 歌曲ID 3
     private String title; // 歌曲名称 0
     private String album; // 专辑 7
     private long albumId;//专辑ID 6
@@ -18,16 +20,47 @@ public class Mp3Info {
     private long size; // 歌曲大小 8
     private String url; // 歌曲路径 5
     private String picUrl;
-    private List<String> lyric;
-    private List<Artist> artists;
     private int type = Constant.TYPE_LOCAL;
 
-    public Mp3Info() {
+    public SongInfo() {
         super();
     }
 
+    protected SongInfo(Parcel in) {
+        id = in.readString();
+        title = in.readString();
+        album = in.readString();
+        albumId = in.readLong();
+        artist = in.readString();
+        duration = in.readLong();
+        size = in.readLong();
+        url = in.readString();
+        picUrl = in.readString();
+        type = in.readInt();
+    }
+
+    public static final Creator<SongInfo> CREATOR = new Creator<SongInfo>() {
+        @Override
+        public SongInfo createFromParcel(Parcel in) {
+            return new SongInfo(in);
+        }
+
+        @Override
+        public SongInfo[] newArray(int size) {
+            return new SongInfo[size];
+        }
+    };
+
     public int getType() {
         return type;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public void setType(int type) {
@@ -40,30 +73,6 @@ public class Mp3Info {
 
     public void setPicUrl(String picUrl) {
         this.picUrl = picUrl;
-    }
-
-    public List<String> getLyric() {
-        return lyric;
-    }
-
-    public void setLyric(List<String> lyric) {
-        this.lyric = lyric;
-    }
-
-    public List<Artist> getArtists() {
-        return artists;
-    }
-
-    public void setArtists(List<Artist> artists) {
-        this.artists = artists;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     public String getTitle() {
@@ -122,19 +131,10 @@ public class Mp3Info {
         this.url = url;
     }
 
-    public String getId_String() {
-        return id_String;
-    }
-
-    public void setId_String(String id_String) {
-        this.id_String = id_String;
-    }
-
     @Override
     public String toString() {
-        return "Mp3Info{" +
+        return "SongInfo{" +
                 "id=" + id +
-                ", id_String='" + id_String + '\'' +
                 ", title='" + title + '\'' +
                 ", album='" + album + '\'' +
                 ", albumId=" + albumId +
@@ -143,27 +143,26 @@ public class Mp3Info {
                 ", size=" + size +
                 ", url='" + url + '\'' +
                 ", picUrl='" + picUrl + '\'' +
-                ", lyric=" + lyric +
-                ", artists=" + artists +
                 ", type=" + type +
                 '}';
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == null){
-            return false;
-        }
-        if (this == obj){
-            return true;
-        }
-        if (obj instanceof Mp3Info){
-            Mp3Info mp3Info = (Mp3Info) obj;
-            if (this.getId() != 0 && mp3Info.getId() != 0)
-                return this.getId() == mp3Info.getId();
-            if (this.getId_String() != null && mp3Info.getId_String() != null)
-                return this.getId_String().equals(mp3Info.getId_String());
-        }
-        return false;
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
+        dest.writeString(title);
+        dest.writeString(album);
+        dest.writeLong(albumId);
+        dest.writeString(artist);
+        dest.writeLong(duration);
+        dest.writeLong(size);
+        dest.writeString(url);
+        dest.writeString(picUrl);
+        dest.writeInt(type);
     }
 }

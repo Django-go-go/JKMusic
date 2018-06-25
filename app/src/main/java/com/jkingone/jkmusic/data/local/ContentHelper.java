@@ -151,14 +151,14 @@ public class ContentHelper {
         return mContext.getContentResolver().query(uri, null, selection, null, sortOrder);
     }
 
-//    public List<Mp3Info> getMusic(){
-//        ArrayList<Mp3Info> mp3Infos = new ArrayList<>();
+//    public List<SongInfo> getMusic(){
+//        ArrayList<SongInfo> mp3Infos = new ArrayList<>();
 //        Cursor cursor = null;
 //        try{
 //            cursor = query(FileCategory.Music, SortMethod.size);
 //
 //            for (int i = 0; i < cursor.getCount(); i++) {
-//                Mp3Info mp3Info = new Mp3Info();
+//                SongInfo mp3Info = new SongInfo();
 //                if(cursor.moveToNext()){
 //                    long id = cursor.getLong(cursor
 //                            .getColumnIndex(Audio.Media._ID));   //音乐id

@@ -1,0 +1,33 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/liner_root"
+    android:layout_width="match_parent"
+    android:layout_height="48dp"
+    android:orientation="horizontal"
+    android:background="@drawable/selector_line_frag"
+    tools:context="com.jkingone.jkmusic.ui.fragment.PlayFragment">
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/pager"
+        android:layout_weight="1"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"/>
+
+    <ImageView
+        android:padding="8dp"
+        android:id="@+id/iv_play"
+        android:background="@drawable/shadow_oval_widget"
+        android:layout_gravity="center_vertical"
+        android:src="@drawable/music"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent" />
+
+    <ImageView
+        android:padding="8dp"
+        android:id="@+id/iv_menu"
+        android:background="@drawable/shadow_oval_widget"
+        android:layout_gravity="center_vertical"
+        android:src="@drawable/music"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent" />
+</LinearLayout>

@@ -7,19 +7,23 @@ import android.os.Parcelable;
  * Created by Administrator on 2017/9/8.
  */
 
-public class TopList implements Parcelable{
+public class TopList implements Parcelable {
     private String name;
     private String type;
     private String comment;
     private String pic_s210;
     private String pic_s260;
+    private String pic_s192;
+    private String pic_s444;
 
-    public TopList(String name, String type, String comment, String pic_s210, String pic_s260) {
+    public TopList(String name, String type, String comment, String pic_s210, String pic_s260, String pic_s192, String pic_s444) {
         this.name = name;
         this.type = type;
         this.comment = comment;
         this.pic_s210 = pic_s210;
         this.pic_s260 = pic_s260;
+        this.pic_s192 = pic_s192;
+        this.pic_s444 = pic_s444;
     }
 
     protected TopList(Parcel in) {
@@ -28,6 +32,8 @@ public class TopList implements Parcelable{
         comment = in.readString();
         pic_s210 = in.readString();
         pic_s260 = in.readString();
+        pic_s192 = in.readString();
+        pic_s444 = in.readString();
     }
 
     public static final Creator<TopList> CREATOR = new Creator<TopList>() {
@@ -41,6 +47,22 @@ public class TopList implements Parcelable{
             return new TopList[size];
         }
     };
+
+    public String getPic_s192() {
+        return pic_s192;
+    }
+
+    public void setPic_s192(String pic_s192) {
+        this.pic_s192 = pic_s192;
+    }
+
+    public String getPic_s444() {
+        return pic_s444;
+    }
+
+    public void setPic_s444(String pic_s444) {
+        this.pic_s444 = pic_s444;
+    }
 
     public String getName() {
         return name;
@@ -83,6 +105,19 @@ public class TopList implements Parcelable{
     }
 
     @Override
+    public String toString() {
+        return "TopList{" +
+                "name='" + name + '\'' +
+                ", type='" + type + '\'' +
+                ", comment='" + comment + '\'' +
+                ", pic_s210='" + pic_s210 + '\'' +
+                ", pic_s260='" + pic_s260 + '\'' +
+                ", pic_s192='" + pic_s192 + '\'' +
+                ", pic_s444='" + pic_s444 + '\'' +
+                '}';
+    }
+
+    @Override
     public int describeContents() {
         return 0;
     }
@@ -94,16 +129,7 @@ public class TopList implements Parcelable{
         dest.writeString(comment);
         dest.writeString(pic_s210);
         dest.writeString(pic_s260);
-    }
-
-    @Override
-    public String toString() {
-        return "TopList{" +
-                "name='" + name + '\'' +
-                ", type='" + type + '\'' +
-                ", comment='" + comment + '\'' +
-                ", pic_s210='" + pic_s210 + '\'' +
-                ", pic_s260='" + pic_s260 + '\'' +
-                '}';
+        dest.writeString(pic_s192);
+        dest.writeString(pic_s444);
     }
 }

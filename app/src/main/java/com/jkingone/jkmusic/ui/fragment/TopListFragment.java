@@ -1,15 +1,19 @@
 package com.jkingone.jkmusic.ui.fragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -17,6 +21,7 @@ import com.jkingone.commonlib.Utils.ScreenUtils;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.adapter.HeadAndFootRecycleAdapter;
 import com.jkingone.jkmusic.data.entity.TopList;
+import com.jkingone.jkmusic.ui.activity.SongListActivity;
 import com.jkingone.jkmusic.ui.fragment.presenter.TopListFragPresenter;
 import com.squareup.picasso.Picasso;
 
@@ -98,7 +103,7 @@ public class TopListFragment extends LazyFragment implements TopListFragPresente
         mRecyclerView.setAdapter(mListAdapter);
     }
 
-    static class TopListAdapter extends HeadAndFootRecycleAdapter {
+    class TopListAdapter extends HeadAndFootRecycleAdapter {
 
         private static final int TYPE_CONTENT = 2;
 
@@ -135,11 +140,21 @@ public class TopListFragment extends LazyFragment implements TopListFragPresente
         }
 
         @Override
-        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position) {
             if (holder instanceof VH) {
                 VH vh = (VH) holder;
                 TopList topList = mList.get(position);
                 vh.textView.setText(topList.getName());
+                vh.imageView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (mList.get(position) != null){
+                            Intent intent = new Intent(mContext, SongListActivity.class);
+                            intent.putExtra(SongListActivity.TYPE_TOPLIST, mList.get(position));
+                            startActivity(intent);
+                        }
+                    }
+                });
 
                 int w = ScreenUtils.getScreenWidth(mContext);
 
@@ -150,13 +165,6 @@ public class TopListFragment extends LazyFragment implements TopListFragPresente
                 if (pos % 5 == 1 || pos % 5 == 2) {
                     if (topList.getPic_s210() != null) {
                         Picasso.get().load(topList.getPic_s210())
-                                .placeholder(R.drawable.music)
-                                .resize(w / 3 * 2, h)
-                                .centerCrop()
-                                .into(vh.imageView);
-                    } else if (topList.getPic_s260() != null) {
-                        Picasso.get().load(topList.getPic_s260())
-                                .placeholder(R.drawable.music)
                                 .resize(w / 3 * 2, h)
                                 .centerCrop()
                                 .into(vh.imageView);
@@ -164,21 +172,11 @@ public class TopListFragment extends LazyFragment implements TopListFragPresente
                 } else {
                     if (topList.getPic_s260() != null) {
                         Picasso.get().load(topList.getPic_s260())
-                                .placeholder(R.drawable.music)
-                                .resize(w / 3, h)
-                                .centerCrop()
-                                .into(vh.imageView);
-                    } else if (topList.getPic_s210() != null) {
-                        Picasso.get().load(topList.getPic_s210())
-                                .placeholder(R.drawable.music)
                                 .resize(w / 3, h)
                                 .centerCrop()
                                 .into(vh.imageView);
                     }
                 }
-
-
-
             }
         }
 

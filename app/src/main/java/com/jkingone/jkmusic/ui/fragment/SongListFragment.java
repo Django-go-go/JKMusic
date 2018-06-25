@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,7 @@ import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.adapter.SongListAdapter;
 import com.jkingone.jkmusic.data.entity.SongList;
 import com.jkingone.jkmusic.ui.activity.ClassifySongListActivity;
+import com.jkingone.jkmusic.ui.activity.SongListActivity;
 import com.jkingone.jkmusic.ui.fragment.presenter.SongListFragPresenter;
 
 import java.util.ArrayList;
@@ -127,10 +129,9 @@ public class SongListFragment extends LazyFragment implements SongListFragPresen
             @Override
             public void contentOnClick(int pos) {
                 if (mLists.get(pos) != null){
-//                    Intent intent = new Intent(getContext(), SongListActivity.class);
-//                    intent.putExtra("songlist2", mLists.get(pos));
-//                    startActivity(intent);
-//                    getActivity().overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                    Intent intent = new Intent(getContext(), SongListActivity.class);
+                    intent.putExtra(SongListActivity.TYPE_SONGLIST, mLists.get(pos));
+                    startActivity(intent);
                 }
             }
         });
