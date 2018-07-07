@@ -3,19 +3,15 @@ package com.jkingone.jkmusic.ui.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.jkingone.commonlib.Utils.DensityUtils;
@@ -25,20 +21,17 @@ import com.jkingone.jkmusic.adapter.HeadAndFootRecycleAdapter;
 import com.jkingone.jkmusic.data.entity.SongInfo;
 import com.jkingone.jkmusic.data.entity.SongList;
 import com.jkingone.jkmusic.data.entity.TopList;
-import com.jkingone.jkmusic.ui.activity.presenter.BasePresenter;
-import com.jkingone.jkmusic.ui.activity.presenter.SongListPresenter;
+import com.jkingone.jkmusic.ui.mvp.contract.SongListContract;
+import com.jkingone.jkmusic.ui.mvp.SongListPresenter;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class SongListActivity extends BaseActivity<SongListPresenter.ViewCallback, SongListPresenter>
-        implements SongListPresenter.ViewCallback {
+public class SongListActivity extends BaseActivity<SongListPresenter> implements SongListContract.ViewCallback {
 
     private static final String TAG = "SongListActivity";
 
@@ -93,7 +86,7 @@ public class SongListActivity extends BaseActivity<SongListPresenter.ViewCallbac
 
     @Override
     public SongListPresenter createPresenter() {
-        return new SongListPresenter(this, this);
+        return new SongListPresenter(this);
     }
 
     private void initTopList() {

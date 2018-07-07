@@ -1,51 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout android:layout_marginTop="10dp"
+    android:layout_marginBottom="10dp"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:layout_column="3"
-    android:layout_row="2"
-    android:background="@drawable/shadow_rect_widget">
+    android:layout_alignParentBottom="true"
+    android:id="@+id/linearLayout_play"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <FrameLayout
-        android:layout_row="0"
-        android:layout_column="0"
-        android:layout_rowSpan="1"
-        android:layout_columnSpan="1"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_gravity="center">
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/mode_play"
+        android:layout_gravity="center|start"
+        android:src="@drawable/music"/>
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/last_play"
+        android:layout_gravity="center"
+        android:layout_weight="0.20"
+        android:src="@drawable/music_mid"/>
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/play_pause"
+        android:layout_gravity="center"
+        android:src="@drawable/music_large"/>
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/next_play"
+        android:layout_gravity="center"
+        android:layout_weight="0.20"
+        android:src="@drawable/music_mid"/>
 
-    </FrameLayout>
+    <ImageView
+        android:id="@+id/menu_play"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:src="@drawable/music_mid"/>
 
-    <FrameLayout
-        android:layout_rowSpan="1"
-        android:layout_columnSpan="1"
-        android:layout_row="0"
-        android:layout_column="1"
-        android:layout_gravity="center_vertical|fill">
-
-    </FrameLayout>
-
-    <FrameLayout
-        android:layout_rowSpan="1"
-        android:layout_columnSpan="1"
-        android:layout_width="36dp"
-        android:layout_height="48dp"
-        android:layout_column="2"
-        android:layout_row="0"
-        android:layout_gravity="fill_horizontal"
-        android:background="@drawable/shadow_rect_widget"
-        android:padding="4dp">
-
-    </FrameLayout>
-
-    <View
-        android:layout_height="0.5dp"
-        android:layout_column="1"
-        android:layout_row="1"
-        android:layout_rowSpan="1"
-        android:layout_columnSpan="2"
-        android:background="@color/gray_trans"/>
-
-</GridLayout>
+</LinearLayout>

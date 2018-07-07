@@ -1,11 +1,4 @@
 package com.jkingone.jkmusic.ui.activity;
-import android.app.job.JobScheduler;
-import android.app.job.JobService;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.Handler;
 import android.support.design.widget.NavigationView;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -14,19 +7,16 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.jkingone.jkmusic.MusicBroadcastReceiver;
+import com.jkingone.commonlib.Utils.PermissionUtils;
 import com.jkingone.jkmusic.R;
-import com.jkingone.jkmusic.service.MusicService;
-import com.jkingone.jkmusic.ui.activity.presenter.BasePresenter;
+import com.jkingone.jkmusic.ui.mvp.BasePresenter;
 import com.jkingone.jkmusic.ui.fragment.NetWorkFragment;
 import com.jkingone.jkmusic.ui.fragment.PlaceholderFragment;
 
@@ -51,7 +41,7 @@ public class MainActivity extends BaseActivity {
 	private MyPagerAdapter adapter;
 
 	private Fragment[] fragment = {
-			PlaceholderFragment.newInstance("~~~~~~~"),
+			PlaceholderFragment.newInstance("~~~~~~~~~"),
 			NetWorkFragment.newInstance("-------")};
 
 	@Override
@@ -65,20 +55,22 @@ public class MainActivity extends BaseActivity {
 
 		setPlayFragment(R.id.fragment_container);
 
+		PermissionUtils.hasPermission(this);
+
 	}
 
 	@Override
-	protected void onResume() {
-		super.onResume();
+	protected void onStart() {
+		super.onStart();
 		exeBindService();
-		registerMusicBroadcast();
+		registerFragMusicBroadcast();
 	}
 
 	@Override
-	protected void onPause() {
-		super.onPause();
+	protected void onStop() {
+		super.onStop();
 		exeUnbindService();
-		unregisterMusicBroadcast();
+		unregisterFragMusicBroadcast();
 	}
 
 	@Override

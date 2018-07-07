@@ -1,12 +1,9 @@
-package com.jkingone.jkmusic.ui.activity.presenter;
-
-import android.content.Context;
-import android.util.Log;
+package com.jkingone.jkmusic.ui.mvp;
 
 import com.jkingone.jkmusic.Utils;
 import com.jkingone.jkmusic.data.entity.Song;
-import com.jkingone.jkmusic.data.entity.SongInfo;
 import com.jkingone.jkmusic.data.remote.RemoteData;
+import com.jkingone.jkmusic.ui.mvp.contract.SongListContract;
 
 import java.util.List;
 
@@ -18,26 +15,19 @@ import retrofit2.Response;
  * Created by Administrator on 2017/8/8.
  */
 
-public class SongListPresenter extends BasePresenter<SongListPresenter.ViewCallback> {
+public class SongListPresenter extends BasePresenter<SongListContract.ViewCallback, SongListContract.Model> {
     public static final String TAG = "SongListActivity";
 
-    public interface ViewCallback {
-        void showView(List<SongInfo> songInfos);
-    }
-
-    private ViewCallback mView;
-    private Context mContext;
-
-    public SongListPresenter(ViewCallback view, Context context) {
-        mView = view;
-        mContext = context;
+    public SongListPresenter(SongListContract.ViewCallback view) {
+        super();
+        attachView(view);
     }
 
     public void getSongFromSongList(String id){
         new RemoteData().getSongFromSongList(id).enqueue(new Callback<List<Song>>() {
             @Override
             public void onResponse(Call<List<Song>> call, Response<List<Song>> response) {
-                mView.showView(Utils.songToSongInfo(response.body()));
+                getView().showView(Utils.songToSongInfo(response.body()));
             }
 
             @Override
@@ -51,7 +41,7 @@ public class SongListPresenter extends BasePresenter<SongListPresenter.ViewCallb
         new RemoteData().getSongFromTopList(type).enqueue(new Callback<List<Song>>() {
             @Override
             public void onResponse(Call<List<Song>> call, Response<List<Song>> response) {
-                mView.showView(Utils.songToSongInfo(response.body()));
+                getView().showView(Utils.songToSongInfo(response.body()));
             }
 
             @Override
@@ -59,5 +49,10 @@ public class SongListPresenter extends BasePresenter<SongListPresenter.ViewCallb
 
             }
         });
+    }
+
+    @Override
+    public SongListContract.Model createModel() {
+        return null;
     }
 }

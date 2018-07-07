@@ -7,7 +7,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +16,8 @@ import com.jkingone.jkmusic.adapter.SongListAdapter;
 import com.jkingone.jkmusic.data.entity.SongList;
 import com.jkingone.jkmusic.ui.activity.ClassifySongListActivity;
 import com.jkingone.jkmusic.ui.activity.SongListActivity;
-import com.jkingone.jkmusic.ui.fragment.presenter.SongListFragPresenter;
+import com.jkingone.jkmusic.ui.mvp.contract.SongListFragContract;
+import com.jkingone.jkmusic.ui.mvp.SongListFragPresenter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +30,7 @@ import butterknife.Unbinder;
  * Created by Administrator on 2017/8/6.
  */
 
-public class SongListFragment extends LazyFragment implements SongListFragPresenter.ViewCallback {
+public class SongListFragment extends BaseFragment<SongListFragPresenter> implements SongListFragContract.ViewCallback {
 
     public static final String TAG = "SongListFragment";
 
@@ -40,8 +40,6 @@ public class SongListFragment extends LazyFragment implements SongListFragPresen
     private SongListAdapter mRecycleAdapter;
 
     private List<SongList> mLists;
-
-    private SongListFragPresenter mPresenter;
 
     private int offset = 1;
 
@@ -99,8 +97,6 @@ public class SongListFragment extends LazyFragment implements SongListFragPresen
             }
         });
 
-        mPresenter = new SongListFragPresenter(getContext(), this);
-
         return view;
     }
 
@@ -141,5 +137,10 @@ public class SongListFragment extends LazyFragment implements SongListFragPresen
                 startActivity(new Intent(getContext(), ClassifySongListActivity.class));
             }
         });
+    }
+
+    @Override
+    public SongListFragPresenter createPresenter() {
+        return new SongListFragPresenter(this);
     }
 }

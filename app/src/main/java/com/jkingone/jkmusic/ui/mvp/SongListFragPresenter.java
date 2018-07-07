@@ -1,11 +1,11 @@
-package com.jkingone.jkmusic.ui.fragment.presenter;
+package com.jkingone.jkmusic.ui.mvp;
 
-import android.content.Context;
 import android.util.Log;
 
 import com.jkingone.jkmusic.data.entity.SongList;
 import com.jkingone.jkmusic.data.remote.RemoteData;
 import com.jkingone.jkmusic.ui.fragment.SongListFragment;
+import com.jkingone.jkmusic.ui.mvp.contract.SongListFragContract;
 
 import java.util.List;
 
@@ -17,17 +17,11 @@ import retrofit2.Response;
  * Created by Administrator on 2017/8/6.
  */
 
-public class SongListFragPresenter {
-    private Context mContext;
-    private ViewCallback mView;
+public class SongListFragPresenter extends BasePresenter<SongListFragContract.ViewCallback, SongListFragContract.Model> {
 
-    public interface ViewCallback {
-        void showView(List<SongList> songLists);
-    }
-
-    public SongListFragPresenter(Context context, ViewCallback view) {
-        mContext = context;
-        mView = view;
+    public SongListFragPresenter(SongListFragContract.ViewCallback view) {
+        super();
+        attachView(view);
     }
 
     public void getSongList(int size, int no){
@@ -35,7 +29,7 @@ public class SongListFragPresenter {
         new RemoteData().getSongList(size, no).enqueue(new Callback<List<SongList>>() {
             @Override
             public void onResponse(Call<List<SongList>> call, Response<List<SongList>> response) {
-                mView.showView(response.body());
+                getView().showView(response.body());
             }
 
             @Override
@@ -44,5 +38,10 @@ public class SongListFragPresenter {
             }
         });
 
+    }
+
+    @Override
+    public SongListFragContract.Model createModel() {
+        return null;
     }
 }

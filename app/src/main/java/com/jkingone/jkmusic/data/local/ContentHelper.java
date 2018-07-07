@@ -29,6 +29,8 @@ import android.provider.MediaStore.Images;
 import android.provider.MediaStore.Video;
 import android.util.Log;
 
+import com.jkingone.jkmusic.data.entity.SongInfo;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -54,9 +56,6 @@ public class ContentHelper {
     public enum FileCategory {
         All, Music, Video, Picture, Theme, Doc, Zip, Apk, Other, Favorite
     }
-
-    public static HashMap<FileCategory, Integer> categoryNames = new HashMap<FileCategory, Integer>();
-
 
 
     private Context mContext;
@@ -107,7 +106,6 @@ public class ContentHelper {
                 break;
             case Music:
                 uri = Audio.Media.getContentUri(volumeName);
-                Log.i(TAG, "getContentUriByCategory: " + uri);
                 break;
             case Video:
                 uri = Video.Media.getContentUri(volumeName);
@@ -151,55 +149,55 @@ public class ContentHelper {
         return mContext.getContentResolver().query(uri, null, selection, null, sortOrder);
     }
 
-//    public List<SongInfo> getMusic(){
-//        ArrayList<SongInfo> mp3Infos = new ArrayList<>();
-//        Cursor cursor = null;
-//        try{
-//            cursor = query(FileCategory.Music, SortMethod.size);
-//
-//            for (int i = 0; i < cursor.getCount(); i++) {
-//                SongInfo mp3Info = new SongInfo();
-//                if(cursor.moveToNext()){
-//                    long id = cursor.getLong(cursor
-//                            .getColumnIndex(Audio.Media._ID));   //音乐id
-//                    long album_id = cursor.getLong(cursor
-//                            .getColumnIndex(Audio.Media.ALBUM_ID));         //专辑id
-//                    String title = cursor.getString((cursor
-//                            .getColumnIndex(Audio.Media.TITLE)));//音乐标题
-//                    String artist = cursor.getString(cursor
-//                            .getColumnIndex(Audio.Media.ARTIST));//艺术家
-//                    long duration = cursor.getLong(cursor
-//                            .getColumnIndex(Audio.Media.DURATION));//时长
-//                    long size = cursor.getLong(cursor
-//                            .getColumnIndex(Audio.Media.SIZE));  //文件大小
-//                    String url = cursor.getString(cursor
-//                            .getColumnIndex(Audio.Media.DATA)); //文件路径
-//                    int isMusic = cursor.getInt(cursor
-//                            .getColumnIndex(Audio.Media.IS_MUSIC));//是否为音乐
-//                    String album = cursor.getString(cursor
-//                            .getColumnIndex(Audio.Media.ALBUM));
-//                    if (isMusic != 0) {     //只把音乐添加到集合当中
-//                        mp3Info.setId(id);
-//                        mp3Info.setTitle(title);
-//                        mp3Info.setArtist(artist);
-//                        mp3Info.setDuration(duration);
-//                        mp3Info.setSize(size);
-//                        mp3Info.setUrl(url);
-//                        mp3Info.setAlbum(album);
-//                        mp3Info.setAlbumId(album_id);
-//                        mp3Info.setPicUrl("content://media/external/audio/albumart" + "/" + mp3Info.getAlbumId());
-//                        mp3Infos.add(mp3Info);
-//                    }
-//                }
-//            }
-//        }catch (Exception e){
-//            System.out.println("exception " + e.toString());
-//        }finally {
-//            if (cursor != null)
-//                cursor.close();
-//        }
-//        return mp3Infos;
-//    }
+    public List<SongInfo> getMusic() {
+        ArrayList<SongInfo> mp3Infos = new ArrayList<>();
+        Cursor cursor = null;
+        try{
+            cursor = mContext.getContentResolver().query(Audio.Media.EXTERNAL_CONTENT_URI, null, null, null, null);
+
+            for (int i = 0; i < cursor.getCount(); i++) {
+                SongInfo mp3Info = new SongInfo();
+                if(cursor.moveToNext()){
+                    long id = cursor.getLong(cursor
+                            .getColumnIndex(Audio.Media._ID));   //音乐id
+                    long album_id = cursor.getLong(cursor
+                            .getColumnIndex(Audio.Media.ALBUM_ID));         //专辑id
+                    String title = cursor.getString((cursor
+                            .getColumnIndex(Audio.Media.TITLE)));//音乐标题
+                    String artist = cursor.getString(cursor
+                            .getColumnIndex(Audio.Media.ARTIST));//艺术家
+                    long duration = cursor.getLong(cursor
+                            .getColumnIndex(Audio.Media.DURATION));//时长
+                    long size = cursor.getLong(cursor
+                            .getColumnIndex(Audio.Media.SIZE));  //文件大小
+                    String url = cursor.getString(cursor
+                            .getColumnIndex(Audio.Media.DATA)); //文件路径
+                    int isMusic = cursor.getInt(cursor
+                            .getColumnIndex(Audio.Media.IS_MUSIC));//是否为音乐
+                    String album = cursor.getString(cursor
+                            .getColumnIndex(Audio.Media.ALBUM));
+                    if (isMusic != 0 && duration > 1000 * 5) {     //只把音乐添加到集合当中
+                        mp3Info.setId(String.valueOf(id));
+                        mp3Info.setTitle(title);
+                        mp3Info.setArtist(artist);
+                        mp3Info.setDuration(duration);
+                        mp3Info.setSize(size);
+                        mp3Info.setUrl(url);
+                        mp3Info.setAlbum(album);
+                        mp3Info.setAlbumId(album_id);
+                        mp3Info.setPicUrl("content://media/external/audio/albumart" + "/" + mp3Info.getAlbumId());
+                        mp3Infos.add(mp3Info);
+                    }
+                }
+            }
+        }catch (Exception e){
+
+        }finally {
+            if (cursor != null)
+                cursor.close();
+        }
+        return mp3Infos;
+    }
 
     public String getUrl(long id){
         String path = null;
@@ -224,88 +222,6 @@ public class ContentHelper {
 
     private SortMethod mSort = SortMethod.name;
 
-    private boolean mFileFirst;
 
-    private HashMap<SortMethod, Comparator> mComparatorList = new HashMap<SortMethod, Comparator>(){
-        {
-            put(SortMethod.name, cmpName);
-            put(SortMethod.size, cmpSize);
-            put(SortMethod.date, cmpDate);
-//            put(SortMethod.type, cmpType);
-        }
-    };
 
-    public void setSortMethog(SortMethod s) {
-        mSort = s;
-    }
-
-    public SortMethod getSortMethod() {
-        return mSort;
-    }
-
-    public void setFileFirst(boolean f) {
-        mFileFirst = f;
-    }
-
-    public Comparator getComparator() {
-        return mComparatorList.get(mSort);
-    }
-
-    private abstract class FileComparator implements Comparator<FileInfo> {
-
-        @Override
-        public int compare(FileInfo object1, FileInfo object2) {
-            if (object1.IsDir == object2.IsDir) {
-                return doCompare(object1, object2);
-            }
-
-            if (mFileFirst) {
-                // the files are listed before the dirs
-                return (object1.IsDir ? 1 : -1);
-            } else {
-                // the dir-s are listed before the files
-                return object1.IsDir ? -1 : 1;
-            }
-        }
-
-        protected abstract int doCompare(FileInfo object1, FileInfo object2);
-    }
-
-    private Comparator cmpName = new FileComparator() {
-        @Override
-        public int doCompare(FileInfo object1, FileInfo object2) {
-            return object1.fileName.compareToIgnoreCase(object2.fileName);
-        }
-    };
-
-    private Comparator cmpSize = new FileComparator() {
-        @Override
-        public int doCompare(FileInfo object1, FileInfo object2) {
-            return longToCompareInt(object1.fileSize - object2.fileSize);
-        }
-    };
-
-    private Comparator cmpDate = new FileComparator() {
-        @Override
-        public int doCompare(FileInfo object1, FileInfo object2) {
-            return longToCompareInt(object2.ModifiedDate - object1.ModifiedDate);
-        }
-    };
-
-    private int longToCompareInt(long result) {
-        return result > 0 ? 1 : (result < 0 ? -1 : 0);
-    }
-
-//    private Comparator cmpType = new FileComparator() {
-//        @Override
-//        public int doCompare(FileInfo object1, FileInfo object2) {
-//            int result = FileUtils.getExtFromFilename(object1.fileName).compareToIgnoreCase(
-//                    FileUtils.getExtFromFilename(object2.fileName));
-//            if (result != 0)
-//                return result;
-//
-//            return FileUtils.getNameFromFilename(object1.fileName).compareToIgnoreCase(
-//                    FileUtils.getNameFromFilename(object2.fileName));
-//        }
-//    };
 }

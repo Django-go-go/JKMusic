@@ -1,12 +1,9 @@
 package com.jkingone.jkmusic.ui.fragment;
 
-import android.arch.lifecycle.LifecycleObserver;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,7 +11,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.jkingone.jkmusic.R;
-import com.jkingone.jkmusic.ui.activity.PlaceholderActivity;
+import com.jkingone.jkmusic.ui.activity.PlayActivity;
 
 public class PlaceholderFragment extends LazyFragment {
     public static final String TAG = "PlaceholderFragment";
@@ -35,7 +32,7 @@ public class PlaceholderFragment extends LazyFragment {
         mTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(PlaceholderFragment.this.getContext(), PlaceholderActivity.class));
+                startActivity(new Intent(getContext(), PlayActivity.class));
             }
         });
         Log.i(TAG, "onCreateView: " + params[0]);

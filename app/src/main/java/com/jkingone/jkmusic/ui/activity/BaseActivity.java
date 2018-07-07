@@ -8,45 +8,37 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 ;
 import com.jkingone.jkmusic.IMusicInterface;
-import com.jkingone.jkmusic.MusicBroadcastReceiver;
-import com.jkingone.jkmusic.data.entity.SongInfo;
 import com.jkingone.jkmusic.service.MusicService;
-import com.jkingone.jkmusic.ui.activity.presenter.BasePresenter;
+import com.jkingone.jkmusic.ui.mvp.BasePresenter;
 import com.jkingone.jkmusic.ui.fragment.PlayFragment;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.lang.ref.WeakReference;
 
-public abstract class BaseActivity<V, T extends BasePresenter<V>> extends AppCompatActivity {
-
-    private static final String TAG = "BaseActivity";
+public abstract class BaseActivity<P extends BasePresenter> extends AppCompatActivity {
 
     protected IMusicInterface playService;
     private boolean isBound = false;
-    protected T mPresenter;
+    protected P mPresenter;
 
-    protected MusicBroadcastReceiver mMusicBroadcastReceiver;
+    protected FragMusicBroadcastReceiver mMusicBroadcastReceiver;
 
-    private PlayFragment mPlayFragment = PlayFragment.newInstance("PlayFragment");
+    private PlayFragment mPlayFragment;
 
-    @SuppressWarnings("unchecked")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPresenter = createPresenter();
-        if (mPresenter != null) {
-            mPresenter.attachView((V) this);
-        }
     }
 
-    public abstract T createPresenter();
+    public abstract P createPresenter();
 
     protected void setPlayFragment(int resId) {
+        if (mPlayFragment == null) {
+            mPlayFragment = PlayFragment.newInstance("PlayFragment");
+        }
         getSupportFragmentManager().beginTransaction().add(resId, mPlayFragment).commit();
     }
 
@@ -54,10 +46,7 @@ public abstract class BaseActivity<V, T extends BasePresenter<V>> extends AppCom
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             playService = IMusicInterface.Stub.asInterface(service);
-            try {
-                playService.play();
-            } catch (RemoteException e) {
-            }
+            updateForFirstConnect();
         }
 
         @Override
@@ -66,6 +55,8 @@ public abstract class BaseActivity<V, T extends BasePresenter<V>> extends AppCom
             isBound = false;
         }
     };
+
+    protected void updateForFirstConnect() {}
 
     protected void exeBindService(){
         if(!isBound){
@@ -82,15 +73,19 @@ public abstract class BaseActivity<V, T extends BasePresenter<V>> extends AppCom
         }
     }
 
-    protected void registerMusicBroadcast() {
-        if (mMusicBroadcastReceiver == null) {
-            mMusicBroadcastReceiver = new MusicBroadcastReceiver();
-        }
-
-        registerReceiver(mMusicBroadcastReceiver, new IntentFilter(MusicBroadcastReceiver.ACTION));
+    public IMusicInterface getIMusicInterface() {
+        return playService;
     }
 
-    protected void unregisterMusicBroadcast() {
+    protected void registerFragMusicBroadcast() {
+        if (mMusicBroadcastReceiver == null) {
+            mMusicBroadcastReceiver = new FragMusicBroadcastReceiver(new WeakReference<>(mPlayFragment));
+        }
+
+        registerReceiver(mMusicBroadcastReceiver, new IntentFilter(MusicService.ACTION));
+    }
+
+    protected void unregisterFragMusicBroadcast() {
         if (mMusicBroadcastReceiver != null) {
             unregisterReceiver(mMusicBroadcastReceiver);
         }
@@ -99,6 +94,27 @@ public abstract class BaseActivity<V, T extends BasePresenter<V>> extends AppCom
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mPresenter.detachView();
+        if (mPresenter != null) {
+            mPresenter.detachView();
+        }
     }
+
+    private static class FragMusicBroadcastReceiver extends BroadcastReceiver {
+
+        private WeakReference<PlayFragment> mPlayFragment;
+
+        FragMusicBroadcastReceiver(WeakReference<PlayFragment> playFragment) {
+            mPlayFragment = playFragment;
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (MusicService.ACTION.equals(intent.getAction())) {
+                if (mPlayFragment.get() != null) {
+                    mPlayFragment.get().updateUI(intent);
+                }
+            }
+        }
+    }
+
 }

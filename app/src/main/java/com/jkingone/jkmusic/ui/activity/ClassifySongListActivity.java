@@ -2,6 +2,7 @@ package com.jkingone.jkmusic.ui.activity;
 
 import android.animation.Animator;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.support.annotation.NonNull;
@@ -25,7 +26,8 @@ import com.jkingone.commonlib.Utils.ScreenUtils;
 import com.jkingone.jkmusic.R;
 import com.jkingone.customviewlib.WaveView;
 import com.jkingone.jkmusic.data.entity.SongList;
-import com.jkingone.jkmusic.ui.activity.presenter.ClassifySongListPresenter;
+import com.jkingone.jkmusic.ui.mvp.contract.ClassifySongListContract;
+import com.jkingone.jkmusic.ui.mvp.ClassifySongListPresenter;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -34,8 +36,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class ClassifySongListActivity extends BaseActivity<ClassifySongListPresenter.ViewCallBack, ClassifySongListPresenter>
-        implements ClassifySongListPresenter.ViewCallBack {
+public class ClassifySongListActivity extends BaseActivity<ClassifySongListPresenter> implements ClassifySongListContract.ViewCallBack {
 
     @BindView(R.id.recycle_universal)
     RecyclerView mRecyclerView;
@@ -153,7 +154,7 @@ public class ClassifySongListActivity extends BaseActivity<ClassifySongListPrese
         mRecyclerView.setAdapter(new ClassifySongListAdapter(this, classifySongLists));
     }
 
-    static class ClassifySongListAdapter extends RecyclerView.Adapter<ClassifySongListAdapter.VH> {
+    class ClassifySongListAdapter extends RecyclerView.Adapter<ClassifySongListAdapter.VH> {
         private LayoutInflater mInflater;
         private Context mContext;
         private List<SongList> mList;
@@ -171,7 +172,17 @@ public class ClassifySongListActivity extends BaseActivity<ClassifySongListPrese
         }
 
         @Override
-        public void onBindViewHolder(@NonNull VH holder, int position) {
+        public void onBindViewHolder(@NonNull VH holder, final int position) {
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mList.get(position) != null){
+                        Intent intent = new Intent(mContext, SongListActivity.class);
+                        intent.putExtra(SongListActivity.TYPE_SONGLIST, mList.get(position));
+                        startActivity(intent);
+                    }
+                }
+            });
             holder.textView_name.setText("标签: " + mList.get(position).getTag());
             holder.textView_title.setText(mList.get(position).getTitle());
             holder.textView_desc.setText(mList.get(position).getDesc());
