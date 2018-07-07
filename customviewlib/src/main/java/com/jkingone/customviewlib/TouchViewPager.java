@@ -15,6 +15,10 @@ public class TouchViewPager extends ViewPager {
 
     public static final String TAG = "TouchViewPager";
 
+    private boolean isClick = false;
+
+    private float downX = 0;
+
     public TouchViewPager(Context context) {
         super(context);
     }
@@ -28,9 +32,22 @@ public class TouchViewPager extends ViewPager {
         boolean need = super.onTouchEvent(event);
 
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            isClick = true;
             if (getParent() != null) {
                 View view = (View) getParent();
                 view.setPressed(true);
+            }
+            downX = event.getX();
+        }
+
+        if (event.getAction() == MotionEvent.ACTION_MOVE) {
+            float curX = event.getX();
+            float dif = Math.abs(curX - downX);
+
+            isClick = !(dif > 12);
+            if (getParent() != null && !isClick) {
+                View view = (View) getParent();
+                view.setPressed(false);
             }
         }
 
@@ -39,7 +56,10 @@ public class TouchViewPager extends ViewPager {
                 View view = (View) getParent();
                 view.setPressed(false);
             }
-            performClick();
+            if (isClick) {
+                performClick();
+            }
+            isClick = false;
         }
 
         return need;

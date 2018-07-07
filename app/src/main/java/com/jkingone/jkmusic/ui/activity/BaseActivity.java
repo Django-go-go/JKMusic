@@ -1,36 +1,25 @@
 package com.jkingone.jkmusic.ui.activity;
 
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 ;
-import com.jkingone.jkmusic.IMusicInterface;
-import com.jkingone.jkmusic.service.MusicService;
+import com.jkingone.jkmusic.MusicManagerService;
 import com.jkingone.jkmusic.ui.mvp.BasePresenter;
 import com.jkingone.jkmusic.ui.fragment.PlayFragment;
 
-import java.lang.ref.WeakReference;
-
 public abstract class BaseActivity<P extends BasePresenter> extends AppCompatActivity {
 
-    protected IMusicInterface playService;
-    private boolean isBound = false;
     protected P mPresenter;
 
-    protected FragMusicBroadcastReceiver mMusicBroadcastReceiver;
-
     private PlayFragment mPlayFragment;
+
+    protected MusicManagerService mMusicManagerService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPresenter = createPresenter();
+        mMusicManagerService = new MusicManagerService(this);
     }
 
     public abstract P createPresenter();
@@ -42,53 +31,23 @@ public abstract class BaseActivity<P extends BasePresenter> extends AppCompatAct
         getSupportFragmentManager().beginTransaction().add(resId, mPlayFragment).commit();
     }
 
-    private ServiceConnection MyServiceConn = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            playService = IMusicInterface.Stub.asInterface(service);
-            updateForFirstConnect();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            playService = null;
-            isBound = false;
-        }
-    };
-
-    protected void updateForFirstConnect() {}
-
     protected void exeBindService(){
-        if(!isBound){
-            Intent intent = new Intent(this, MusicService.class);
-            bindService(intent, MyServiceConn, Context.BIND_AUTO_CREATE);
-            isBound = true;
-        }
+        mMusicManagerService.exeBindService();
     }
 
     protected void exeUnbindService(){
-        if(isBound){
-            unbindService(MyServiceConn);
-            isBound = false;
-        }
+        mMusicManagerService.exeUnbindService();
     }
 
-    public IMusicInterface getIMusicInterface() {
-        return playService;
+    public MusicManagerService getMusicManagerService() {
+        return mMusicManagerService;
     }
 
-    protected void registerFragMusicBroadcast() {
-        if (mMusicBroadcastReceiver == null) {
-            mMusicBroadcastReceiver = new FragMusicBroadcastReceiver(new WeakReference<>(mPlayFragment));
+    public MusicManagerService checkMusicManagerService() {
+        if (mMusicManagerService.checkIsNull()) {
+            return null;
         }
-
-        registerReceiver(mMusicBroadcastReceiver, new IntentFilter(MusicService.ACTION));
-    }
-
-    protected void unregisterFragMusicBroadcast() {
-        if (mMusicBroadcastReceiver != null) {
-            unregisterReceiver(mMusicBroadcastReceiver);
-        }
+        return mMusicManagerService;
     }
 
     @Override
@@ -96,24 +55,6 @@ public abstract class BaseActivity<P extends BasePresenter> extends AppCompatAct
         super.onDestroy();
         if (mPresenter != null) {
             mPresenter.detachView();
-        }
-    }
-
-    private static class FragMusicBroadcastReceiver extends BroadcastReceiver {
-
-        private WeakReference<PlayFragment> mPlayFragment;
-
-        FragMusicBroadcastReceiver(WeakReference<PlayFragment> playFragment) {
-            mPlayFragment = playFragment;
-        }
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (MusicService.ACTION.equals(intent.getAction())) {
-                if (mPlayFragment.get() != null) {
-                    mPlayFragment.get().updateUI(intent);
-                }
-            }
         }
     }
 

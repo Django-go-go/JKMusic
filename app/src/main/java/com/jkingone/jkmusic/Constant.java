@@ -8,6 +8,9 @@ import java.util.List;
  */
 
 public class Constant {
+
+    public static final int PAGER_SIZE = 6;
+
     public static final int TYPE_LOCAL = 1;
     public static final int TYPE_NET = 2;
     public static final int TYPE_BMOB = 3;

@@ -1,10 +1,8 @@
 package com.jkingone.jkmusic.ui.fragment;
 
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -16,10 +14,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.jkingone.commonlib.Utils.DensityUtils;
+import com.jkingone.jkmusic.Constant;
+import com.jkingone.jkmusic.MusicBroadcastReceiver;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.data.entity.SongInfo;
 import com.jkingone.jkmusic.data.local.ContentHelper;
-import com.jkingone.jkmusic.service.MusicService;
 import com.jkingone.jkmusic.ui.activity.BaseActivity;
 import com.jkingone.jkmusic.ui.activity.PlayActivity;
 import com.squareup.picasso.Picasso;
@@ -38,7 +37,6 @@ public class PlayFragment extends LazyFragment {
 
     public static final String CUR_SONG = "cur_song";
     public static final String CUR_INDEX = "cur_index";
-    public static final String SONG_SIZE = "song_size";
 
     @BindView(R.id.pager)
     ViewPager mViewPager;
@@ -47,7 +45,7 @@ public class PlayFragment extends LazyFragment {
     @BindView(R.id.iv_menu)
     ImageView mImageViewMenu;
 
-    private List<View> mRootViews = new ArrayList<>();
+    private List<View> mRootViews = new ArrayList<>(6);
     private ImageView mImageViewCover;
     private TextView mTextViewSinger;
     private TextView mTextViewSongName;
@@ -58,7 +56,7 @@ public class PlayFragment extends LazyFragment {
     private SongInfo mCurSongInfo;
     private int mCurIndex = Integer.MIN_VALUE;
 
-    private boolean isSelfMove;
+    private boolean isComplete;
     private boolean isNext;
 
     private BaseActivity mBaseActivity;
@@ -78,7 +76,7 @@ public class PlayFragment extends LazyFragment {
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_play, container, false);
         mUnbinder = ButterKnife.bind(this, view);
 
@@ -96,39 +94,71 @@ public class PlayFragment extends LazyFragment {
 
             @Override
             public void onPageSelected(int position) {
-
-                if (!isSelfMove) {
-                    if (mBaseActivity.getIMusicInterface() != null) {
-                        try {
-                            if (isNext) {
-                                mBaseActivity.getIMusicInterface().next();
-                            } else {
-                                mBaseActivity.getIMusicInterface().previous();
-                            }
-                            isSelfMove = true;
-                        } catch (RemoteException e) {
-                            //do nothing
-                        }
+                if (!isComplete) {
+                    if (isNext) {
+                        mBaseActivity.checkMusicManagerService().next();
+                    } else {
+                        mBaseActivity.checkMusicManagerService().previous();
                     }
+                    Log.i(TAG, "onPageSelected: " + isNext);
                 } else {
-                    isSelfMove = false;
                     updateViewPager(position);
+                    Log.i(TAG, "onPageSelected: ");
+                }
+                isComplete = false;
+                if (position == 0) {
+                    mViewPager.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            isComplete = true;
+                            mViewPager.setCurrentItem(Constant.PAGER_SIZE - 2, false);
+                        }
+                    }, 500);
+                }
+                if (position == Constant.PAGER_SIZE - 1) {
+                    mViewPager.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            isComplete = true;
+                            mViewPager.setCurrentItem(1, false);
+                        }
+                    }, 500);
                 }
             }
 
             @Override
             public void onPageScrollStateChanged(int state) {
-//                Log.i(TAG, "onPageScrollStateChanged: ");
+            }
+        });
+
+        mBaseActivity.getMusicManagerService().setPlayCallback(new MusicBroadcastReceiver.PlayCallback() {
+            @Override
+            public void playStateChange(boolean isPlaying) {
+                if (isPlaying) {
+                    mImageViewPlay.setImageResource(R.drawable.music_xxh_yellow);
+                } else {
+                    mImageViewPlay.setImageResource(R.drawable.music);
+                }
+            }
+
+            @Override
+            public void mediaSourceChange(boolean indexChanged, int index, List<SongInfo> songInfos) {
+
+            }
+
+            @Override
+            public void indexChanged(int index, boolean isComplete) {
+                updateIndex(index);
+                PlayFragment.this.isComplete = isComplete;
+                if (isComplete) {
+                    mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1, true);
+                } else {
+                    updateViewPager(mViewPager.getCurrentItem());
+                }
             }
         });
 
         return view;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
     }
 
     @Override
@@ -139,45 +169,26 @@ public class PlayFragment extends LazyFragment {
 
     @OnClick(R.id.iv_menu)
     public void onMenuClick() {
-        try {
-            if (mBaseActivity.getIMusicInterface() != null) {
-                mBaseActivity.getIMusicInterface().prepareMediaSource(mSongInfos);
-                mBaseActivity.getIMusicInterface().playForIndex(3);
+        if (mBaseActivity.checkMusicManagerService() != null) {
+            mBaseActivity.checkMusicManagerService().prepareMediaSources(mSongInfos);
+            mBaseActivity.checkMusicManagerService().playIndex(2);
 
-                mCurIndex = 3;
-                mCurSongInfo = mSongInfos.get(mCurIndex);
+            updateIndex(2);
 
-                mViewPager.setAdapter(new MusicAdapter());
-                isSelfMove  = true;
-                mViewPager.setCurrentItem(3);
-            }
-        } catch (RemoteException e) {
-            //do nothing
+            isComplete = true;
+            mViewPager.setAdapter(new MusicAdapter());
+            mViewPager.setCurrentItem(2);
         }
-//        try {
-//            if (mBaseActivity.getIMusicInterface() != null) {
-//                if (mSongInfos != null) {
-//                    mSongInfos.clear();
-//                }
-//                mSongInfos.addAll(mBaseActivity.getIMusicInterface().getMediaSource());
-//            }
-//        } catch (RemoteException e) {
-//            //do nothing
-//        }
     }
 
     @OnClick(R.id.iv_play)
     public void onPlayClick() {
-        try {
-            if (mBaseActivity.getIMusicInterface() != null) {
-                if (mBaseActivity.getIMusicInterface().isPlaying()) {
-                    mBaseActivity.getIMusicInterface().pause();
-                } else {
-                    mBaseActivity.getIMusicInterface().play();
-                }
+        if (mBaseActivity.checkMusicManagerService() != null) {
+            if (mBaseActivity.checkMusicManagerService().isPlaying()) {
+                mBaseActivity.checkMusicManagerService().pause();
+            } else {
+                mBaseActivity.checkMusicManagerService().play();
             }
-        } catch (RemoteException e) {
-            //do nothing
         }
     }
 
@@ -186,33 +197,14 @@ public class PlayFragment extends LazyFragment {
         Intent intent = new Intent(mBaseActivity, PlayActivity.class);
         intent.putExtra(CUR_SONG, mCurSongInfo);
         intent.putExtra(CUR_INDEX, mCurIndex);
-        intent.putExtra(SONG_SIZE, mSongInfos.size());
         startActivity(intent);
-    }
-
-    private void updateForFirstConnect() {
-        if (mBaseActivity.getIMusicInterface() != null) {
-            try {
-                if (mBaseActivity.getIMusicInterface().isPlaying()) {
-                    mImageViewPlay.setImageResource(R.drawable.music_xxh_yellow);
-                } else {
-                    mImageViewPlay.setImageResource(R.drawable.music);
-                }
-                int curIndex = mBaseActivity.getIMusicInterface().getCurrentWindowIndex();
-                if (curIndex != mCurIndex) {
-
-                }
-            } catch (RemoteException e) {
-                //do nothing
-            }
-        }
     }
 
     private class MusicAdapter extends PagerAdapter {
 
         @Override
         public int getCount() {
-            return mSongInfos.size();
+            return Constant.PAGER_SIZE;
         }
 
         @Override
@@ -223,7 +215,6 @@ public class PlayFragment extends LazyFragment {
         @NonNull
         @Override
         public Object instantiateItem(@NonNull ViewGroup container, int position) {
-            Log.i(TAG, "instantiateItem: " + position);
             View view = instantiateView(container, position);
             container.addView(view);
             return view;
@@ -236,8 +227,6 @@ public class PlayFragment extends LazyFragment {
                 mRootViews.set(position, null);
             }
         }
-
-
     }
 
     private synchronized View instantiateView(ViewGroup container, int position) {
@@ -247,7 +236,6 @@ public class PlayFragment extends LazyFragment {
                 mRootViews.add(null);
             }
         }
-        Log.i(TAG, "instantiateView: " + mRootViews.size());
         if (mRootViews.get(position) == null) {
             View view = LayoutInflater.from(getContext()).inflate(R.layout.pager_bottom_music, container, false);
             mRootViews.set(position, view);
@@ -255,17 +243,9 @@ public class PlayFragment extends LazyFragment {
         return mRootViews.get(position);
     }
 
-    private void updateIndex() {
-        if (mBaseActivity.getIMusicInterface() != null) {
-            try {
-                mCurIndex = mBaseActivity.getIMusicInterface().getCurrentWindowIndex();
-                mCurSongInfo = mSongInfos.get(mCurIndex);
-                Log.i(TAG, "updateIndex: " + mCurIndex);
-            } catch (RemoteException e) {
-                //do nothing
-            }
-
-        }
+    private void updateIndex(int index) {
+        mCurIndex = index;
+        mCurSongInfo = mSongInfos.get(mCurIndex);
     }
 
     private void updateViewPager(int pos) {
@@ -281,31 +261,5 @@ public class PlayFragment extends LazyFragment {
                 .into(mImageViewCover);
         mTextViewSinger.setText(mCurSongInfo.getArtist());
         mTextViewSongName.setText(mCurSongInfo.getTitle());
-    }
-
-    public void updateUI(Intent intent) {
-        if (getContext() != null) {
-            if (intent.getStringExtra(MusicService.EXTRA_PLAY) != null) {
-                mImageViewPlay.setImageResource(R.drawable.music_xxh_yellow);
-            }
-            if (intent.getStringExtra(MusicService.EXTRA_PAUSE) != null) {
-                mImageViewPlay.setImageResource(R.drawable.music);
-            }
-            if (intent.getStringExtra(MusicService.EXTRA_RELEASE) != null) {
-                updateIndex();
-                if (isSelfMove) {
-                    updateViewPager(mViewPager.getCurrentItem());
-                    isSelfMove = false;
-                } else {
-                    isSelfMove = true;
-                    mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1);
-                }
-            }
-            if (intent.getStringExtra(MusicService.EXTRA_DATA_LIST) != null) {
-
-            }
-
-        }
-
     }
 }

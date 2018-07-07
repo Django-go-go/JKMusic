@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -26,6 +27,7 @@ import com.google.android.exoplayer2.metadata.Metadata;
 import com.google.android.exoplayer2.metadata.MetadataOutput;
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
 import com.google.android.exoplayer2.source.LoopingMediaSource;
+import com.google.android.exoplayer2.source.MediaPeriod;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.MediaSourceEventListener;
 import com.google.android.exoplayer2.source.TrackGroupArray;
@@ -47,6 +49,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.CookieHandler;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import static com.jkingone.jkmusic.media.JExoPlayerHelper.DEFAULT_COOKIE_MANAGER;
@@ -55,15 +59,21 @@ public class MusicService extends Service {
 
     private static final String TAG = "MusicService";
 
-    //    public static final String ACTION_PLAY = "com.jkingone.jkmusic.service.play";
     public static final String ACTION = "com.jkingone.jkmusic.music.action";
+
     public static final String EXTRA_PLAY = "com.jkingone.jkmusic.service.play";
     public static final String EXTRA_PAUSE = "com.jkingone.jkmusic.service.pause";
+
     public static final String EXTRA_PREV = "com.jkingone.jkmusic.service.prev";
     public static final String EXTRA_NEXT = "com.jkingone.jkmusic.service.next";
     public static final String EXTRA_RELEASE = "com.jkingone.jkmusic.service.release";
-    public static final String EXTRA_DATA = "com.jkingone.jkmusic.service.data";
-    public static final String EXTRA_DATA_LIST = "com.jkingone.jkmusic.service.datalist";
+
+    public static final String MUSIC_INDEX = "com.jkingone.jkmusic.service.index";
+    public static final String MUSIC_COMPLETE = "com.jkingone.jkmusic.service.complete";
+
+    public static final String MUSIC_DATA_INDEX_CHANGE = "com.jkingone.jkmusic.service.data.indexchange";
+    public static final String MUSIC_DATA_CHANGE = "com.jkingone.jkmusic.service.data.change";
+    public static final String MUSIC_DATA_INDEX = "com.jkingone.jkmusic.service.index";
 
     private DataSource.Factory mFileDataSourceFactory;
     private DataSource.Factory mHttpDataSourceFactory;
@@ -74,7 +84,7 @@ public class MusicService extends Service {
 
     private List<SongInfo> mSongInfos = new ArrayList<>();
 
-    private boolean isReleaseAndComplete = false;
+    private boolean isComplete = false;
 
     @Override
     public void onCreate() {
@@ -129,32 +139,9 @@ public class MusicService extends Service {
         }
     }
 
-    private void prepareMediaSource(Uri[] uris) {
-
-        MediaSource[] mediaSources = new MediaSource[uris.length];
-
-        for (int i = 0; i < mediaSources.length; i++) {
-            if (uris[i].getScheme().startsWith("http")) {
-                mediaSources[i] = JExoPlayerHelper.instance(MusicService.this).buildMediaSource(uris[i], null, mHttpDataSourceFactory);
-            } else {
-                mediaSources[i] = JExoPlayerHelper.instance(MusicService.this).buildMediaSource(uris[i], null, mFileDataSourceFactory);
-            }
-        }
-
-        mediaSource = mediaSources.length == 1 ? mediaSources[0] : new ConcatenatingMediaSource(mediaSources);
-
-        mediaSource.addEventListener(new Handler(player.getPlaybackLooper()), new DefaultMediaSourceEventListener());
-    }
-
-    private void sendBroadCastForFragExtra(String key, String value) {
+    private void sendBroadCastForExtra(String key, String value) {
         Intent intent = new Intent(ACTION);
         intent.putExtra(key, value);
-        sendBroadcast(intent);
-    }
-
-    private void sendBroadCastForFragData(SongInfo songInfo) {
-        Intent intent = new Intent(ACTION);
-        intent.putExtra(MusicService.EXTRA_DATA, songInfo);
         sendBroadcast(intent);
     }
 
@@ -167,7 +154,7 @@ public class MusicService extends Service {
         @Override
         public void onMediaPeriodReleased(int windowIndex, MediaSource.MediaPeriodId mediaPeriodId) {
             Log.i(TAG, "onMediaPeriodReleased: " + windowIndex);
-            isReleaseAndComplete = true;
+//            isComplete = true;
         }
 
         @Override
@@ -178,12 +165,13 @@ public class MusicService extends Service {
         @Override
         public void onLoadCompleted(int windowIndex, @Nullable MediaSource.MediaPeriodId mediaPeriodId, LoadEventInfo loadEventInfo, MediaLoadData mediaLoadData) {
             Log.i(TAG, "onLoadCompleted: " + windowIndex);
-            isReleaseAndComplete = true;
+            isComplete = true;
         }
 
         @Override
         public void onLoadCanceled(int windowIndex, @Nullable MediaSource.MediaPeriodId mediaPeriodId, LoadEventInfo loadEventInfo, MediaLoadData mediaLoadData) {
             Log.i(TAG, "onLoadCanceled: " + windowIndex);
+            isComplete = false;
         }
 
         @Override
@@ -194,10 +182,15 @@ public class MusicService extends Service {
         @Override
         public void onReadingStarted(int windowIndex, MediaSource.MediaPeriodId mediaPeriodId) {
             Log.i(TAG, "onReadingStarted: " + windowIndex);
-            if (isReleaseAndComplete) {
-                sendBroadCastForFragExtra(EXTRA_RELEASE, EXTRA_RELEASE);
-                isReleaseAndComplete = false;
+            Intent intent = new Intent(ACTION);
+            if (isComplete) {
+                intent.putExtra(MUSIC_COMPLETE, true);
+            } else {
+                intent.putExtra(MUSIC_COMPLETE, false);
             }
+            intent.putExtra(MUSIC_INDEX, windowIndex);
+            sendBroadcast(intent);
+            isComplete = false;
         }
 
         @Override
@@ -229,9 +222,9 @@ public class MusicService extends Service {
                         + player.getBufferedPosition() + " " + player.getDuration());
 
                 if (playWhenReady) {
-                    sendBroadCastForFragExtra(MusicService.EXTRA_PLAY, MusicService.EXTRA_PLAY);
+                    sendBroadCastForExtra(MusicService.EXTRA_PLAY, MusicService.EXTRA_PLAY);
                 } else {
-                    sendBroadCastForFragExtra(MusicService.EXTRA_PAUSE, MusicService.EXTRA_PAUSE);
+                    sendBroadCastForExtra(MusicService.EXTRA_PAUSE, MusicService.EXTRA_PAUSE);
                 }
             }
         }
@@ -244,8 +237,64 @@ public class MusicService extends Service {
 
     private class MusicManager extends IMusicInterface.Stub {
 
+        private MediaSource[] createMediaSources(Collection<SongInfo> songInfos) {
+            if (songInfos == null) {
+                Log.i(TAG, "song is null");
+                throw new IllegalArgumentException("song is null");
+            }
+
+            Uri[] uris = new Uri[songInfos.size()];
+            int j = 0;
+            for (SongInfo songInfo : songInfos) {
+                String path = songInfo.getUrl();
+                if (path.startsWith("http")) {
+                    uris[j] = Uri.parse(path);
+                } else {
+                    uris[j] = Uri.fromFile(new File(path));
+                }
+                j++;
+            }
+
+            MediaSource[] mediaSources = new MediaSource[uris.length];
+
+            for (int i = 0; i < mediaSources.length; i++) {
+                if (uris[i].getScheme().startsWith("http")) {
+                    mediaSources[i] = JExoPlayerHelper.instance(MusicService.this).buildMediaSource(uris[i], null, mHttpDataSourceFactory);
+                } else {
+                    mediaSources[i] = JExoPlayerHelper.instance(MusicService.this).buildMediaSource(uris[i], null, mFileDataSourceFactory);
+                }
+            }
+
+            return mediaSources;
+        }
+
+        private MediaSource createMediaSource(SongInfo songInfo) {
+            if (songInfo == null) {
+                Log.i(TAG, "song is null");
+                throw new IllegalArgumentException("song is null");
+            }
+
+            Uri uri;
+                String path = songInfo.getUrl();
+                if (path.startsWith("http")) {
+                    uri = Uri.parse(path);
+                } else {
+                    uri = Uri.fromFile(new File(path));
+                }
+
+            MediaSource mediaSource;
+
+                if (uri.getScheme().startsWith("http")) {
+                    mediaSource = JExoPlayerHelper.instance(MusicService.this).buildMediaSource(uri, null, mHttpDataSourceFactory);
+                } else {
+                    mediaSource = JExoPlayerHelper.instance(MusicService.this).buildMediaSource(uri, null, mFileDataSourceFactory);
+            }
+
+            return mediaSource;
+        }
+
         @Override
-        public void prepareMediaSource(List<SongInfo> songInfos) throws RemoteException {
+        public void prepareMediaSources(List<SongInfo> songInfos) throws RemoteException {
 
             if (songInfos == null) {
                 Log.i(TAG, "song is null");
@@ -253,33 +302,137 @@ public class MusicService extends Service {
             }
 
             mSongInfos.addAll(songInfos);
-            Uri[] uris = new Uri[songInfos.size()];
-            for (int i = 0; i < uris.length; i++) {
-                String path = songInfos.get(i).getUrl();
-                if (path.startsWith("http")) {
-                    uris[i] = Uri.parse(path);
-                } else {
-                    uris[i] = Uri.fromFile(new File(path));
-                }
-            }
-            MusicService.this.prepareMediaSource(uris);
+
+            mediaSource = /*mediaSources.length == 1 ? mediaSources[0] : */new ConcatenatingMediaSource(createMediaSources(songInfos));
+
+            mediaSource.addEventListener(new Handler(player.getPlaybackLooper()), new DefaultMediaSourceEventListener());
+
         }
 
         @Override
-        public void addMediaSource(SongInfo songInfo) throws RemoteException {
-            sendBroadCastForFragExtra(MusicService.EXTRA_DATA_LIST, MusicService.EXTRA_DATA_LIST);
+        public void addMediaSource(final SongInfo songInfo) throws RemoteException {
+            if (mediaSource instanceof ConcatenatingMediaSource) {
+                ConcatenatingMediaSource concatenatingMediaSource = (ConcatenatingMediaSource) mediaSource;
+                final int index = getCurrentWindowIndex();
+                concatenatingMediaSource.addMediaSource(createMediaSource(songInfo), new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            mSongInfos.add(songInfo);
+                            Intent intent = new Intent(ACTION);
+                            intent.putParcelableArrayListExtra(MUSIC_DATA_CHANGE, new ArrayList<Parcelable>(mSongInfos));
+                            if (index != getCurrentWindowIndex()) {
+                                intent.putExtra(MUSIC_DATA_INDEX_CHANGE, true);
+                                intent.putExtra(MUSIC_DATA_INDEX, getCurrentWindowIndex());
+                            } else {
+                                intent.putExtra(MUSIC_DATA_INDEX_CHANGE, false);
+                            }
+                            sendBroadcast(intent);
+                        } catch (RemoteException e) {
+                            //do nothing
+                        }
+                    }
+                });
+            }
+        }
+
+        @Override
+        public List<SongInfo> getMediaSources() throws RemoteException {
+            return mSongInfos;
+        }
+
+        @Override
+        public void removeMediaSource(final int index) throws RemoteException {
+            if (mediaSource instanceof ConcatenatingMediaSource) {
+                ConcatenatingMediaSource concatenatingMediaSource = (ConcatenatingMediaSource) mediaSource;
+                final int pos = getCurrentWindowIndex();
+                concatenatingMediaSource.removeMediaSource(index, new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            mSongInfos.remove(index);
+                            Intent intent = new Intent(ACTION);
+                            intent.putParcelableArrayListExtra(MUSIC_DATA_CHANGE, new ArrayList<Parcelable>(mSongInfos));
+                            if (pos != getCurrentWindowIndex()) {
+                                intent.putExtra(MUSIC_DATA_INDEX_CHANGE, true);
+                                intent.putExtra(MUSIC_DATA_INDEX, getCurrentWindowIndex());
+                            } else {
+                                intent.putExtra(MUSIC_DATA_INDEX_CHANGE, false);
+                            }
+                            sendBroadcast(intent);
+                        } catch (RemoteException e) {
+                            //do nothing
+                        }
+                    }
+                });
+            }
+        }
+
+        @Override
+        public void clearMediaSources() throws RemoteException {
+            if (mediaSource instanceof ConcatenatingMediaSource) {
+                ConcatenatingMediaSource concatenatingMediaSource = (ConcatenatingMediaSource) mediaSource;
+                concatenatingMediaSource.clear(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            mSongInfos.clear();
+                            Intent intent = new Intent(ACTION);
+                            intent.putParcelableArrayListExtra(MUSIC_DATA_CHANGE, new ArrayList<Parcelable>(mSongInfos));
+                            intent.putExtra(MUSIC_DATA_INDEX_CHANGE, true);
+                            intent.putExtra(MUSIC_DATA_INDEX, getCurrentWindowIndex());
+                            sendBroadcast(intent);
+                        } catch (RemoteException e) {
+                            //do nothing
+                        }
+                    }
+                });
+            }
+        }
+
+        @Override
+        public void addMediaSources(final List<SongInfo> songInfos) throws RemoteException {
+            if (mediaSource instanceof ConcatenatingMediaSource) {
+
+                if (songInfos == null) {
+                    Log.i(TAG, "song is null");
+                    throw new IllegalArgumentException("song is null");
+                }
+
+                ConcatenatingMediaSource source = (ConcatenatingMediaSource) mediaSource;
+                final int index = getCurrentWindowIndex();
+                source.addMediaSources(Arrays.asList(createMediaSources(songInfos)), new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            mSongInfos.addAll(songInfos);
+                            Intent intent = new Intent(ACTION);
+                            intent.putParcelableArrayListExtra(MUSIC_DATA_CHANGE, new ArrayList<Parcelable>(mSongInfos));
+                            if (index != getCurrentWindowIndex()) {
+                                intent.putExtra(MUSIC_DATA_INDEX_CHANGE, true);
+                                intent.putExtra(MUSIC_DATA_INDEX, getCurrentWindowIndex());
+                            } else {
+                                intent.putExtra(MUSIC_DATA_INDEX_CHANGE, false);
+                            }
+                            sendBroadcast(intent);
+                        } catch (RemoteException e) {
+                            //do nothing
+                        }
+                    }
+                });
+            }
         }
 
         @Override
         public void play() throws RemoteException {
+            checkPlayerNotNull();
             if (mediaSource != null && getPlaybackState() == Player.STATE_READY) {
-                checkPlayerNotNull();
                 player.setPlayWhenReady(true);
             }
         }
 
         @Override
-        public void playForIndex(int index) throws RemoteException {
+        public void playIndex(int index) throws RemoteException {
             checkPlayerNotNull();
             player.setPlayWhenReady(true);
             player.prepare(mediaSource);
@@ -320,11 +473,6 @@ public class MusicService extends Service {
         public boolean isPlaying() throws RemoteException {
             checkPlayerNotNull();
             return getPlaybackState() == Player.STATE_READY && player.getPlayWhenReady();
-        }
-
-        @Override
-        public List<SongInfo> getMediaSource() throws RemoteException {
-            return mSongInfos;
         }
 
         @Override

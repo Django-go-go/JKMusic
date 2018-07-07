@@ -5,11 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Handler;
-import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -22,19 +20,19 @@ import android.widget.TextView;
 
 import com.google.android.exoplayer2.C;
 import com.jkingone.commonlib.PicassoTransform;
-import com.jkingone.commonlib.Utils.DensityUtils;
 import com.jkingone.commonlib.Utils.ScreenUtils;
 import com.jkingone.commonlib.Utils.TimeUtils;
 import com.jkingone.customviewlib.PicassoBackground;
+import com.jkingone.jkmusic.Constant;
+import com.jkingone.jkmusic.MusicBroadcastReceiver;
+import com.jkingone.jkmusic.MusicManagerService;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.data.entity.SongInfo;
 import com.jkingone.jkmusic.service.MusicService;
 import com.jkingone.jkmusic.ui.fragment.PlayFragment;
 import com.jkingone.jkmusic.ui.mvp.BasePresenter;
-import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,26 +62,17 @@ public class PlayActivity extends BaseActivity {
     @BindView(R.id.seekbar)
     SeekBar mSeekBar;
 
-    private List<View> mPagerViews = new ArrayList<>();
+    private List<View> mPagerViews = new ArrayList<>(6);
     private ImageView mImageViewAlbum;
 
     private List<SongInfo> mSongInfos;
     private SongInfo mCurSongInfo;
-    private int mSongSize;
     private int mCurIndex;
-
-    private PlayBroadcastReceiver mPlayBroadcastReceiver;
 
     private ScheduledExecutorService mSeekBarExecutorService;
     private ScheduledFuture<?> mScheduledFuture;
-    private Runnable mUpdateTask = new Runnable() {
-        @Override
-        public void run() {
-            updateSeekBar();
-        }
-    };
 
-    private boolean isSelfMove;
+    private boolean isComplete;
     private boolean isNext;
 
     @Override
@@ -96,16 +85,50 @@ public class PlayActivity extends BaseActivity {
         Intent intent = getIntent();
         mCurSongInfo = intent.getParcelableExtra(PlayFragment.CUR_SONG);
         mCurIndex = intent.getIntExtra(PlayFragment.CUR_INDEX, Integer.MIN_VALUE);
-        mSongSize = intent.getIntExtra(PlayFragment.SONG_SIZE, 0);
 
         initToolbar();
 
         initViewPager();
+
+        mMusicManagerService.setBindServiceCallback(new MusicManagerService.BindServiceCallback() {
+            @Override
+            public void updateFirst() {
+                if (mMusicManagerService.isPlaying()) {
+                    scheduleSeekBarUpdate();
+                } else {
+                    updateSeekBar();
+                }
+                updateViewPager(mViewPager.getCurrentItem());
+            }
+        });
+
+        mMusicManagerService.setPlayCallback(new MusicBroadcastReceiver.PlayCallback() {
+            @Override
+            public void playStateChange(boolean isPlaying) {
+
+            }
+
+            @Override
+            public void mediaSourceChange(boolean indexChanged, int index, List<SongInfo> songInfos) {
+
+            }
+
+            @Override
+            public void indexChanged(int index, boolean isComplete) {
+                updateIndex(index);
+                PlayActivity.this.isComplete = isComplete;
+                if (!isComplete) {
+                    updateViewPager(mViewPager.getCurrentItem());
+                } else {
+                    mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1, true);
+                }
+            }
+        });
     }
 
     private void initViewPager() {
         mViewPager.setAdapter(new MusicAdapter());
-        mViewPager.setCurrentItem(mCurIndex);
+        mViewPager.setCurrentItem(1);
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             int lastOffset = 0;
 
@@ -117,29 +140,38 @@ public class PlayActivity extends BaseActivity {
 
             @Override
             public void onPageSelected(int position) {
-
-                if (!isSelfMove) {
-                    if (playService != null) {
-                        try {
-                            if (isNext) {
-                                playService.next();
-                            } else {
-                                playService.previous();
-                            }
-                            isSelfMove = true;
-                        } catch (RemoteException e) {
-                            //do nothing
-                        }
+                if (!isComplete) {
+                    if (isNext) {
+                        mMusicManagerService.next();
+                    } else {
+                        mMusicManagerService.previous();
                     }
                 } else {
-                    isSelfMove = false;
                     updateViewPager(position);
+                }
+                isComplete = false;
+                if (position == 0) {
+                    mViewPager.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            isComplete = true;
+                            mViewPager.setCurrentItem(Constant.PAGER_SIZE - 2, false);
+                        }
+                    }, 500);
+                }
+                if (position == Constant.PAGER_SIZE - 1) {
+                    mViewPager.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            isComplete = true;
+                            mViewPager.setCurrentItem(1, false);
+                        }
+                    }, 500);
                 }
             }
 
             @Override
             public void onPageScrollStateChanged(int state) {
-//                Log.i(TAG, "onPageScrollStateChanged: ");
             }
         });
     }
@@ -160,7 +192,6 @@ public class PlayActivity extends BaseActivity {
     protected void onStart() {
         super.onStart();
         exeBindService();
-        registerPlayBroadcast();
         getScheduledService();
     }
 
@@ -168,7 +199,6 @@ public class PlayActivity extends BaseActivity {
     protected void onStop() {
         super.onStop();
         exeUnbindService();
-        unregisterPlayBroadcast();
         releaseScheduledService();
     }
 
@@ -177,46 +207,28 @@ public class PlayActivity extends BaseActivity {
         return null;
     }
 
-    public void updateForFirstConnect() {
-        try {
-            if (playService.isPlaying()) {
-                scheduleSeekBarUpdate();
-            } else {
-                updateSeekBar();
-            }
-            updateViewPager(mCurIndex);
-        } catch (RemoteException e) {
-            //do nothing
-        }
-    }
-
     private void updateSeekBar() {
-        if (playService != null) {
-            try {
-                long progress = playService.getCurrentPosition();
-                long total = playService.getDuration();
-                long buf = playService.getBufferedPosition();
+        if (checkMusicManagerService() != null) {
+            long progress = mMusicManagerService.getCurrentPosition();
+            long total = mMusicManagerService.getDuration();
+            long buf = mMusicManagerService.getBufferedPosition();
 
-                if (progress == C.TIME_UNSET) {
-                    progress = 0;
-                }
-                if (total == C.TIME_UNSET) {
-                    total = 0;
-                }
-                if (buf == C.TIME_UNSET) {
-                    buf = 0;
-                }
-
-                mTextViewStart.setText(TimeUtils.formatTime(progress));
-                mTextViewTotal.setText(TimeUtils.formatTime(total));
-
-                mSeekBar.setMax((int) total);
-                mSeekBar.setProgress((int) progress);
-                mSeekBar.setSecondaryProgress((int) buf);
-
-            } catch (RemoteException e) {
-                //do nothing
+            if (progress == C.TIME_UNSET) {
+                progress = 0;
             }
+            if (total == C.TIME_UNSET) {
+                total = 0;
+            }
+            if (buf == C.TIME_UNSET) {
+                buf = 0;
+            }
+
+            mTextViewStart.setText(TimeUtils.formatTime(progress));
+            mTextViewTotal.setText(TimeUtils.formatTime(total));
+
+            mSeekBar.setMax((int) total);
+            mSeekBar.setProgress((int) progress);
+            mSeekBar.setSecondaryProgress((int) buf);
         }
     }
 
@@ -236,50 +248,24 @@ public class PlayActivity extends BaseActivity {
         mToolbar.setSubtitle(mCurSongInfo.getArtist());
     }
 
-    private void updateIndex() {
-        if (playService != null) {
-            try {
-                mCurIndex = playService.getCurrentWindowIndex();
-                if (mSongInfos == null) {
-                    mSongInfos = playService.getMediaSource();
-                }
-                mCurSongInfo = mSongInfos.get(mCurIndex);
-                Log.i(TAG, "updateIndex: " + mCurIndex);
-            } catch (RemoteException e) {
-                //do nothing
-            }
-
+    private void updateIndex(int index) {
+        mCurIndex = index;
+        if (mSongInfos == null) {
+            mSongInfos = mMusicManagerService.getMediaSources();
         }
-    }
-
-    public void updateUI(Intent intent) {
-        if (intent.getStringExtra(MusicService.EXTRA_PLAY) != null) {
-//            mImageViewPlay.setImageResource(R.drawable.music_xxh_yellow);
-        }
-        if (intent.getStringExtra(MusicService.EXTRA_PAUSE) != null) {
-//            mImageViewPlay.setImageResource(R.drawable.music);
-        }
-        if (intent.getStringExtra(MusicService.EXTRA_RELEASE) != null) {
-            updateIndex();
-            if (isSelfMove) {
-                updateViewPager(mViewPager.getCurrentItem());
-                isSelfMove = false;
-            } else {
-                isSelfMove = true;
-                mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1);
-            }
-        }
-        if (intent.getStringExtra(MusicService.EXTRA_DATA_LIST) != null) {
-
-        }
+        mCurSongInfo = mSongInfos.get(mCurIndex);
     }
 
     private void scheduleSeekBarUpdate() {
-
         mScheduledFuture = mSeekBarExecutorService.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                new Handler(getMainLooper()).post(mUpdateTask);
+                new Handler(getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateSeekBar();
+                    }
+                });
             }
         }, 100, 1000, TimeUnit.MILLISECONDS);
     }
@@ -304,24 +290,11 @@ public class PlayActivity extends BaseActivity {
         }
     }
 
-    private void registerPlayBroadcast() {
-        if (mPlayBroadcastReceiver == null) {
-            mPlayBroadcastReceiver = new PlayBroadcastReceiver(new WeakReference<>(this));
-        }
-        registerReceiver(mPlayBroadcastReceiver, new IntentFilter(MusicService.ACTION));
-    }
-
-    private void unregisterPlayBroadcast() {
-        if (mPlayBroadcastReceiver != null) {
-            unregisterReceiver(mPlayBroadcastReceiver);
-        }
-    }
-
     private class MusicAdapter extends PagerAdapter {
 
         @Override
         public int getCount() {
-            return mSongSize;
+            return Constant.PAGER_SIZE;
         }
 
         @Override
@@ -359,23 +332,5 @@ public class PlayActivity extends BaseActivity {
             mPagerViews.set(position, view);
         }
         return mPagerViews.get(position);
-    }
-
-    private static class PlayBroadcastReceiver extends BroadcastReceiver {
-
-        private WeakReference<PlayActivity> mWeakReference;
-
-        PlayBroadcastReceiver(WeakReference<PlayActivity> weakReference) {
-            mWeakReference = weakReference;
-        }
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (MusicService.ACTION.equals(intent.getAction())) {
-                if (mWeakReference.get() != null) {
-                    mWeakReference.get().updateUI(intent);
-                }
-            }
-        }
     }
 }

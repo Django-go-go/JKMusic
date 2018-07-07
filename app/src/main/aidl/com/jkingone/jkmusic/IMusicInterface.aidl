@@ -4,10 +4,15 @@ package com.jkingone.jkmusic;
 import com.jkingone.jkmusic.data.entity.SongInfo;
 
 interface IMusicInterface {
-    void prepareMediaSource(in List<SongInfo> songInfos);
+    void prepareMediaSources(in List<SongInfo> songInfos);
     void addMediaSource(in SongInfo songInfo);
+    List<SongInfo> getMediaSources();
+    void removeMediaSource(int index);
+    void clearMediaSources();
+    void addMediaSources(in List<SongInfo> songInfos);
+
     void play();
-    void playForIndex(int index);
+    void playIndex(int index);
     void pause();
     void next();
     void previous();
@@ -17,8 +22,6 @@ interface IMusicInterface {
     void releasePlayer();
 
     boolean isPlaying();
-
-    List<SongInfo> getMediaSource();
 
       /**
        * Returns the current state of the player.
