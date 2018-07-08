@@ -71,9 +71,11 @@ public class MusicView extends FrameLayout {
         int width = getMeasuredWidth() - getPaddingStart() - getPaddingEnd();
 
         radius = Math.min(height, width) / 2;
+        double innerRadius = (double)radius * Math.sqrt(2) / 2;
+        strokeWidth = radius - (int)innerRadius;
         mLayoutParams.gravity = Gravity.CENTER;
-        mLayoutParams.width = (radius - strokeWidth) * 2;
-        mLayoutParams.height = (radius - strokeWidth) * 2;
+        mLayoutParams.width = (int) innerRadius * 2;
+        mLayoutParams.height = (int) innerRadius * 2;
         mImageView.setLayoutParams(mLayoutParams);
         Log.i(TAG, "onMeasure1: " + getMeasuredWidth() + " " + getMeasuredHeight() + " " + radius);
     }
