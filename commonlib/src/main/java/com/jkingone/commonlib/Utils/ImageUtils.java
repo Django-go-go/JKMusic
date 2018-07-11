@@ -3,6 +3,7 @@ package com.jkingone.commonlib.Utils;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorMatrix;
@@ -16,56 +17,33 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RSRuntimeException;
 import android.renderscript.RenderScript;
+import android.renderscript.ScriptIntrinsicBlend;
 import android.renderscript.ScriptIntrinsicBlur;
+
+import com.jkingone.commonlib.R;
 
 /**
  * Created by Administrator on 2017/7/23.
  */
 public class ImageUtils {
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
-    public static Bitmap blur(Context context, Bitmap bitmap, int radius) throws RSRuntimeException {
-        RenderScript rs = null;
-        Allocation input = null;
-        Allocation output = null;
-        ScriptIntrinsicBlur blur = null;
-        try {
-            rs = RenderScript.create(context);
-            rs.setMessageHandler(new RenderScript.RSMessageHandler());
-            input = Allocation.createFromBitmap(rs, bitmap, Allocation.MipmapControl.MIPMAP_NONE,
-                    Allocation.USAGE_SCRIPT);
-            output = Allocation.createTyped(rs, input.getType());
-            blur = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
-
-            blur.setInput(input);
-            blur.setRadius(radius);
-            blur.forEach(output);
-            output.copyTo(bitmap);
-        } finally {
-            if (rs != null) {
-                rs.destroy();
-            }
-            if (input != null) {
-                input.destroy();
-            }
-            if (output != null) {
-                output.destroy();
-            }
-            if (blur != null) {
-                blur.destroy();
-            }
+    public static Bitmap blurBitmap(Bitmap bitmap, int radius, int sample, Context context, boolean isFast) {
+        bitmap = sampleBitmap(bitmap, sample);
+        if (isFast) {
+            return renderScriptBlur(bitmap, radius, context);
+        } else {
+            return fastBlur(bitmap, radius);
         }
-
-        return bitmap;
     }
 
-    public static Bitmap blur(Bitmap sentBitmap, int radius, boolean canReuseInBitmap) {
+    private static Bitmap fastBlur(Bitmap bitmap, int radius) {
 
         // Stack Blur v1.0 from
         // http://www.quasimondo.com/StackBlurForCanvas/StackBlurDemo.html
@@ -94,13 +72,6 @@ public class ImageUtils {
         // the following line:
         //
         // Stack Blur Algorithm by Mario Klingemann <mario@quasimondo.com>
-
-        Bitmap bitmap;
-        if (canReuseInBitmap) {
-            bitmap = sentBitmap;
-        } else {
-            bitmap = sentBitmap.copy(sentBitmap.getConfig(), true);
-        }
 
         if (radius < 1) {
             return (null);
@@ -300,15 +271,12 @@ public class ImageUtils {
         return (bitmap);
     }
 
+    private static Bitmap renderScriptBlur(Bitmap bitmap, float radius, Context context) {
 
-    /************************
-     * 高斯模糊处理
-     * @param bitmap
-     * @param context
-     * @return
-     ***********************/
-
-    public static Bitmap blurBitmap(Bitmap bitmap, Context context) {
+        Bitmap colorBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_launcher_foreground);
+//                Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig());
+//        Canvas canvas = new Canvas(colorBitmap);
+//        canvas.drawColor(Color.MAGENTA);
 
         // 用需要创建高斯模糊bitmap创建一个空的bitmap
         Bitmap outBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
@@ -322,19 +290,24 @@ public class ImageUtils {
         // 创建Allocations，此类是将数据传递给RenderScript内核的主要方法，并制定一个后备类型存储给定类型
         Allocation allIn = Allocation.createFromBitmap(rs, bitmap);
         Allocation allOut = Allocation.createFromBitmap(rs, outBitmap);
+        Allocation colorIn = Allocation.createFromBitmap(rs, colorBitmap);
 
         //设定模糊度(注：Radius最大只能设置25.f)
-        blurScript.setRadius(25.f);
+        blurScript.setRadius(radius);
 
         // Perform the Renderscript
         blurScript.setInput(allIn);
         blurScript.forEach(allOut);
+
+        ScriptIntrinsicBlend blendScript = ScriptIntrinsicBlend.create(rs, Element.U8_4(rs));
+        blendScript.forEachMultiply(colorIn, allOut);
 
         // Copy the final bitmap created by the out Allocation to the outBitmap
         allOut.copyTo(outBitmap);
 
         // recycle the original bitmap
         bitmap.recycle();
+        colorBitmap.recycle();
 
         // After finishing everything, we destroy the Renderscript.
         rs.destroy();
@@ -342,32 +315,36 @@ public class ImageUtils {
         return outBitmap;
     }
 
-    //放大缩小图片
-    public static Bitmap zoomBitmap(Bitmap bitmap, int w, int h){
-        int width = bitmap.getWidth();
-        int height = bitmap.getHeight();
-        Matrix matrix = new Matrix();
-        float scaleWidth = ((float)w / width);
-        float scaleHeight = ((float)h / height);
-        matrix.postScale(scaleWidth, scaleHeight);
-        return Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
+    private static Bitmap sampleBitmap(Bitmap bitmap, int sample) {
+        int scaledWidth = bitmap.getWidth() / sample;
+        int scaledHeight = bitmap.getHeight() / sample;
+
+        Bitmap copyBitmap = Bitmap.createBitmap(scaledWidth, scaledHeight, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(copyBitmap);
+        canvas.scale(1 / (float) sample, 1 / (float) sample);
+        Paint paint = new Paint();
+        paint.setFlags(Paint.FILTER_BITMAP_FLAG);
+        canvas.drawBitmap(bitmap, 0, 0, paint);
+        bitmap.recycle();
+        return copyBitmap;
     }
+
     //将Drawable转化为Bitmap
-    public static Bitmap drawableToBitmap(Drawable drawable){
+    public static Bitmap drawableToBitmap(Drawable drawable) {
         int width = drawable.getIntrinsicWidth();
         int height = drawable.getIntrinsicHeight();
         Bitmap bitmap = Bitmap.createBitmap(width, height,
                 drawable.getOpacity() != PixelFormat.OPAQUE ? Bitmap.Config.ARGB_8888
                         : Bitmap.Config.RGB_565);
         Canvas canvas = new Canvas(bitmap);
-        drawable.setBounds(0,0,width,height);
+        drawable.setBounds(0, 0, width, height);
         drawable.draw(canvas);
         return bitmap;
 
     }
 
     //获得圆角图片的方法
-    public static Bitmap getRoundedCornerBitmap(Bitmap bitmap,float roundPx){
+    public static Bitmap getRoundedCornerBitmap(Bitmap bitmap, float roundPx) {
 
         Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(output);
@@ -387,8 +364,9 @@ public class ImageUtils {
 
         return output;
     }
+
     //获得带倒影的图片方法
-    public static Bitmap createReflectionImageWithOrigin(Bitmap bitmap){
+    public static Bitmap createReflectionImageWithOrigin(Bitmap bitmap) {
         final int reflectionGap = 4;
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
@@ -397,9 +375,9 @@ public class ImageUtils {
         matrix.preScale(1, -1);
 
         Bitmap reflectionImage = Bitmap.createBitmap(bitmap,
-                0, height/2, width, height/2, matrix, false);
+                0, height / 2, width, height / 2, matrix, false);
 
-        Bitmap bitmapWithReflection = Bitmap.createBitmap(width, (height + height/2), Bitmap.Config.ARGB_8888);
+        Bitmap bitmapWithReflection = Bitmap.createBitmap(width, (height + height / 2), Bitmap.Config.ARGB_8888);
 
         Canvas canvas = new Canvas(bitmapWithReflection);
         canvas.drawBitmap(bitmap, 0, 0, null);
@@ -439,7 +417,7 @@ public class ImageUtils {
         //将保存的颜色矩阵的数组作为参数传入
         ColorMatrix colorMatrix = new ColorMatrix(colorArray);
         //再把该colorMatrix作为参数传入来实例化ColorMatrixColorFilter
-        ColorMatrixColorFilter colorFilter=new ColorMatrixColorFilter(colorMatrix);
+        ColorMatrixColorFilter colorFilter = new ColorMatrixColorFilter(colorMatrix);
         //并把该过滤器设置给画笔
         paint.setColorFilter(colorFilter);
         //传如baseBitmap表示按照原图样式开始绘制，将得到是复制后的图片
@@ -449,30 +427,30 @@ public class ImageUtils {
 
     public static Bitmap createColorBitmap(float[] colorArray, Bitmap bitmap) {
         Bitmap copyBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig());
-        Canvas canvas=new Canvas(copyBitmap);//将画纸固定在画布上
-        Paint paint=new Paint();//实例画笔对象
-        ColorMatrix mColorMatrix=new ColorMatrix();
+        Canvas canvas = new Canvas(copyBitmap);//将画纸固定在画布上
+        Paint paint = new Paint();//实例画笔对象
+        ColorMatrix mColorMatrix = new ColorMatrix();
         //设置色调
         mColorMatrix.setRotate(0, colorArray[0]);
         mColorMatrix.setRotate(1, colorArray[1]);
         mColorMatrix.setRotate(2, colorArray[2]);
         //设置饱和度
-        ColorMatrix mBaoheMatrix=new ColorMatrix();
+        ColorMatrix mBaoheMatrix = new ColorMatrix();
         mBaoheMatrix.setSaturation(colorArray[3]);
         //设置亮度：
         // colorMatrix.setScale(rScale, gScale, bScale, aScale)
         // 第一个参数表示:红色,第二个表示绿色，第三个表示蓝色，第四个表示透明度
         // 当三原色如果是以相同的比例混合的话，就会显示出白色。系统也就是根据这些原理来修改一个图像的亮度的。
         // 当亮度为０，图像就变黑了。所以他们比例一样
-        ColorMatrix mLightMatrix=new ColorMatrix();
+        ColorMatrix mLightMatrix = new ColorMatrix();
         mLightMatrix.setScale(colorArray[4], colorArray[5], colorArray[6], colorArray[7]);
         //再创建组合的ColorMatrix对象将上面三种ColorMatrix的效果混合在一起
-        ColorMatrix mImageViewMatrix=new ColorMatrix();
+        ColorMatrix mImageViewMatrix = new ColorMatrix();
         mImageViewMatrix.postConcat(mColorMatrix);
         mImageViewMatrix.postConcat(mBaoheMatrix);
         mImageViewMatrix.postConcat(mLightMatrix);
 
-        ColorMatrixColorFilter colorFilter=new ColorMatrixColorFilter(mImageViewMatrix);//再把该mImageViewMatrix作为参数传入来实例化ColorMatrixColorFilter
+        ColorMatrixColorFilter colorFilter = new ColorMatrixColorFilter(mImageViewMatrix);//再把该mImageViewMatrix作为参数传入来实例化ColorMatrixColorFilter
         paint.setColorFilter(colorFilter);//并把该过滤器设置给画笔
         canvas.drawBitmap(bitmap, new Matrix(), paint);//传如baseBitmap表示按照原图样式开始绘制，将得到是复制后的图片
         return copyBitmap;
@@ -497,20 +475,19 @@ public class ImageUtils {
      * 第四，五个表示读取第一个像素的坐标(x,y)
      * 第六、width表示从每一行中读取中读取的像素宽度
      * 第七、height表示读取的行数
-     *
      */
 
     private static Bitmap handleImageByPiex(Bitmap bitmap) {
-        int width=bitmap.getWidth();
-        int height=bitmap.getHeight();
-        int color,r,g,b,a;
-        int [] oldPixels=new int[width*height];
-        int [] newPixels=new int[width*height];
-        Bitmap myCopyBitmap=Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig());
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        int color, r, g, b, a;
+        int[] oldPixels = new int[width * height];
+        int[] newPixels = new int[width * height];
+        Bitmap myCopyBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), bitmap.getConfig());
         bitmap.getPixels(oldPixels, 0, width, 0, 0, width, height);
         //然后就去遍历这个数组oldPixels，并取出每个像素，然后再取出每个像素的ARGB属性，然后通过想修改ARGB属性,得到新的像素点
         //并把新的像素点保存新的数组newPixels中
-        for (int i = 0; i < width*height; i++) {
+        for (int i = 0; i < width * height; i++) {
             color = oldPixels[i];//取出每一个像素点
             r = Color.red(color);//取出当前像素点的R值
             g = Color.green(color);//取出当前像素点的G值
@@ -541,10 +518,10 @@ public class ImageUtils {
 //            }
 
             /*老照片效果*/
-            r=(int)(0.393*r+0.769*g+0.189*b);
-            g=(int)(0.349*r+0.686*g+0.168*b);
-            b=(int)(0.272*r+0.534*g+0.131*b);
-            newPixels[i]=Color.argb(a, r, g, b);
+            r = (int) (0.393 * r + 0.769 * g + 0.189 * b);
+            g = (int) (0.349 * r + 0.686 * g + 0.168 * b);
+            b = (int) (0.272 * r + 0.534 * g + 0.131 * b);
+            newPixels[i] = Color.argb(a, r, g, b);
         }
         myCopyBitmap.setPixels(newPixels, 0, width, 0, 0, width, height);
         return myCopyBitmap;

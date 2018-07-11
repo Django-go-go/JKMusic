@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.view.PagerAdapter;
@@ -24,7 +25,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.google.android.exoplayer2.C;
-import com.jkingone.commonlib.PicassoTransform;
+import com.jkingone.commonlib.Utils.ImageUtils;
 import com.jkingone.commonlib.Utils.ScreenUtils;
 import com.jkingone.commonlib.Utils.TimeUtils;
 import com.jkingone.customviewlib.PicassoBackground;
@@ -37,6 +38,7 @@ import com.jkingone.jkmusic.service.MusicService;
 import com.jkingone.jkmusic.ui.fragment.PlayFragment;
 import com.jkingone.jkmusic.ui.mvp.BasePresenter;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Transformation;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
@@ -76,6 +78,7 @@ public class PlayActivity extends BaseActivity {
     private MusicAdapter mMusicAdapter;
 
     private List<View> mPagerViews = new ArrayList<>(6);
+    private View mCurView;
     private ImageView mImageViewAlbum;
 
     private List<SongInfo> mSongInfos;
@@ -147,7 +150,7 @@ public class PlayActivity extends BaseActivity {
     }
 
     private void initViewPager() {
-        setViewPagerScroll(mViewPager, 1500);
+        setViewPagerScroll(mViewPager, 1200);
         if (mMusicAdapter == null) {
             mMusicAdapter = new MusicAdapter();
         }
@@ -297,7 +300,17 @@ public class PlayActivity extends BaseActivity {
         mImageViewAlbum = view.findViewById(R.id.iv_pager_album);
         Picasso.get()
                 .load(mCurSongInfo.getPicUrl())
-                .transform(new PicassoTransform(this, PicassoTransform.MAX_RADIUS, 10))
+                .transform(new Transformation() {
+                    @Override
+                    public Bitmap transform(Bitmap source) {
+                        return ImageUtils.blurBitmap(source, 25, 8, PlayActivity.this, true);
+                    }
+
+                    @Override
+                    public String key() {
+                        return mCurSongInfo.getPicUrl();
+                    }
+                })
                 .into(mViewRoot);
         Picasso.get()
                 .load(mCurSongInfo.getPicUrl())
@@ -354,36 +367,30 @@ public class PlayActivity extends BaseActivity {
     }
 
     private void postViewPagerAnimator(final boolean start) {
-        if (mViewPagerAnimator == null) {
-            mViewPagerAnimator = ObjectAnimator.ofFloat(instantiateView(null, mViewPager.getCurrentItem()),
-                    "rotation", 0, 360);
+        View curView = instantiateView(null, mViewPager.getCurrentItem());
+        boolean isChange = mCurView != curView;
+        if (mViewPagerAnimator == null || isChange) {
+            mViewPagerAnimator = ObjectAnimator.ofFloat(curView, "rotation", 0, 360);
             mViewPagerAnimator.setDuration(9000);
             mViewPagerAnimator.setInterpolator(new LinearInterpolator());
             mViewPagerAnimator.setRepeatCount(ObjectAnimator.INFINITE);
             mViewPagerAnimator.setRepeatMode(ObjectAnimator.RESTART);
-            mViewPagerAnimator.addPauseListener(new Animator.AnimatorPauseListener() {
-                @Override
-                public void onAnimationPause(Animator animation) {
-
-                }
-
-                @Override
-                public void onAnimationResume(Animator animation) {
-
-                }
-            });
+            mCurView = curView;
         }
-        mViewPagerAnimator.setAutoCancel(true);
         mViewPager.postDelayed(new Runnable() {
             @Override
             public void run() {
                 if (start) {
-                    mViewPagerAnimator.start();
+                    if (mViewPagerAnimator.isStarted()) {
+                        mViewPagerAnimator.resume();
+                    } else {
+                        mViewPagerAnimator.start();
+                    }
                 } else {
                     mViewPagerAnimator.pause();
                 }
             }
-        }, 800);
+        }, 500);
 
     }
 
