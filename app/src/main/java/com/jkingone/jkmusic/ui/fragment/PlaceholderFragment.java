@@ -1,22 +1,41 @@
 package com.jkingone.jkmusic.ui.fragment;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
+import android.os.Build;
 import android.os.Bundle;
+import android.renderscript.RSRuntimeException;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.jkingone.commonlib.Utils.ImageUtils;
 import com.jkingone.jkmusic.R;
+import com.jkingone.jkmusic.data.local.ContentHelper;
 import com.jkingone.jkmusic.ui.activity.PlayActivity;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class PlaceholderFragment extends LazyFragment {
     public static final String TAG = "PlaceholderFragment";
 
     private TextView mTextView;
+
+    private ImageView mImageView;
 
     public static PlaceholderFragment newInstance(String... params) {
         PlaceholderFragment fragment = new PlaceholderFragment();
@@ -27,14 +46,17 @@ public class PlaceholderFragment extends LazyFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_placeholder, container, false);
-        mTextView = view.findViewById(R.id.tv_placeholder);
-        mTextView.setText(params[0]);
-        mTextView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(getContext(), PlayActivity.class));
-            }
-        });
+//        mTextView = view.findViewById(R.id.tv_placeholder);
+//        mTextView.setText(params[0]);
+//        mTextView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                startActivity(new Intent(getContext(), PlayActivity.class));
+//            }
+//        });
+
+//        mImageView = view.findViewById(R.id.iv_test);
+
         Log.i(TAG, "onCreateView: " + params[0]);
         return view;
     }
@@ -103,6 +125,30 @@ public class PlaceholderFragment extends LazyFragment {
     public void onResume() {
         super.onResume();
         Log.i(TAG, "onResume: " + params[0]);
+
+//        int mSampling = 4;
+//
+//        Bitmap source = BitmapFactory.decodeResource(getResources(), R.drawable.test2);
+//        int scaledWidth = source.getWidth() / mSampling;
+//        int scaledHeight = source.getHeight() / mSampling;
+//
+//        Bitmap bitmap = Bitmap.createBitmap(scaledWidth, scaledHeight, Bitmap.Config.ARGB_8888);
+//
+//        Canvas canvas = new Canvas(bitmap);
+//        canvas.scale(1 / (float) mSampling, 1 / (float) mSampling);
+//        Paint paint = new Paint();
+//        paint.setFlags(Paint.FILTER_BITMAP_FLAG);
+//        canvas.drawBitmap(source, 0, 0, paint);
+//
+//        bitmap = ImageUtils.blurBitmap(bitmap, getContext());
+//
+//        BitmapDrawable bitmapDrawable = new BitmapDrawable(getResources(), bitmap);
+//        ColorDrawable colorDrawable = new ColorDrawable(Color.parseColor("#85403b3b"));
+//        LayerDrawable layerDrawable = new LayerDrawable(new Drawable[] {bitmapDrawable, colorDrawable});
+//
+//        source.recycle();
+//
+//        mImageView.setImageDrawable(layerDrawable);
     }
 
     @Override

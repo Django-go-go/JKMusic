@@ -354,36 +354,36 @@ public class PlayActivity extends BaseActivity {
     }
 
     private void postViewPagerAnimator(final boolean start) {
-        if (mViewPagerAnimator == null) {
-            mViewPagerAnimator = ObjectAnimator.ofFloat(instantiateView(null, mViewPager.getCurrentItem()),
-                    "rotation", 0, 360);
-            mViewPagerAnimator.setDuration(9000);
-            mViewPagerAnimator.setInterpolator(new LinearInterpolator());
-            mViewPagerAnimator.setRepeatCount(ObjectAnimator.INFINITE);
-            mViewPagerAnimator.setRepeatMode(ObjectAnimator.RESTART);
-            mViewPagerAnimator.addPauseListener(new Animator.AnimatorPauseListener() {
-                @Override
-                public void onAnimationPause(Animator animation) {
-
-                }
-
-                @Override
-                public void onAnimationResume(Animator animation) {
-
-                }
-            });
-        }
-        mViewPagerAnimator.setAutoCancel(true);
-        mViewPager.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (start) {
-                    mViewPagerAnimator.start();
-                } else {
-                    mViewPagerAnimator.pause();
-                }
-            }
-        }, 800);
+//        if (mViewPagerAnimator == null) {
+//            mViewPagerAnimator = ObjectAnimator.ofFloat(instantiateView(null, mViewPager.getCurrentItem()),
+//                    "rotation", 0, 360);
+//            mViewPagerAnimator.setDuration(9000);
+//            mViewPagerAnimator.setInterpolator(new LinearInterpolator());
+//            mViewPagerAnimator.setRepeatCount(ObjectAnimator.INFINITE);
+//            mViewPagerAnimator.setRepeatMode(ObjectAnimator.RESTART);
+//            mViewPagerAnimator.addPauseListener(new Animator.AnimatorPauseListener() {
+//                @Override
+//                public void onAnimationPause(Animator animation) {
+//
+//                }
+//
+//                @Override
+//                public void onAnimationResume(Animator animation) {
+//
+//                }
+//            });
+//        }
+//        mViewPagerAnimator.setAutoCancel(true);
+//        mViewPager.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                if (start) {
+//                    mViewPagerAnimator.start();
+//                } else {
+//                    mViewPagerAnimator.pause();
+//                }
+//            }
+//        }, 800);
 
     }
 
@@ -434,7 +434,7 @@ public class PlayActivity extends BaseActivity {
     public void setViewPagerScroll(ViewPager viewPager, int duration) {
         try {
             Field mScroller = ViewPager.class.getDeclaredField("mScroller");
-            ViewPagerScroller pagerScroller = new ViewPagerScroller(this, duration);
+            ViewPagerScroller pagerScroller = new ViewPagerScroller(this);
             mScroller.setAccessible(true);
             mScroller.set(viewPager, pagerScroller);
         } catch(Exception e) {
@@ -443,33 +443,19 @@ public class PlayActivity extends BaseActivity {
     }
 
     public static class ViewPagerScroller extends Scroller {
-        private int mScrollDuration = 2000;             // 滑动速度
-
-        public ViewPagerScroller(Context context, int scrollDuration) {
-            super(context);
-            mScrollDuration = scrollDuration;
-        }
 
         public ViewPagerScroller(Context context) {
             super(context);
         }
 
-        public ViewPagerScroller(Context context, Interpolator interpolator) {
-            super(context, interpolator);
-        }
-
-        public ViewPagerScroller(Context context, Interpolator interpolator, boolean flywheel) {
-            super(context, interpolator, flywheel);
-        }
-
         @Override
         public void startScroll(int startX, int startY, int dx, int dy, int duration) {
-            super.startScroll(startX, startY, dx, dy, mScrollDuration);
+            super.startScroll(startX, startY, dx, dy, duration * 2);
         }
 
-        @Override
-        public void startScroll(int startX, int startY, int dx, int dy) {
-            super.startScroll(startX, startY, dx, dy, mScrollDuration);
-        }
+//        @Override
+//        public void startScroll(int startX, int startY, int dx, int dy) {
+//            super.startScroll(startX, startY, dx, dy, getDuration());
+//        }
     }
 }

@@ -1,15 +1,21 @@
 package com.jkingone.jkmusic.ui.fragment;
 
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -169,16 +175,17 @@ public class PlayFragment extends LazyFragment {
 
     @OnClick(R.id.iv_menu)
     public void onMenuClick() {
-        if (mBaseActivity.checkMusicManagerService() != null) {
-            mBaseActivity.checkMusicManagerService().prepareMediaSources(mSongInfos);
-            mBaseActivity.checkMusicManagerService().playIndex(2);
-
-            updateIndex(2);
-
-            isComplete = true;
-            mViewPager.setAdapter(new MusicAdapter());
-            mViewPager.setCurrentItem(2);
-        }
+        createMusicListDialog();
+//        if (mBaseActivity.checkMusicManagerService() != null) {
+//            mBaseActivity.checkMusicManagerService().prepareMediaSources(mSongInfos);
+//            mBaseActivity.checkMusicManagerService().playIndex(2);
+//
+//            updateIndex(2);
+//
+//            isComplete = true;
+//            mViewPager.setAdapter(new MusicAdapter());
+//            mViewPager.setCurrentItem(2);
+//        }
     }
 
     @OnClick(R.id.iv_play)
@@ -198,6 +205,30 @@ public class PlayFragment extends LazyFragment {
         intent.putExtra(CUR_SONG, mCurSongInfo);
         intent.putExtra(CUR_INDEX, mCurIndex);
         startActivity(intent);
+    }
+
+    //==============================================================================================
+    //
+    //==============================================================================================
+
+    private AlertDialog mAlertDialog;
+    private WindowManager.LayoutParams mLayoutParams;
+
+    private void createMusicListDialog() {
+        if (mAlertDialog == null) {
+            mAlertDialog = new AlertDialog.Builder(mBaseActivity, R.style.Dialog).setView(R.layout.test).create();
+            mLayoutParams = new WindowManager.LayoutParams();
+            mLayoutParams.gravity = Gravity.BOTTOM;
+            mLayoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
+            mLayoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
+
+        }
+        mAlertDialog.show();
+
+        if (mAlertDialog.getWindow() != null) {
+            mAlertDialog.getWindow().setAttributes(mLayoutParams);
+            mAlertDialog.getWindow().setWindowAnimations(R.style.DialogAnimator);
+        }
     }
 
     private class MusicAdapter extends PagerAdapter {

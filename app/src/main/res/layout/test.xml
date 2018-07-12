@@ -5,38 +5,37 @@
     android:layout_height="wrap_content"
     android:layout_alignParentBottom="true"
     android:id="@+id/linearLayout_play"
+    android:orientation="vertical"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <ImageView
-        android:layout_width="wrap_content"
+        android:layout_gravity="center"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/mode_play"
-        android:layout_gravity="center|start"
         android:src="@drawable/music"/>
     <ImageView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/last_play"
         android:layout_gravity="center"
-        android:layout_weight="0.20"
         android:src="@drawable/music_mid"/>
     <ImageView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/play_pause"
         android:layout_gravity="center"
         android:src="@drawable/music_large"/>
     <ImageView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/next_play"
         android:layout_gravity="center"
-        android:layout_weight="0.20"
         android:src="@drawable/music_mid"/>
 
     <ImageView
         android:id="@+id/menu_play"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:src="@drawable/music_mid"/>
