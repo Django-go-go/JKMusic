@@ -7,6 +7,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.view.PagerAdapter;
@@ -53,6 +60,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static java.security.AccessController.getContext;
+
 public class PlayActivity extends BaseActivity {
 
     private static final String TAG = "PlayActivity";
@@ -77,6 +86,7 @@ public class PlayActivity extends BaseActivity {
     private ObjectAnimator mViewPagerAnimator;
     private MusicAdapter mMusicAdapter;
 
+    private List<ObjectAnimator> mViewPagerAnimators = new ArrayList<>(6);
     private List<View> mPagerViews = new ArrayList<>(6);
     private View mCurView;
     private ImageView mImageViewAlbum;
@@ -106,6 +116,10 @@ public class PlayActivity extends BaseActivity {
 
         initViewPager();
 
+        initCallback();
+    }
+
+    private void initCallback() {
         mMusicManagerService.setBindServiceCallback(new MusicManagerService.BindServiceCallback() {
             @Override
             public void updateFirst() {
@@ -150,55 +164,55 @@ public class PlayActivity extends BaseActivity {
     }
 
     private void initViewPager() {
-        setViewPagerScroll(mViewPager, 1200);
+        setViewPagerScroll(mViewPager);
         if (mMusicAdapter == null) {
             mMusicAdapter = new MusicAdapter();
         }
         mViewPager.setAdapter(mMusicAdapter);
         mViewPager.setCurrentItem(1);
-        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            int lastOffset = 0;
-
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                isNext = positionOffsetPixels > lastOffset;
-                lastOffset = positionOffsetPixels;
-            }
+        mViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+            int lastPos = mViewPager.getCurrentItem();
 
             @Override
             public void onPageSelected(int position) {
-                if (!isComplete) {
-                    if (isNext) {
-                        mMusicManagerService.next();
-                    } else {
-                        mMusicManagerService.previous();
-                    }
-                } else {
-                    updateViewPager(position);
+
+                isNext = (lastPos == Constant.PAGER_SIZE - 1 && position == 1) || (position > lastPos);
+                if (lastPos == 0 && position == Constant.PAGER_SIZE - 2) {
+                    isNext = false;
                 }
-                isComplete = false;
+                Log.i(TAG, "onPageSelected: " + position + " " + isComplete + " " + isNext);
+                lastPos = position;
+
                 if (position == 0) {
                     mViewPager.postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            isComplete = true;
+                            isComplete = false;
+                            isNext = false;
                             mViewPager.setCurrentItem(Constant.PAGER_SIZE - 2, false);
                         }
                     }, 500);
-                }
-                if (position == Constant.PAGER_SIZE - 1) {
+                } else if (position == Constant.PAGER_SIZE - 1) {
                     mViewPager.postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            isComplete = true;
+                            isComplete = false;
+                            isNext = true;
                             mViewPager.setCurrentItem(1, false);
                         }
                     }, 500);
+                } else {
+                    if (!isComplete) {
+                        if (isNext) {
+                            mMusicManagerService.next();
+                        } else {
+                            mMusicManagerService.previous();
+                        }
+                    } else {
+                        updateViewPager(position);
+                    }
+                    isComplete = false;
                 }
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
             }
         });
     }
@@ -242,8 +256,8 @@ public class PlayActivity extends BaseActivity {
             }
             case R.id.iv_last: {
                 if (checkMusicManagerService() != null) {
-                    mViewPager.setCurrentItem(mViewPager.getCurrentItem() - 1, true);
                     isComplete = false;
+                    mViewPager.setCurrentItem(mViewPager.getCurrentItem() - 1, true);
                 }
                 break;
             }
@@ -259,8 +273,8 @@ public class PlayActivity extends BaseActivity {
             }
             case R.id.iv_next: {
                 if (checkMusicManagerService() != null) {
-                    mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1, true);
                     isComplete = false;
+                    mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1, true);
                 }
                 break;
             }
@@ -303,7 +317,11 @@ public class PlayActivity extends BaseActivity {
                 .transform(new Transformation() {
                     @Override
                     public Bitmap transform(Bitmap source) {
-                        return ImageUtils.blurBitmap(source, 25, 8, PlayActivity.this, true);
+                        Bitmap bitmap = ImageUtils.blurBitmap(source, 25, 8, PlayActivity.this, true);
+                        BitmapDrawable bitmapDrawable = new BitmapDrawable(getResources(), bitmap);
+                        ColorDrawable colorDrawable = new ColorDrawable(Color.parseColor("#85403b3b"));
+                        LayerDrawable layerDrawable = new LayerDrawable(new Drawable[]{bitmapDrawable, colorDrawable});
+                        return ImageUtils.drawableToBitmap(layerDrawable);
                     }
 
                     @Override
@@ -367,63 +385,21 @@ public class PlayActivity extends BaseActivity {
     }
 
     private void postViewPagerAnimator(final boolean start) {
-<<<<<<< HEAD
-//        if (mViewPagerAnimator == null) {
-//            mViewPagerAnimator = ObjectAnimator.ofFloat(instantiateView(null, mViewPager.getCurrentItem()),
-//                    "rotation", 0, 360);
-//            mViewPagerAnimator.setDuration(9000);
-//            mViewPagerAnimator.setInterpolator(new LinearInterpolator());
-//            mViewPagerAnimator.setRepeatCount(ObjectAnimator.INFINITE);
-//            mViewPagerAnimator.setRepeatMode(ObjectAnimator.RESTART);
-//            mViewPagerAnimator.addPauseListener(new Animator.AnimatorPauseListener() {
-//                @Override
-//                public void onAnimationPause(Animator animation) {
-//
-//                }
-//
-//                @Override
-//                public void onAnimationResume(Animator animation) {
-//
-//                }
-//            });
-//        }
-//        mViewPagerAnimator.setAutoCancel(true);
-//        mViewPager.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                if (start) {
-//                    mViewPagerAnimator.start();
-//                } else {
-//                    mViewPagerAnimator.pause();
-//                }
-//            }
-//        }, 800);
-=======
-        View curView = instantiateView(null, mViewPager.getCurrentItem());
-        boolean isChange = mCurView != curView;
-        if (mViewPagerAnimator == null || isChange) {
-            mViewPagerAnimator = ObjectAnimator.ofFloat(curView, "rotation", 0, 360);
-            mViewPagerAnimator.setDuration(9000);
-            mViewPagerAnimator.setInterpolator(new LinearInterpolator());
-            mViewPagerAnimator.setRepeatCount(ObjectAnimator.INFINITE);
-            mViewPagerAnimator.setRepeatMode(ObjectAnimator.RESTART);
-            mCurView = curView;
-        }
         mViewPager.postDelayed(new Runnable() {
             @Override
             public void run() {
+                ObjectAnimator objectAnimator = instantiateAnimator(mViewPager.getCurrentItem());
                 if (start) {
-                    if (mViewPagerAnimator.isStarted()) {
-                        mViewPagerAnimator.resume();
+                    if (objectAnimator.isStarted()) {
+                        objectAnimator.resume();
                     } else {
-                        mViewPagerAnimator.start();
+                        objectAnimator.start();
                     }
                 } else {
-                    mViewPagerAnimator.pause();
+                    objectAnimator.pause();
                 }
             }
         }, 500);
->>>>>>> 6bf2a8d7a3da2fcbe0583aa6f5153a2f7a8b8a0d
 
     }
 
@@ -451,7 +427,7 @@ public class PlayActivity extends BaseActivity {
         public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
             if (position < mPagerViews.size()) {
                 container.removeView(mPagerViews.get(position));
-                mPagerViews.set(position, null);
+                clearViewPager(mPagerViews.get(position));
             }
         }
 
@@ -471,13 +447,32 @@ public class PlayActivity extends BaseActivity {
         return mPagerViews.get(position);
     }
 
-    public void setViewPagerScroll(ViewPager viewPager, int duration) {
+    private synchronized ObjectAnimator instantiateAnimator(int position) {
+        int size = mViewPagerAnimators.size();
+        if (position >= size) {
+            for (int i = size; i <= position; i++) {
+                mViewPagerAnimators.add(null);
+            }
+        }
+        if (mViewPagerAnimators.get(position) == null) {
+            ObjectAnimator objectAnimator = ObjectAnimator.ofFloat(instantiateView(null, position), "rotation", 0, 360);
+            objectAnimator.setDuration(9000);
+            objectAnimator.setInterpolator(new LinearInterpolator());
+            objectAnimator.setRepeatCount(ObjectAnimator.INFINITE);
+            objectAnimator.setRepeatMode(ObjectAnimator.RESTART);
+            objectAnimator.setAutoCancel(true);
+            mViewPagerAnimators.set(position, objectAnimator);
+        }
+        return mViewPagerAnimators.get(position);
+    }
+
+    public void setViewPagerScroll(ViewPager viewPager) {
         try {
             Field mScroller = ViewPager.class.getDeclaredField("mScroller");
             ViewPagerScroller pagerScroller = new ViewPagerScroller(this);
             mScroller.setAccessible(true);
             mScroller.set(viewPager, pagerScroller);
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -485,17 +480,30 @@ public class PlayActivity extends BaseActivity {
     public static class ViewPagerScroller extends Scroller {
 
         public ViewPagerScroller(Context context) {
-            super(context);
+            this(context, sInterpolator);
         }
+
+        public ViewPagerScroller(Context context, Interpolator interpolator) {
+            super(context, interpolator);
+        }
+
+        private static final Interpolator sInterpolator = new Interpolator() {
+            @Override
+            public float getInterpolation(float t) {
+                t -= 1.0f;
+                return t * t * t * t * t + 1.0f;
+            }
+        };
+
 
         @Override
         public void startScroll(int startX, int startY, int dx, int dy, int duration) {
             super.startScroll(startX, startY, dx, dy, duration * 2);
         }
+    }
 
-//        @Override
-//        public void startScroll(int startX, int startY, int dx, int dy) {
-//            super.startScroll(startX, startY, dx, dy, getDuration());
-//        }
+    private void clearViewPager(View view) {
+        ImageView imageViewCover = view.findViewById(R.id.iv_pager_album);
+        imageViewCover.setImageDrawable(null);
     }
 }

@@ -45,9 +45,6 @@
     <style name="Dialog" parent="AlertDialog.AppCompat.Light">
         <item name="android:windowFrame">@null</item>
         <item name="android:backgroundDimEnabled">true</item>
-        <!--<item name="android:windowEnterAnimation">@anim/dialog_enter</item>-->
-        <!--<item name="android:windowExitAnimation">@anim/dialog_exit</item>-->
-        <!--<item name="android:windowAnimationStyle">@style/DialogAnimator</item>-->
     </style>
 
     <style name="DialogAnimator" parent="Animation.AppCompat.Dialog">

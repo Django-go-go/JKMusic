@@ -46,14 +46,14 @@ public class PlaceholderFragment extends LazyFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_placeholder, container, false);
-//        mTextView = view.findViewById(R.id.tv_placeholder);
-//        mTextView.setText(params[0]);
-//        mTextView.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                startActivity(new Intent(getContext(), PlayActivity.class));
-//            }
-//        });
+        mTextView = view.findViewById(R.id.tv_placeholder);
+        mTextView.setText(params[0]);
+        mTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getContext(), PlayActivity.class));
+            }
+        });
 
 //        mImageView = view.findViewById(R.id.iv_test);
 
@@ -125,30 +125,6 @@ public class PlaceholderFragment extends LazyFragment {
     public void onResume() {
         super.onResume();
         Log.i(TAG, "onResume: " + params[0]);
-
-//        int mSampling = 4;
-//
-//        Bitmap source = BitmapFactory.decodeResource(getResources(), R.drawable.test2);
-//        int scaledWidth = source.getWidth() / mSampling;
-//        int scaledHeight = source.getHeight() / mSampling;
-//
-//        Bitmap bitmap = Bitmap.createBitmap(scaledWidth, scaledHeight, Bitmap.Config.ARGB_8888);
-//
-//        Canvas canvas = new Canvas(bitmap);
-//        canvas.scale(1 / (float) mSampling, 1 / (float) mSampling);
-//        Paint paint = new Paint();
-//        paint.setFlags(Paint.FILTER_BITMAP_FLAG);
-//        canvas.drawBitmap(source, 0, 0, paint);
-//
-//        bitmap = ImageUtils.blurBitmap(bitmap, getContext());
-//
-//        BitmapDrawable bitmapDrawable = new BitmapDrawable(getResources(), bitmap);
-//        ColorDrawable colorDrawable = new ColorDrawable(Color.parseColor("#85403b3b"));
-//        LayerDrawable layerDrawable = new LayerDrawable(new Drawable[] {bitmapDrawable, colorDrawable});
-//
-//        source.recycle();
-//
-//        mImageView.setImageDrawable(layerDrawable);
     }
 
     @Override

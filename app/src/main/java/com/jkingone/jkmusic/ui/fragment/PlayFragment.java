@@ -22,6 +22,7 @@ import android.widget.TextView;
 import com.jkingone.commonlib.Utils.DensityUtils;
 import com.jkingone.jkmusic.Constant;
 import com.jkingone.jkmusic.MusicBroadcastReceiver;
+import com.jkingone.jkmusic.MusicManagerService;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.data.entity.SongInfo;
 import com.jkingone.jkmusic.data.local.ContentHelper;
@@ -88,55 +89,26 @@ public class PlayFragment extends LazyFragment {
 
         mSongInfos = new ContentHelper(getContext()).getMusic();
 
-        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+        initViewPager();
 
-            int lastOffset = 0;
+        initCallback();
 
+        return view;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mUnbinder.unbind();
+    }
+
+    private void initCallback() {
+        mBaseActivity.getMusicManagerService().setBindServiceCallback(new MusicManagerService.BindServiceCallback() {
             @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                isNext = positionOffsetPixels > lastOffset;
-                lastOffset = positionOffsetPixels;
-            }
+            public void updateFirst() {
 
-            @Override
-            public void onPageSelected(int position) {
-                if (!isComplete) {
-                    if (isNext) {
-                        mBaseActivity.checkMusicManagerService().next();
-                    } else {
-                        mBaseActivity.checkMusicManagerService().previous();
-                    }
-                    Log.i(TAG, "onPageSelected: " + isNext);
-                } else {
-                    updateViewPager(position);
-                    Log.i(TAG, "onPageSelected: ");
-                }
-                isComplete = false;
-                if (position == 0) {
-                    mViewPager.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            isComplete = true;
-                            mViewPager.setCurrentItem(Constant.PAGER_SIZE - 2, false);
-                        }
-                    }, 500);
-                }
-                if (position == Constant.PAGER_SIZE - 1) {
-                    mViewPager.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            isComplete = true;
-                            mViewPager.setCurrentItem(1, false);
-                        }
-                    }, 500);
-                }
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
             }
         });
-
         mBaseActivity.getMusicManagerService().setPlayCallback(new MusicBroadcastReceiver.PlayCallback() {
             @Override
             public void playStateChange(boolean isPlaying) {
@@ -163,29 +135,69 @@ public class PlayFragment extends LazyFragment {
                 }
             }
         });
-
-        return view;
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        mUnbinder.unbind();
+    private void initViewPager() {
+        mViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+
+            int lastPos = mViewPager.getCurrentItem();
+
+            @Override
+            public void onPageSelected(int position) {
+
+                isNext = (lastPos == Constant.PAGER_SIZE - 1 && position == 1) || (position > lastPos);
+                if (lastPos == 0 && position == Constant.PAGER_SIZE - 2) {
+                    isNext = false;
+                }
+                Log.i(TAG, "onPageSelected: " + position + " " + isComplete + " " + isNext);
+                lastPos = position;
+
+                if (position == 0) {
+                    mViewPager.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            isComplete = false;
+                            isNext = false;
+                            mViewPager.setCurrentItem(Constant.PAGER_SIZE - 2, false);
+                        }
+                    }, 200);
+                } else if (position == Constant.PAGER_SIZE - 1) {
+                    mViewPager.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            isComplete = false;
+                            isNext = true;
+                            mViewPager.setCurrentItem(1, false);
+                        }
+                    }, 200);
+                } else {
+                    if (!isComplete) {
+                        if (isNext) {
+                            mBaseActivity.checkMusicManagerService().next();
+                        } else {
+                            mBaseActivity.checkMusicManagerService().previous();
+                        }
+                    } else {
+                        updateViewPager(position);
+                    }
+                    isComplete = false;
+                }
+            }
+        });
     }
 
     @OnClick(R.id.iv_menu)
     public void onMenuClick() {
-        createMusicListDialog();
-//        if (mBaseActivity.checkMusicManagerService() != null) {
-//            mBaseActivity.checkMusicManagerService().prepareMediaSources(mSongInfos);
-//            mBaseActivity.checkMusicManagerService().playIndex(2);
-//
-//            updateIndex(2);
-//
-//            isComplete = true;
-//            mViewPager.setAdapter(new MusicAdapter());
-//            mViewPager.setCurrentItem(2);
-//        }
+        if (mBaseActivity.checkMusicManagerService() != null) {
+            mBaseActivity.checkMusicManagerService().prepareMediaSources(mSongInfos);
+            mBaseActivity.checkMusicManagerService().playIndex(2);
+
+            updateIndex(2);
+
+            isComplete = true;
+            mViewPager.setAdapter(new MusicAdapter());
+            mViewPager.setCurrentItem(2);
+        }
     }
 
     @OnClick(R.id.iv_play)
@@ -255,7 +267,7 @@ public class PlayFragment extends LazyFragment {
         public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
             if (position < mRootViews.size()) {
                 container.removeView(mRootViews.get(position));
-                mRootViews.set(position, null);
+                clearViewPager(mRootViews.get(position));
             }
         }
     }
@@ -292,5 +304,14 @@ public class PlayFragment extends LazyFragment {
                 .into(mImageViewCover);
         mTextViewSinger.setText(mCurSongInfo.getArtist());
         mTextViewSongName.setText(mCurSongInfo.getTitle());
+    }
+
+    private void clearViewPager(View view) {
+        ImageView imageViewCover = view.findViewById(R.id.iv_cover);
+        TextView textViewSinger = view.findViewById(R.id.tv_singer);
+        TextView textViewSongName = view.findViewById(R.id.tv_songName);
+        textViewSinger.setText("");
+        textViewSongName.setText("");
+        imageViewCover.setImageDrawable(null);
     }
 }
