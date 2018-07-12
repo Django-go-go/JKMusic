@@ -13,10 +13,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.jkingone.commonlib.Utils.DensityUtils;
+import com.jkingone.customviewlib.JDialog;
 import com.jkingone.jkmusic.Constant;
 import com.jkingone.jkmusic.MusicBroadcastReceiver;
 import com.jkingone.jkmusic.MusicManagerService;
@@ -185,16 +189,41 @@ public class PlayFragment extends LazyFragment {
 
     @OnClick(R.id.iv_menu)
     public void onMenuClick() {
-        if (mBaseActivity.checkMusicManagerService() != null) {
-            mBaseActivity.checkMusicManagerService().prepareMediaSources(mSongInfos);
-            mBaseActivity.checkMusicManagerService().playIndex(2);
+//        if (mBaseActivity.checkMusicManagerService() != null) {
+//            mBaseActivity.checkMusicManagerService().prepareMediaSources(mSongInfos);
+//            mBaseActivity.checkMusicManagerService().playIndex(2);
+//
+//            updateIndex(2);
+//
+//            isComplete = true;
+//            mViewPager.setAdapter(new MusicAdapter());
+//            mViewPager.setCurrentItem(2);
+//        }
+        createMusicListDialog();
+    }
 
-            updateIndex(2);
+    //==============================================================================================
+    //
+    //==============================================================================================
 
-            isComplete = true;
-            mViewPager.setAdapter(new MusicAdapter());
-            mViewPager.setCurrentItem(2);
+    private JDialog mJDialog;
+
+    private void createMusicListDialog() {
+
+        if (mJDialog == null) {
+            mJDialog = new JDialog(mBaseActivity);
+//            mJDialog.setContentView(R.layout.test, Gravity.CENTER);
+
+            List<String> strings = new ArrayList<>();
+            for (int i = 0; i < 100; i++) {
+                strings.add("index : " + i);
+            }
+            ListView listView = new ListView(mBaseActivity);
+            listView.setAdapter(new ArrayAdapter<>(mBaseActivity, android.R.layout.simple_list_item_1, strings));
+            mJDialog.setContentView(listView);
+
         }
+        mJDialog.show();
     }
 
     @OnClick(R.id.iv_play)
@@ -214,30 +243,6 @@ public class PlayFragment extends LazyFragment {
         intent.putExtra(CUR_SONG, mCurSongInfo);
         intent.putExtra(CUR_INDEX, mCurIndex);
         startActivity(intent);
-    }
-
-    //==============================================================================================
-    //
-    //==============================================================================================
-
-    private AlertDialog mAlertDialog;
-    private WindowManager.LayoutParams mLayoutParams;
-
-    private void createMusicListDialog() {
-        if (mAlertDialog == null) {
-            mAlertDialog = new AlertDialog.Builder(mBaseActivity, R.style.Dialog).setView(R.layout.test).create();
-            mLayoutParams = new WindowManager.LayoutParams();
-            mLayoutParams.gravity = Gravity.BOTTOM;
-            mLayoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
-            mLayoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
-
-        }
-        mAlertDialog.show();
-
-        if (mAlertDialog.getWindow() != null) {
-            mAlertDialog.getWindow().setAttributes(mLayoutParams);
-            mAlertDialog.getWindow().setWindowAnimations(R.style.DialogAnimator);
-        }
     }
 
     private class MusicAdapter extends PagerAdapter {

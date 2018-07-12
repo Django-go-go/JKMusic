@@ -1,4 +1,5 @@
 package com.jkingone.jkmusic.ui.activity;
+import android.graphics.Color;
 import android.support.design.widget.NavigationView;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -15,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.jkingone.commonlib.Utils.PermissionUtils;
+import com.jkingone.commonlib.Utils.ScreenUtils;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.ui.mvp.BasePresenter;
 import com.jkingone.jkmusic.ui.fragment.NetWorkFragment;
@@ -47,7 +49,10 @@ public class MainActivity extends BaseActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_navigation_drawer);
+
+        ScreenUtils.setTranslucent(this);
+
+        setContentView(R.layout.activity_navigation_drawer);
 
 		ButterKnife.bind(this);
 
@@ -58,6 +63,8 @@ public class MainActivity extends BaseActivity {
 		PermissionUtils.hasPermission(this);
 
 		exeBindService();
+
+		mDrawerLayout.setStatusBarBackgroundColor(getResources().getColor(R.color.colorPrimary));
 
 	}
 
