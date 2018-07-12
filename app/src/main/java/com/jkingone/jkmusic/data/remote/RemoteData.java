@@ -9,22 +9,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.jkingone.jkmusic.data.API.BannerApi;
-import com.jkingone.jkmusic.data.API.HotSongApi;
-import com.jkingone.jkmusic.data.API.HotSongListApi;
-import com.jkingone.jkmusic.data.API.HotWordApi;
-import com.jkingone.jkmusic.data.API.SearchSongApi;
-import com.jkingone.jkmusic.data.API.SongApi;
-import com.jkingone.jkmusic.data.API.SongFromSongListApi;
-import com.jkingone.jkmusic.data.API.SongFromTopListApi;
-import com.jkingone.jkmusic.data.API.SongListApi;
-import com.jkingone.jkmusic.data.API.TagSongListApi;
-import com.jkingone.jkmusic.data.API.TopListApi;
-import com.jkingone.jkmusic.data.entity.NetSong;
-import com.jkingone.jkmusic.data.entity.SearchSong;
-import com.jkingone.jkmusic.data.entity.Song;
-import com.jkingone.jkmusic.data.entity.SongList;
-import com.jkingone.jkmusic.data.entity.TopList;
+import com.jkingone.jkmusic.MusicApi;
+import com.jkingone.jkmusic.entity.NetSong;
+import com.jkingone.jkmusic.entity.SearchSong;
+import com.jkingone.jkmusic.entity.Song;
+import com.jkingone.jkmusic.entity.SongList;
+import com.jkingone.jkmusic.entity.TopList;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -48,88 +38,61 @@ public final class RemoteData {
     public static final String TAG = "RemoteData";
 
     public Call<List<TopList>> getTopList() {
-//        OkHttpClient c = new OkHttpClient.Builder().addInterceptor(new RequestInterceptor()).build();
-//        Request r = new Request.Builder().get()
-//                .url("http://tingapi.ting.baidu.com/v1/restserver/ting?from=android&version=5.6.5.6&format=json&method=baidu.ting.billboard.billCategory&&kflag=1")
-//                .header("User-Agent", "Mozilla")
-//                .build();
-//        c.newCall(r).enqueue(new okhttp3.Callback() {
-//            @Override
-//            public void onFailure(okhttp3.Call call, IOException e) {
-//                Log.e(TAG, "onFailure: ", e);
-//            }
-//
-//            @Override
-//            public void onResponse(okhttp3.Call call, okhttp3.Response response) throws IOException {
-//                Gson gson = new Gson();
-//                String s = response.body().string();
-//                JsonArray array = new JsonParser().parse(s).getAsJsonObject().getAsJsonArray("content");
-//                List<TopList> songs = new ArrayList<>();
-//                for(JsonElement song : array) {
-//                    if (song != null) {
-//                        songs.add(gson.fromJson(song, TopList.class));
-//                        Log.i(TAG, "convert: " + song);
-//                    } else {
-//                        Log.i(TAG, "convert: convertFactoryForTopList null");
-//                    }
-//                }
-//            }
-//        });
         Retrofit retrofit = createRetrofit(convertFactoryForTopList());
-        TopListApi api = retrofit.create(TopListApi.class);
+        MusicApi api = retrofit.create(MusicApi.class);
         return api.getTopList();
     }
 
     public Call<List<SongList>> getSongList(int size, int no) {
         Retrofit retrofit = createRetrofit(convertFactoryForSongList());
-        SongListApi api = retrofit.create(SongListApi.class);
+        MusicApi api = retrofit.create(MusicApi.class);
         return api.getSongList(size, no);
     }
 
     public Call<List<Song>> getSongFromSongList(String id) {
         Retrofit retrofit = createRetrofit(convertFactoryForSongFromSongList());
-        SongFromSongListApi api = retrofit.create(SongFromSongListApi.class);
+        MusicApi api = retrofit.create(MusicApi.class);
         return api.getSongFromSongList(id);
     }
 
     public Call<List<Song>> getSongFromTopList(int type) {
         Retrofit retrofit = createRetrofit(convertFactoryForSongFromTopList());
-        SongFromTopListApi api = retrofit.create(SongFromTopListApi.class);
+        MusicApi api = retrofit.create(MusicApi.class);
         return api.getSongFromTopList(type);
     }
 
     public Call<Song> getSong(String id) {
         Retrofit retrofit = createRetrofit(convertFactoryForSong());
-        SongApi api = retrofit.create(SongApi.class);
+        MusicApi api = retrofit.create(MusicApi.class);
         return api.getSong(id);
     }
 
     public Call<List<SongList>> getHotSongList(int num) {
         Retrofit retrofit = createRetrofit(convertFactoryForHotSongList());
-        HotSongListApi api = retrofit.create(HotSongListApi.class);
+        MusicApi api = retrofit.create(MusicApi.class);
         return api.getHotSongList(num);
     }
 
     public Call<List<SongList>> getTagSongList(String tag) {
         Retrofit retrofit = createRetrofit(convertFactoryForTagSongList());
-        TagSongListApi api = retrofit.create(TagSongListApi.class);
+        MusicApi api = retrofit.create(MusicApi.class);
         return api.getTagSongList(tag);
     }
 
 
     public Call<List<SearchSong>> getSearchSong(String query) {
         Retrofit retrofit = createRetrofit(convertFactoryForSearchSong());
-        SearchSongApi api = retrofit.create(SearchSongApi.class);
+        MusicApi api = retrofit.create(MusicApi.class);
         return api.getSearchSong(query);
     }
 
     public Call<List<String>> getHotWord() {
         Retrofit retrofit = createRetrofit(convertFactoryForHotWord());
-        HotWordApi api = retrofit.create(HotWordApi.class);
+        MusicApi api = retrofit.create(MusicApi.class);
         return api.getHotWord();
     }
 
-    public void getNetSong(String id, final HttpCallBack callback) {
+    public void getNetSong(String id) {
         OkHttpClient client = new OkHttpClient.Builder().build();
         String url = UrlString.Song.songInfo(id);
         Log.i(TAG, "url: " + url);
@@ -163,13 +126,7 @@ public final class RemoteData {
                         JsonObject array2 = new JsonParser().parse(s).getAsJsonObject().getAsJsonObject("songinfo");
                         NetSong netSong = gson.fromJson(array2, NetSong.class);
                         netSong.setFile_link(netSong1.getFile_link());
-                        if (callback != null) {
-                            callback.netSong(netSong);
-                        }
                     } else {
-                        if (callback != null) {
-                            callback.netSong(null);
-                        }
                     }
                 }
 
@@ -179,13 +136,13 @@ public final class RemoteData {
 
     public Call<List<Song>> getHotSong() {
         Retrofit retrofit = createRetrofit(convertFactoryForHotSong());
-        HotSongApi api = retrofit.create(HotSongApi.class);
+        MusicApi api = retrofit.create(MusicApi.class);
         return api.getHotSong();
     }
 
     public Call<List<String>> getBanner() {
         Retrofit retrofit = createRetrofit(convertFactoryForBanner());
-        BannerApi api = retrofit.create(BannerApi.class);
+        MusicApi api = retrofit.create(MusicApi.class);
         return api.getBanner(9);
     }
 
@@ -496,16 +453,10 @@ public final class RemoteData {
             public Converter<ResponseBody, ?> responseBodyConverter(Type type, final Annotation[] annotations, Retrofit retrofit) {
                 return new Converter<ResponseBody, List<String>>() {
                     @Override
-                    public List<String> convert(ResponseBody value) throws IOException {
+                    public List<String> convert(@NonNull ResponseBody value) throws IOException {
                         Log.i(TAG, "convert: " + value);
                         String s = value.string();
-//                        JsonArray array = new JsonParser().parse(s).getAsJsonObject().getAsJsonArray("pic");
                         List<String> banners = new ArrayList<>();
-//                        for (JsonElement song : array) {
-//                            if (song != null) {
-//                                banners.add(song.getAsJsonObject().get("randpic").getAsString());
-//                            }
-//                        }
                         banners.add(s);
                         return banners;
                     }

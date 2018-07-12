@@ -8,9 +8,7 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.RemoteException;
 
-import com.jkingone.jkmusic.IMusicInterface;
-import com.jkingone.jkmusic.MusicBroadcastReceiver;
-import com.jkingone.jkmusic.data.entity.SongInfo;
+import com.jkingone.jkmusic.entity.SongInfo;
 import com.jkingone.jkmusic.service.MusicService;
 
 import java.util.List;

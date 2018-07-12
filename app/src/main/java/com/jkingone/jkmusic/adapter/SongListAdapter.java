@@ -14,8 +14,7 @@ import com.jkingone.commonlib.Utils.DensityUtils;
 import com.jkingone.commonlib.Utils.ScreenUtils;
 import com.jkingone.customviewlib.LoadView;
 import com.jkingone.jkmusic.R;
-import com.jkingone.jkmusic.data.entity.SongList;
-import com.jkingone.jkmusic.ui.activity.SongListActivity;
+import com.jkingone.jkmusic.entity.SongList;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;

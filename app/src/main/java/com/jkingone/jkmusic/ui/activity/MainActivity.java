@@ -1,5 +1,4 @@
 package com.jkingone.jkmusic.ui.activity;
-import android.app.ActivityManager;
 import android.support.design.widget.NavigationView;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -16,14 +15,10 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.jkingone.commonlib.Utils.PermissionUtils;
-import com.jkingone.jkmusic.MusicBroadcastReceiver;
 import com.jkingone.jkmusic.R;
-import com.jkingone.jkmusic.data.entity.SongInfo;
 import com.jkingone.jkmusic.ui.mvp.BasePresenter;
 import com.jkingone.jkmusic.ui.fragment.NetWorkFragment;
 import com.jkingone.jkmusic.ui.fragment.PlaceholderFragment;
-
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;

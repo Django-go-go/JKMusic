@@ -13,7 +13,7 @@ import android.view.ViewGroup;
 
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.adapter.SongListAdapter;
-import com.jkingone.jkmusic.data.entity.SongList;
+import com.jkingone.jkmusic.entity.SongList;
 import com.jkingone.jkmusic.ui.activity.ClassifySongListActivity;
 import com.jkingone.jkmusic.ui.activity.SongListActivity;
 import com.jkingone.jkmusic.ui.mvp.contract.SongListFragContract;

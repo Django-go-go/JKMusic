@@ -2,7 +2,7 @@ package com.jkingone.jkmusic.ui.mvp;
 
 import android.util.Log;
 
-import com.jkingone.jkmusic.data.entity.SongList;
+import com.jkingone.jkmusic.entity.SongList;
 import com.jkingone.jkmusic.data.remote.RemoteData;
 import com.jkingone.jkmusic.ui.fragment.SongListFragment;
 import com.jkingone.jkmusic.ui.mvp.contract.SongListFragContract;

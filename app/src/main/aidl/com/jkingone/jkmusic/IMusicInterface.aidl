@@ -1,7 +1,7 @@
 // IMusicInterface.aidl
 package com.jkingone.jkmusic;
 
-import com.jkingone.jkmusic.data.entity.SongInfo;
+import com.jkingone.jkmusic.entity.SongInfo;
 
 interface IMusicInterface {
     void prepareMediaSources(in List<SongInfo> songInfos);

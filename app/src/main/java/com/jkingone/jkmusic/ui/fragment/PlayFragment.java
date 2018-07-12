@@ -1,12 +1,9 @@
 package com.jkingone.jkmusic.ui.fragment;
 
-import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
@@ -24,7 +21,7 @@ import com.jkingone.jkmusic.Constant;
 import com.jkingone.jkmusic.MusicBroadcastReceiver;
 import com.jkingone.jkmusic.MusicManagerService;
 import com.jkingone.jkmusic.R;
-import com.jkingone.jkmusic.data.entity.SongInfo;
+import com.jkingone.jkmusic.entity.SongInfo;
 import com.jkingone.jkmusic.data.local.ContentHelper;
 import com.jkingone.jkmusic.ui.activity.BaseActivity;
 import com.jkingone.jkmusic.ui.activity.PlayActivity;

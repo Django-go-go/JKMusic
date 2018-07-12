@@ -12,8 +12,8 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
-import com.jkingone.jkmusic.data.entity.Song;
-import com.jkingone.jkmusic.data.entity.SongInfo;
+import com.jkingone.jkmusic.entity.Song;
+import com.jkingone.jkmusic.entity.SongInfo;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;

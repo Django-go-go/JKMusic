@@ -17,7 +17,7 @@ import android.widget.TextView;
 import com.jkingone.commonlib.Utils.ScreenUtils;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.adapter.HeadAndFootRecycleAdapter;
-import com.jkingone.jkmusic.data.entity.TopList;
+import com.jkingone.jkmusic.entity.TopList;
 import com.jkingone.jkmusic.ui.activity.SongListActivity;
 import com.jkingone.jkmusic.ui.mvp.contract.TopListFragContract;
 import com.jkingone.jkmusic.ui.mvp.TopListFragPresenter;

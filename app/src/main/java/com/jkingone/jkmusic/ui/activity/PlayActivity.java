@@ -1,14 +1,9 @@
 package com.jkingone.jkmusic.ui.activity;
 
-import android.animation.Animator;
 import android.animation.ObjectAnimator;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
@@ -40,14 +35,12 @@ import com.jkingone.jkmusic.Constant;
 import com.jkingone.jkmusic.MusicBroadcastReceiver;
 import com.jkingone.jkmusic.MusicManagerService;
 import com.jkingone.jkmusic.R;
-import com.jkingone.jkmusic.data.entity.SongInfo;
-import com.jkingone.jkmusic.service.MusicService;
+import com.jkingone.jkmusic.entity.SongInfo;
 import com.jkingone.jkmusic.ui.fragment.PlayFragment;
 import com.jkingone.jkmusic.ui.mvp.BasePresenter;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Transformation;
 
-import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,8 +52,6 @@ import java.util.concurrent.TimeUnit;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-
-import static java.security.AccessController.getContext;
 
 public class PlayActivity extends BaseActivity {
 

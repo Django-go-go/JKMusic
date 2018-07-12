@@ -1,6 +1,6 @@
 package com.jkingone.jkmusic.ui.mvp.contract;
 
-import com.jkingone.jkmusic.data.entity.SongInfo;
+import com.jkingone.jkmusic.entity.SongInfo;
 
 import java.util.List;
 

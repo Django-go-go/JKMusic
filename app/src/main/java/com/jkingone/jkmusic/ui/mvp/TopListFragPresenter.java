@@ -1,6 +1,6 @@
 package com.jkingone.jkmusic.ui.mvp;
 
-import com.jkingone.jkmusic.data.entity.TopList;
+import com.jkingone.jkmusic.entity.TopList;
 import com.jkingone.jkmusic.data.remote.RemoteData;
 import com.jkingone.jkmusic.ui.mvp.contract.TopListFragContract;
 

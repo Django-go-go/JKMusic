@@ -1,1 +1,1 @@
-include ':app', ':commonlib', ':customviewlib'
+include ':app', ':commonlib', ':customviewlib', ':imagelib'

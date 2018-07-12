@@ -1,7 +1,7 @@
 package com.jkingone.jkmusic.ui.mvp;
 
 import com.jkingone.jkmusic.Utils;
-import com.jkingone.jkmusic.data.entity.Song;
+import com.jkingone.jkmusic.entity.Song;
 import com.jkingone.jkmusic.data.remote.RemoteData;
 import com.jkingone.jkmusic.ui.mvp.contract.SongListContract;
 

@@ -25,7 +25,7 @@ import com.jkingone.commonlib.Utils.DensityUtils;
 import com.jkingone.commonlib.Utils.ScreenUtils;
 import com.jkingone.jkmusic.R;
 import com.jkingone.customviewlib.WaveView;
-import com.jkingone.jkmusic.data.entity.SongList;
+import com.jkingone.jkmusic.entity.SongList;
 import com.jkingone.jkmusic.ui.mvp.contract.ClassifySongListContract;
 import com.jkingone.jkmusic.ui.mvp.ClassifySongListPresenter;
 import com.squareup.picasso.Picasso;

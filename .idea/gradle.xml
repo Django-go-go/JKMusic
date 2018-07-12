@@ -11,6 +11,7 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/commonlib" />
             <option value="$PROJECT_DIR$/customviewlib" />
+            <option value="$PROJECT_DIR$/imagelib" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />
