@@ -1,31 +1,30 @@
 package com.jkingone.customviewlib;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
-import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v7.widget.ViewUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
-import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
-import android.view.animation.TranslateAnimation;
 import android.widget.FrameLayout;
-import android.widget.Scroller;
 
 import com.jkingone.commonlib.Utils.ScreenUtils;
+
+import java.lang.ref.WeakReference;
 
 
 public class JDialog extends FrameLayout {
@@ -44,17 +43,13 @@ public class JDialog extends FrameLayout {
     private int mContainerWidth;
     private int mContainerHeight;
 
-    private Animation mEnterAnimation;
-    private Animation mExitAnimation;
-
-    private Animation mShadowEnterAnimation;
-    private Animation mShadowExitAnimation;
+    private AnimatorSet mAnimatorSet;
+    private ObjectAnimator mContainerAnimator;
+    private ObjectAnimator mShadowAnimator;
 
     private boolean isShow = false;
 
     private int mLocation = Gravity.BOTTOM;
-
-    private Scroller mScroller;
 
     public JDialog(Context context) {
         this(context, null, 0);
@@ -103,18 +98,19 @@ public class JDialog extends FrameLayout {
             }
         });
 
-        mShadowEnterAnimation = new AlphaAnimation(0, 1);
-        mShadowEnterAnimation.setDuration(200);
-        mShadowEnterAnimation.setInterpolator(new DecelerateInterpolator());
-        mShadowEnterAnimation.setFillAfter(true);
+//        mShadowEnterAnimation = new AlphaAnimation(0, 1);
+//        mShadowEnterAnimation.setDuration(200);
+//        mShadowEnterAnimation.setInterpolator(new DecelerateInterpolator());
+//        mShadowEnterAnimation.setFillAfter(true);
+//
+//        mShadowExitAnimation = new AlphaAnimation(1, 0);
+//        mShadowExitAnimation.setDuration(200);
+//        mShadowExitAnimation.setInterpolator(new DecelerateInterpolator());
+//        mShadowExitAnimation.setFillAfter(true);
 
-        mShadowExitAnimation = new AlphaAnimation(1, 0);
-        mShadowExitAnimation.setDuration(200);
-        mShadowExitAnimation.setInterpolator(new DecelerateInterpolator());
-        mShadowExitAnimation.setFillAfter(true);
-
-        mScroller = new Scroller(context, new DecelerateInterpolator());
-
+        ViewConfiguration configuration = ViewConfiguration.get(context);
+        mTouchSlop = configuration.getScaledTouchSlop();
+        mMinYVelocity = configuration.getScaledMinimumFlingVelocity();
     }
 
     public void setContentView(int resId) {
@@ -144,10 +140,14 @@ public class JDialog extends FrameLayout {
             throw new NullPointerException("null");
         }
 
-        if (Gravity.BOTTOM == gravity || Gravity.TOP == gravity) {
+        if (Gravity.BOTTOM == gravity) {
             mContainerHeight = ScreenUtils.getScreenHeight(mActivity) / 3 * 2;
             mContainerLayoutParams = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, mContainerHeight, gravity);
-            mContainerView.setBackgroundResource(R.drawable.shape_rect_half_white);
+            mContainerView.setBackgroundResource(R.drawable.shape_rect_top_white);
+        } else if (Gravity.TOP == gravity) {
+            mContainerHeight = ScreenUtils.getScreenHeight(mActivity) / 3 * 2;
+            mContainerLayoutParams = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, mContainerHeight, gravity);
+            mContainerView.setBackgroundResource(R.drawable.shape_rect_bottom_white);
         } else {
             mContainerHeight = ScreenUtils.getScreenHeight(mActivity) / 3;
             mContainerLayoutParams = new FrameLayout.LayoutParams(mContainerWidth, mContainerHeight, gravity);
@@ -159,6 +159,88 @@ public class JDialog extends FrameLayout {
     }
 
     public void show() {
+
+        addToDecorView();
+
+        enterAnimator();
+    }
+
+    public void hide() {
+        exitAnimator();
+    }
+
+    private void enterAnimator() {
+
+        if (mLocation == Gravity.BOTTOM) {
+            mContainerAnimator = ObjectAnimator.ofFloat(mContainerView, "translationY", mContainerHeight, 0);
+        } else if (mLocation == Gravity.TOP) {
+            mContainerAnimator = ObjectAnimator.ofFloat(mContainerView, "translationY", -mContainerHeight, 0);
+        } else {
+            mContainerAnimator = ObjectAnimator.ofFloat(mContainerView, "alpha", 0, 1);
+        }
+
+        mShadowAnimator = ObjectAnimator.ofFloat(mShadowView, "alpha", 0, 1);
+
+        initAndStartAnimatorSet(DURATION, new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                isShow = true;
+                isScroll = false;
+            }
+
+            @Override
+            public void onAnimationStart(Animator animation) {
+                mShadowView.setVisibility(VISIBLE);
+                mContainerView.setVisibility(VISIBLE);
+                isScroll = true;
+            }
+        });
+
+    }
+
+    private void exitAnimator() {
+
+        if (mLocation == Gravity.BOTTOM) {
+            mContainerAnimator = ObjectAnimator.ofFloat(mContainerView, "translationY", 0, mContainerHeight);
+        } else if (mLocation == Gravity.TOP) {
+            mContainerAnimator = ObjectAnimator.ofFloat(mContainerView, "translationY", 0, -mContainerHeight);
+        } else {
+            mContainerAnimator = ObjectAnimator.ofFloat(mContainerView, "alpha", 1, 0);
+        }
+        mShadowAnimator = ObjectAnimator.ofFloat(mShadowView, "alpha", 1, 0);
+
+        initAndStartAnimatorSet(DURATION, new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                removeFromDecorView();
+                isScroll = false;
+            }
+
+            @Override
+            public void onAnimationStart(Animator animation) {
+                isScroll = true;
+            }
+        });
+
+    }
+
+    private void initAndStartAnimatorSet(int duration, Animator.AnimatorListener animatorListener) {
+        if (mContainerAnimator == null || mShadowAnimator == null) {
+            Log.i(TAG, "initAnimatorSet: animator is null");
+            throw new NullPointerException("animator is null");
+        }
+        if (mAnimatorSet == null) {
+            mAnimatorSet = new AnimatorSet();
+            mAnimatorSet.setInterpolator(new DecelerateInterpolator());
+        }
+        mAnimatorSet.setDuration(duration);
+        mAnimatorSet.playTogether(mContainerAnimator, mShadowAnimator);
+        mAnimatorSet.removeAllListeners();
+        mAnimatorSet.addListener(animatorListener);
+        mAnimatorSet.start();
+    }
+
+    private void addToDecorView() {
 
         if (mContentView == null) {
             Log.i(TAG, "show: contentView is null");
@@ -178,176 +260,262 @@ public class JDialog extends FrameLayout {
         if (mContainerView.getChildCount() == 0) {
             mContainerView.addView(mContentView, new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         }
-
-        post(new Runnable() {
-            @Override
-            public void run() {
-                if (mEnterAnimation == null) {
-                    if (Gravity.BOTTOM == mLocation || Gravity.TOP == mLocation) {
-                        mEnterAnimation = new TranslateAnimation(0, 0, mContainerView.getHeight(), 0);
-                    } else {
-                        mEnterAnimation = new AlphaAnimation(0, 1);
-                    }
-
-                    mEnterAnimation.setInterpolator(new AccelerateInterpolator());
-                    mEnterAnimation.setDuration(200);
-                    mEnterAnimation.setAnimationListener(new Animation.AnimationListener() {
-                        @Override
-                        public void onAnimationStart(Animation animation) {
-                            mShadowView.setVisibility(VISIBLE);
-                            mContainerView.setVisibility(VISIBLE);
-                        }
-
-                        @Override
-                        public void onAnimationEnd(Animation animation) {
-                            isShow = true;
-                        }
-
-                        @Override
-                        public void onAnimationRepeat(Animation animation) {
-                        }
-                    });
-                }
-                mShadowView.startAnimation(mShadowEnterAnimation);
-                mContainerView.startAnimation(mEnterAnimation);
-            }
-        });
-
     }
 
-    public void hide() {
-
-        post(new Runnable() {
-            @Override
-            public void run() {
-                if (mExitAnimation == null) {
-                    if (Gravity.BOTTOM == mLocation || Gravity.TOP == mLocation) {
-                        mExitAnimation = new TranslateAnimation(0, 0, 0, mContainerView.getHeight());
-                    } else {
-                        mExitAnimation = new AlphaAnimation(1, 0);
-                    }
-                    mExitAnimation.setInterpolator(new AccelerateInterpolator());
-                    mExitAnimation.setDuration(200);
-                    mExitAnimation.setAnimationListener(new Animation.AnimationListener() {
-                        @Override
-                        public void onAnimationStart(Animation animation) {
-
-                        }
-
-                        @Override
-                        public void onAnimationEnd(Animation animation) {
-                            mContainerView.setVisibility(INVISIBLE);
-                            mShadowView.setVisibility(INVISIBLE);
-                            mDecorView.removeView(JDialog.this);
-                            isShow = false;
-                        }
-
-                        @Override
-                        public void onAnimationRepeat(Animation animation) {
-
-                        }
-                    });
-                }
-
-                mShadowView.startAnimation(mShadowExitAnimation);
-                mContainerView.startAnimation(mExitAnimation);
-            }
-        });
-
+    private void removeFromDecorView() {
+        mContainerView.setVisibility(INVISIBLE);
+        mShadowView.setVisibility(INVISIBLE);
+        mDecorView.removeView(JDialog.this);
+        isScroll = false;
+        mAlpha = 1;
+        isShow = false;
     }
 
     public boolean isShow() {
         return isShow;
     }
 
+    private float mLastY;
+    private float mDownY;
+
+    private float mAlpha = 1;
+
+    private int mOriginTop;
+    private int mOriginBottom;
+
+    private int mScrollDistance;
+    private boolean isScroll = false;
+
+    private static final int SCROLL_DIS = 360;
+    private static final int DURATION = 200;
+
+
+    private int mTouchSlop;
+
+    private VelocityTracker mVelocityTracker;
+    private int mMinYVelocity;
+
+    private CheckScroll mCheckScroll;
+    public interface CheckScroll {
+        boolean canScrollVertically();
+    }
+
+    public void setCheckScroll(CheckScroll checkScroll) {
+        mCheckScroll = checkScroll;
+    }
+
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
 
-        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-            top = mContainerView.getTop();
-            Log.i(TAG, "onInterceptTouchEvent: " + top);
-            lastY = ev.getY();
-//            downY = ev.getY();
+        if (mLocation != Gravity.BOTTOM && mLocation != Gravity.TOP) {
             return false;
         }
 
+        if (mCheckScroll != null && mCheckScroll.canScrollVertically()) {
+            return false;
+        }
+
+        if (isScroll) {
+            return false;
+        }
+
+        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+            mOriginTop = mContainerView.getTop();
+            mOriginBottom = mContainerView.getBottom();
+            mLastY = mDownY = ev.getY();
+        }
+
         if (ev.getAction() == MotionEvent.ACTION_MOVE) {
-            if (mContainerView.getTop() < top) {
-                return false;
-            } else {
+            float dis = Math.abs(ev.getY() - mDownY);
+            boolean canScroll = (mDownY <= ev.getY() && mLocation == Gravity.BOTTOM)
+                    || (mDownY >= ev.getY() && mLocation == Gravity.TOP);
+            if (canScroll && dis >= mTouchSlop) {
                 return true;
             }
         }
 
-        return true;
+        return super.onInterceptTouchEvent(ev);
     }
-
-    private float lastY = 0;
-//    private float downY = 0;
-
-    private int top;
-    private int distance;
-
-    private static final int DIS = 50;
-    private static final int MSG_START = 1;
-    private static final int MSG_RUN = 2;
-    private static final int MSG_END = 3;
-    private static final int DELAY = 10;
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+
+        if (mVelocityTracker == null) {
+            mVelocityTracker = VelocityTracker.obtain();
+        }
+
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                lastY = event.getY();
-//                downY = event.getY();
+                mLastY = mDownY = event.getY();
+                mVelocityTracker.clear();
+                mVelocityTracker.addMovement(event);
                 break;
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
-                distance = Math.abs(mContainerView.getTop() - top);
-                scrollToTop();
+                if (mLocation == Gravity.BOTTOM) {
+                    mScrollDistance = Math.abs(mContainerView.getTop() - mOriginTop);
+                }
+                if (mLocation == Gravity.TOP) {
+                    mScrollDistance = Math.abs(mContainerView.getBottom() - mOriginBottom);
+                }
+                if (mScrollDistance > SCROLL_DIS) {
+                    scrollToBack();
+                } else {
+                    scrollToCorrect();
+                }
+                if (mVelocityTracker != null) {
+                    mVelocityTracker.recycle();
+                    mVelocityTracker = null;
+                }
                 break;
             case MotionEvent.ACTION_MOVE:
-                if (mContainerView.getTop() >= top) {
-                    float curY = event.getY();
-                    float dif = curY - lastY;
-                    mContainerView.offsetTopAndBottom((int) dif);
-                    lastY = curY;
+                float curY = event.getY();
+                float touchDis = Math.abs(curY - mDownY);
+
+                mVelocityTracker.addMovement(event);
+                mVelocityTracker.computeCurrentVelocity(1000);
+
+                boolean canScroll = (mDownY <= curY && mLocation == Gravity.BOTTOM)
+                        || (mDownY >= curY && mLocation == Gravity.TOP);
+
+                if (canScroll && touchDis >= mTouchSlop) {
+                    float dis = curY - mLastY;
+
+                    if (mLocation == Gravity.TOP) {
+                        mAlpha += dis / mContainerHeight;
+                    }
+                    if (mLocation == Gravity.BOTTOM) {
+                        mAlpha -= dis / mContainerHeight;
+                    }
+
+                    mContainerView.offsetTopAndBottom((int) dis);
+                    mShadowView.setAlpha(mAlpha);
+                    mLastY = curY;
+
+                    if (Math.abs(mVelocityTracker.getYVelocity()) >= mMinYVelocity * 25) {
+                        scrollToBack();
+                    }
                 }
                 break;
         }
         return super.onTouchEvent(event);
     }
 
-    private void scrollToTop() {
-        new ScrollHandler().sendEmptyMessage(MSG_START);
+    private void scrollToCorrect() {
+        if (mLocation == Gravity.BOTTOM) {
+            mContainerAnimator = ObjectAnimator.ofFloat(mContainerView, "translationY",
+                    mContainerView.getTranslationY(), mContainerView.getTranslationY() - mScrollDistance);
+        }
+        if (mLocation == Gravity.TOP) {
+            mContainerAnimator = ObjectAnimator.ofFloat(mContainerView, "translationY",
+                    mContainerView.getTranslationY(), mContainerView.getTranslationY() + mScrollDistance);
+        }
+
+        mShadowAnimator = ObjectAnimator.ofFloat(mShadowView, "alpha", mAlpha, 1);
+
+        initAndStartAnimatorSet(DURATION * mScrollDistance / mContainerHeight, new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                isShow = true;
+                isScroll = false;
+            }
+
+            @Override
+            public void onAnimationStart(Animator animation) {
+                isScroll = true;
+            }
+        });
     }
 
-    private class ScrollHandler extends Handler {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_START:
-                    if (distance < DIS) {
-                        mContainerView.offsetTopAndBottom(-distance);
-                        distance = 0;
-                    } else {
-                        sendEmptyMessageDelayed(MSG_RUN, DELAY);
-                    }
-                    break;
-                case MSG_RUN:
-                    if (distance - DIS > 0) {
-                        distance -= DIS;
-                        mContainerView.offsetTopAndBottom(-DIS);
-                        sendEmptyMessageDelayed(MSG_RUN, DELAY);
-                    } else {
-                        sendEmptyMessageDelayed(MSG_END, DELAY);
-                    }
-                    break;
-                case MSG_END:
-                    mContainerView.offsetTopAndBottom(-distance);
-                    distance = 0;
-                    break;
-            }
+    private void scrollToBack() {
+        if (mLocation == Gravity.BOTTOM) {
+            mContainerAnimator = ObjectAnimator.ofFloat(mContainerView, "translationY",
+                    mContainerView.getTranslationY(), mContainerView.getTranslationY() + mContainerHeight - mScrollDistance);
         }
+        if (mLocation == Gravity.TOP) {
+            mContainerAnimator = ObjectAnimator.ofFloat(mContainerView, "translationY",
+                    mContainerView.getTranslationY(), mContainerView.getTranslationY() - mContainerHeight + mScrollDistance);
+        }
+
+        mShadowAnimator = ObjectAnimator.ofFloat(mShadowView, "alpha", mAlpha, 0);
+
+        initAndStartAnimatorSet(DURATION * (mContainerHeight - mScrollDistance) / mContainerHeight, new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                removeFromDecorView();
+                isScroll = false;
+            }
+
+            @Override
+            public void onAnimationStart(Animator animation) {
+                isScroll = true;
+            }
+        });
     }
+
+//    private boolean isScrollUp = false;
+//
+//    private static final int DIS = 96;
+//    private static final int MSG_START = 1;
+//    private static final int MSG_RUN = 2;
+//    private static final int MSG_END = 3;
+//    private static final int DELAY = 10;
+//
+//    private static class ScrollHandler extends Handler {
+//
+//        private WeakReference<JDialog> mDialogWeakReference;
+//
+//        ScrollHandler(WeakReference<JDialog> dialogWeakReference) {
+//            mDialogWeakReference = dialogWeakReference;
+//        }
+//
+//        @Override
+//        public void handleMessage(Message msg) {
+//            JDialog jDialog = mDialogWeakReference.get();
+//            if (jDialog != null) {
+//                switch (msg.what) {
+//                    case MSG_START:
+//                        jDialog.isScroll = true;
+//                        sendEmptyMessage(MSG_RUN);
+//                        break;
+//                    case MSG_RUN:
+//                        if (jDialog.mScrollDistance <= 0) {
+//                            sendEmptyMessage(MSG_END);
+//                        } else if (jDialog.mScrollDistance - DIS >= 0) {
+//                            jDialog.mScrollDistance -= DIS;
+//                            jDialog.isScroll = true;
+//                            jDialog.mContainerView.offsetTopAndBottom(jDialog.isScrollUp ? -DIS : DIS);
+//                            if (jDialog.isScrollUp) {
+//                                jDialog.mAlpha += (float) DIS / jDialog.mContainerHeight;
+//                            } else {
+//                                jDialog.mAlpha -= (float) DIS / jDialog.mContainerHeight;
+//                            }
+//                            jDialog.mShadowView.setAlpha(jDialog.mAlpha);
+//                            sendEmptyMessageDelayed(MSG_RUN, DELAY);
+//                        } else {
+//                            jDialog.isScroll = true;
+//                            jDialog.mContainerView.offsetTopAndBottom(jDialog.isScrollUp ? -jDialog.mScrollDistance : jDialog.mScrollDistance);
+//                            jDialog.mScrollDistance = 0;
+//                            sendEmptyMessageDelayed(MSG_RUN, DELAY);
+//                        }
+//                        break;
+//                    case MSG_END:
+//                        jDialog.isScroll = false;
+//                        if (!jDialog.isScrollUp) {
+//                            jDialog.restoreContainerView();
+//                        }
+//                        break;
+//                }
+//            }
+//
+//        }
+//    }
+//
+//    private void restoreContainerView() {
+//        mContainerView.setVisibility(INVISIBLE);
+//        mShadowView.setVisibility(INVISIBLE);
+//        mDecorView.removeView(JDialog.this);
+//        mAlpha = 1;
+//        isShow = false;
+//    }
 }

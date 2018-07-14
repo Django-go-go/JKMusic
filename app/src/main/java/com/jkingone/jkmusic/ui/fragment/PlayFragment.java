@@ -7,6 +7,9 @@ import android.support.annotation.NonNull;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -25,6 +28,7 @@ import com.jkingone.jkmusic.Constant;
 import com.jkingone.jkmusic.MusicBroadcastReceiver;
 import com.jkingone.jkmusic.MusicManagerService;
 import com.jkingone.jkmusic.R;
+import com.jkingone.jkmusic.adapter.PlayListAdapter;
 import com.jkingone.jkmusic.entity.SongInfo;
 import com.jkingone.jkmusic.data.local.ContentHelper;
 import com.jkingone.jkmusic.ui.activity.BaseActivity;
@@ -52,6 +56,8 @@ public class PlayFragment extends LazyFragment {
     ImageView mImageViewPlay;
     @BindView(R.id.iv_menu)
     ImageView mImageViewMenu;
+
+    private JDialog mJDialog;
 
     private List<View> mRootViews = new ArrayList<>(6);
     private ImageView mImageViewCover;
@@ -199,29 +205,35 @@ public class PlayFragment extends LazyFragment {
 //            mViewPager.setAdapter(new MusicAdapter());
 //            mViewPager.setCurrentItem(2);
 //        }
-        createMusicListDialog();
-    }
-
-    //==============================================================================================
-    //
-    //==============================================================================================
-
-    private JDialog mJDialog;
-
-    private void createMusicListDialog() {
-
         if (mJDialog == null) {
             mJDialog = new JDialog(mBaseActivity);
 //            mJDialog.setContentView(R.layout.test, Gravity.CENTER);
+//
+//            List<String> strings = new ArrayList<>();
+//            for (int i = 0; i < 10; i++) {
+//                strings.add("index : " + i);
+//            }
+//            final ListView listView = new ListView(mBaseActivity);
+//            listView.setAdapter(new ArrayAdapter<>(mBaseActivity, android.R.layout.simple_list_item_1, strings));
+//            mJDialog.setContentView(listView);
+//            mJDialog.setCheckScroll(new JDialog.CheckScroll() {
+//                @Override
+//                public boolean canScrollVertically() {
+//                    return listView.canScrollVertically(-1);
+//                }
+//            });
 
-            List<String> strings = new ArrayList<>();
-            for (int i = 0; i < 100; i++) {
-                strings.add("index : " + i);
-            }
-            ListView listView = new ListView(mBaseActivity);
-            listView.setAdapter(new ArrayAdapter<>(mBaseActivity, android.R.layout.simple_list_item_1, strings));
-            mJDialog.setContentView(listView);
-
+            final RecyclerView recyclerView = new RecyclerView(mBaseActivity);
+            recyclerView.setLayoutManager(new LinearLayoutManager(mBaseActivity));
+            recyclerView.addItemDecoration(new DividerItemDecoration(mBaseActivity, DividerItemDecoration.VERTICAL));
+            recyclerView.setAdapter(new PlayListAdapter(mBaseActivity, mSongInfos, 2));
+            mJDialog.setContentView(recyclerView);
+            mJDialog.setCheckScroll(new JDialog.CheckScroll() {
+                @Override
+                public boolean canScrollVertically() {
+                    return recyclerView.canScrollVertically(-1);
+                }
+            });
         }
         mJDialog.show();
     }
