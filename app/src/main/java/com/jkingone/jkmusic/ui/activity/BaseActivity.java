@@ -43,13 +43,6 @@ public abstract class BaseActivity<P extends BasePresenter> extends AppCompatAct
         return mMusicManagerService;
     }
 
-    public MusicManagerService checkMusicManagerService() {
-        if (mMusicManagerService.checkIsNull()) {
-            return null;
-        }
-        return mMusicManagerService;
-    }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();

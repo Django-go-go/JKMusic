@@ -246,14 +246,14 @@ public class PlayActivity extends BaseActivity {
                 break;
             }
             case R.id.iv_last: {
-                if (checkMusicManagerService() != null) {
+                if (getMusicManagerService() != null) {
                     isComplete = false;
                     mViewPager.setCurrentItem(mViewPager.getCurrentItem() - 1, true);
                 }
                 break;
             }
             case R.id.iv_play: {
-                if (checkMusicManagerService() != null) {
+                if (getMusicManagerService() != null) {
                     if (mMusicManagerService.isPlaying()) {
                         mMusicManagerService.pause();
                     } else {
@@ -263,7 +263,7 @@ public class PlayActivity extends BaseActivity {
                 break;
             }
             case R.id.iv_next: {
-                if (checkMusicManagerService() != null) {
+                if (getMusicManagerService() != null) {
                     isComplete = false;
                     mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1, true);
                 }
@@ -276,7 +276,7 @@ public class PlayActivity extends BaseActivity {
     }
 
     private void updateSeekBar() {
-        if (checkMusicManagerService() != null) {
+        if (getMusicManagerService() != null) {
             long progress = mMusicManagerService.getCurrentPosition();
             long total = mMusicManagerService.getDuration();
             long buf = mMusicManagerService.getBufferedPosition();

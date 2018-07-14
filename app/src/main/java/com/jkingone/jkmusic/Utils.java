@@ -12,8 +12,10 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
+import com.google.android.exoplayer2.Player;
 import com.jkingone.jkmusic.entity.Song;
 import com.jkingone.jkmusic.entity.SongInfo;
+import com.jkingone.jkmusic.service.MusicService;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -24,6 +26,20 @@ import java.util.List;
  */
 
 public class Utils {
+
+    public static int getNextRepeatMode(int mode) {
+        if (mode == MusicService.PLAY_MODE_ALL) {
+            return MusicService.PLAY_MODE_ONE;
+        }
+        if (mode == MusicService.PLAY_MODE_ONE) {
+            return MusicService.PLAY_MODE_SHUFFLE;
+        }
+        if (mode == MusicService.PLAY_MODE_SHUFFLE) {
+            return MusicService.PLAY_MODE_ALL;
+        }
+        return MusicService.PLAY_MODE_ALL;
+    }
+
     public static void setIndicator(TabLayout tabs, int leftDip, int rightDip) {
         Class<?> tabLayout = tabs.getClass();
         Field tabStrip = null;

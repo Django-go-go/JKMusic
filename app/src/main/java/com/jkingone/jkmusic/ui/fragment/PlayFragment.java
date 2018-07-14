@@ -21,6 +21,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.jkingone.commonlib.Utils.DensityUtils;
 import com.jkingone.customviewlib.JDialog;
@@ -28,9 +29,11 @@ import com.jkingone.jkmusic.Constant;
 import com.jkingone.jkmusic.MusicBroadcastReceiver;
 import com.jkingone.jkmusic.MusicManagerService;
 import com.jkingone.jkmusic.R;
+import com.jkingone.jkmusic.Utils;
 import com.jkingone.jkmusic.adapter.PlayListAdapter;
 import com.jkingone.jkmusic.entity.SongInfo;
 import com.jkingone.jkmusic.data.local.ContentHelper;
+import com.jkingone.jkmusic.service.MusicService;
 import com.jkingone.jkmusic.ui.activity.BaseActivity;
 import com.jkingone.jkmusic.ui.activity.PlayActivity;
 import com.squareup.picasso.Picasso;
@@ -75,6 +78,8 @@ public class PlayFragment extends LazyFragment {
 
     private BaseActivity mBaseActivity;
 
+    private MusicAdapter mMusicAdapter;
+
     public static PlayFragment newInstance(String... params) {
         PlayFragment fragment = new PlayFragment();
         fragment.setArguments(setParams(params));
@@ -94,8 +99,6 @@ public class PlayFragment extends LazyFragment {
         View view = inflater.inflate(R.layout.fragment_play, container, false);
         mUnbinder = ButterKnife.bind(this, view);
 
-        mSongInfos = new ContentHelper(getContext()).getMusic();
-
         initViewPager();
 
         initCallback();
@@ -113,7 +116,8 @@ public class PlayFragment extends LazyFragment {
         mBaseActivity.getMusicManagerService().setBindServiceCallback(new MusicManagerService.BindServiceCallback() {
             @Override
             public void updateFirst() {
-
+                mSongInfos.clear();
+                mSongInfos.addAll(mBaseActivity.getMusicManagerService().getMediaSources());
             }
         });
         mBaseActivity.getMusicManagerService().setPlayCallback(new MusicBroadcastReceiver.PlayCallback() {
@@ -128,7 +132,11 @@ public class PlayFragment extends LazyFragment {
 
             @Override
             public void mediaSourceChange(boolean indexChanged, int index, List<SongInfo> songInfos) {
-
+                if (songInfos.size() == 0) {
+                    Toast.makeText(mBaseActivity, "clear", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(mBaseActivity, "" + indexChanged + " " + index, Toast.LENGTH_SHORT).show();
+                }
             }
 
             @Override
@@ -145,6 +153,10 @@ public class PlayFragment extends LazyFragment {
     }
 
     private void initViewPager() {
+        if (mMusicAdapter == null) {
+            mMusicAdapter = new MusicAdapter();
+        }
+        mViewPager.setAdapter(mMusicAdapter);
         mViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
 
             int lastPos = mViewPager.getCurrentItem();
@@ -180,9 +192,9 @@ public class PlayFragment extends LazyFragment {
                 } else {
                     if (!isComplete) {
                         if (isNext) {
-                            mBaseActivity.checkMusicManagerService().next();
+                            mBaseActivity.getMusicManagerService().next();
                         } else {
-                            mBaseActivity.checkMusicManagerService().previous();
+                            mBaseActivity.getMusicManagerService().previous();
                         }
                     } else {
                         updateViewPager(position);
@@ -193,18 +205,11 @@ public class PlayFragment extends LazyFragment {
         });
     }
 
+    private View dialogView;
+    private RecyclerView mRecyclerView;
+    private PlayListAdapter mPlayListAdapter;
     @OnClick(R.id.iv_menu)
     public void onMenuClick() {
-//        if (mBaseActivity.checkMusicManagerService() != null) {
-//            mBaseActivity.checkMusicManagerService().prepareMediaSources(mSongInfos);
-//            mBaseActivity.checkMusicManagerService().playIndex(2);
-//
-//            updateIndex(2);
-//
-//            isComplete = true;
-//            mViewPager.setAdapter(new MusicAdapter());
-//            mViewPager.setCurrentItem(2);
-//        }
         if (mJDialog == null) {
             mJDialog = new JDialog(mBaseActivity);
 //            mJDialog.setContentView(R.layout.test, Gravity.CENTER);
@@ -223,28 +228,60 @@ public class PlayFragment extends LazyFragment {
 //                }
 //            });
 
-            final RecyclerView recyclerView = new RecyclerView(mBaseActivity);
-            recyclerView.setLayoutManager(new LinearLayoutManager(mBaseActivity));
-            recyclerView.addItemDecoration(new DividerItemDecoration(mBaseActivity, DividerItemDecoration.VERTICAL));
-            recyclerView.setAdapter(new PlayListAdapter(mBaseActivity, mSongInfos, 2));
-            mJDialog.setContentView(recyclerView);
+            createDialogView();
+            mJDialog.setContentView(dialogView);
             mJDialog.setCheckScroll(new JDialog.CheckScroll() {
                 @Override
                 public boolean canScrollVertically() {
-                    return recyclerView.canScrollVertically(-1);
+                    return mRecyclerView.canScrollVertically(-1);
                 }
             });
         }
+        mPlayListAdapter.setPlayPosition(mBaseActivity.getMusicManagerService().getCurrentWindowIndex());
+        mRecyclerView.scrollToPosition(mBaseActivity.getMusicManagerService().getCurrentWindowIndex());
         mJDialog.show();
+    }
+
+    private void createDialogView() {
+        dialogView = LayoutInflater.from(mBaseActivity).inflate(R.layout.dialog_playlist, mJDialog, false);
+
+        mRecyclerView = dialogView.findViewById(R.id.recycle_dialog);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(mBaseActivity));
+        mPlayListAdapter = new PlayListAdapter(mBaseActivity, mSongInfos, mBaseActivity.getMusicManagerService());
+        mRecyclerView.setAdapter(mPlayListAdapter);
+
+        dialogView.findViewById(R.id.tv_repeat).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TextView textView = (TextView) v;
+                int mode = Utils.getNextRepeatMode(mBaseActivity.getMusicManagerService().getPlayMode());
+                if (mode == MusicService.PLAY_MODE_ALL) {
+                    textView.setText("全部循环");
+                } else if (mode == MusicService.PLAY_MODE_SHUFFLE) {
+                    textView.setText("随机播放");
+                } else {
+                    textView.setText("单曲循环");
+                }
+                mBaseActivity.getMusicManagerService().setPlayMode(mode);
+            }
+        });
+        dialogView.findViewById(R.id.tv_clear).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mBaseActivity.getMusicManagerService().clearMediaSources();
+                mPlayListAdapter.clearData();
+                mPlayListAdapter.notifyDataSetChanged();
+            }
+        });
     }
 
     @OnClick(R.id.iv_play)
     public void onPlayClick() {
-        if (mBaseActivity.checkMusicManagerService() != null) {
-            if (mBaseActivity.checkMusicManagerService().isPlaying()) {
-                mBaseActivity.checkMusicManagerService().pause();
+        if (mBaseActivity.getMusicManagerService() != null) {
+            if (mBaseActivity.getMusicManagerService().isPlaying()) {
+                mBaseActivity.getMusicManagerService().pause();
             } else {
-                mBaseActivity.checkMusicManagerService().play();
+                mBaseActivity.getMusicManagerService().play();
             }
         }
     }

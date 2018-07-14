@@ -8,6 +8,7 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.RemoteException;
 
+import com.google.android.exoplayer2.Player;
 import com.jkingone.jkmusic.entity.SongInfo;
 import com.jkingone.jkmusic.service.MusicService;
 
@@ -252,6 +253,29 @@ public class MusicManagerService implements IMusicInterface {
     }
 
     @Override
+    public void setPlayMode(int playMode) {
+        if (mIMusicInterface != null) {
+            try {
+                mIMusicInterface.setPlayMode(playMode);
+            } catch (RemoteException e) {
+                //do nothing
+            }
+        }
+    }
+
+    @Override
+    public int getPlayMode() {
+        if (mIMusicInterface != null) {
+            try {
+                return mIMusicInterface.getPlayMode();
+            } catch (RemoteException e) {
+                //do nothing
+            }
+        }
+        return MusicService.PLAY_MODE_ALL;
+    }
+
+    @Override
     public int getPlaybackState() {
         if (mIMusicInterface != null) {
             try {
@@ -261,29 +285,6 @@ public class MusicManagerService implements IMusicInterface {
             }
         }
         return Integer.MIN_VALUE;
-    }
-
-    @Override
-    public void setRepeatMode(int repeatMode) {
-        if (mIMusicInterface != null) {
-            try {
-                mIMusicInterface.setRepeatMode(repeatMode);
-            } catch (RemoteException e) {
-                //do nothing
-            }
-        }
-    }
-
-    @Override
-    public int getRepeatMode() {
-        if (mIMusicInterface != null) {
-            try {
-                return mIMusicInterface.getRepeatMode();
-            } catch (RemoteException e) {
-                //do nothing
-            }
-        }
-        return 0;
     }
 
     @Override

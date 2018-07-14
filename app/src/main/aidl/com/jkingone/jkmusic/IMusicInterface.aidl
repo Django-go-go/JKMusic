@@ -23,26 +23,16 @@ interface IMusicInterface {
 
     boolean isPlaying();
 
+    void setPlayMode(int playMode);
+
+    int getPlayMode();
+
       /**
        * Returns the current state of the player.
        *
        * @return One of the {@code STATE} constants defined in this interface.
        */
       int getPlaybackState();
-
-      /**
-       * Sets the {@link RepeatMode} to be used for playback.
-       *
-       * @param repeatMode A repeat mode.
-       */
-      void setRepeatMode(int repeatMode);
-
-      /**
-       * Returns the current {@link RepeatMode} used for playback.
-       *
-       * @return The current repeat mode.
-       */
-      int getRepeatMode();
 
       /**
        * Whether the player is currently loading the source.

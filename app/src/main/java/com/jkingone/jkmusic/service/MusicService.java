@@ -22,6 +22,7 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.jkingone.jkmusic.IMusicInterface;
+import com.jkingone.jkmusic.data.local.ContentHelper;
 import com.jkingone.jkmusic.entity.SongInfo;
 import com.jkingone.jkmusic.media.JExoPlayerHelper;
 
@@ -55,6 +56,10 @@ public class MusicService extends Service {
     public static final String MUSIC_DATA_CHANGE = "com.jkingone.jkmusic.service.data.change";
     public static final String MUSIC_DATA_INDEX = "com.jkingone.jkmusic.service.index";
 
+    public static final int PLAY_MODE_SHUFFLE = 0;
+    public static final int PLAY_MODE_ALL = Player.REPEAT_MODE_ALL;
+    public static final int PLAY_MODE_ONE = Player.REPEAT_MODE_ONE;
+
     private DataSource.Factory mFileDataSourceFactory;
     private DataSource.Factory mHttpDataSourceFactory;
     private SimpleExoPlayer player;
@@ -66,15 +71,14 @@ public class MusicService extends Service {
 
     private boolean isComplete = false;
 
+    private int mPlayMode = PLAY_MODE_ALL;
+
     @Override
     public void onCreate() {
         super.onCreate();
-        mFileDataSourceFactory = JExoPlayerHelper.instance(this).buildFileDataSourceFactory();
-        mHttpDataSourceFactory = JExoPlayerHelper.instance(this).buildHttpDataSourceFactory(false);
-        if (CookieHandler.getDefault() != DEFAULT_COOKIE_MANAGER) {
-            CookieHandler.setDefault(DEFAULT_COOKIE_MANAGER);
-        }
-        trackSelectorParameters = new DefaultTrackSelector.ParametersBuilder().build();
+
+        init();
+
         initializePlayer();
     }
 
@@ -96,6 +100,15 @@ public class MusicService extends Service {
         }
     }
 
+    private void init() {
+        mFileDataSourceFactory = JExoPlayerHelper.instance(this).buildFileDataSourceFactory();
+        mHttpDataSourceFactory = JExoPlayerHelper.instance(this).buildHttpDataSourceFactory(false);
+        if (CookieHandler.getDefault() != DEFAULT_COOKIE_MANAGER) {
+            CookieHandler.setDefault(DEFAULT_COOKIE_MANAGER);
+        }
+        trackSelectorParameters = new DefaultTrackSelector.ParametersBuilder().build();
+    }
+
     private void initializePlayer() {
         if (player == null) {
             TrackSelection.Factory trackSelectionFactory = new AdaptiveTrackSelection.Factory(JExoPlayerHelper.BANDWIDTH_METER);
@@ -104,7 +117,7 @@ public class MusicService extends Service {
             trackSelector.setParameters(trackSelectorParameters);
 
             player = ExoPlayerFactory.newSimpleInstance(this, trackSelector);
-            player.setRepeatMode(Player.REPEAT_MODE_ALL);
+            player.setRepeatMode(mPlayMode);
             player.addListener(new PlayerEventListener());
         }
 
@@ -134,7 +147,6 @@ public class MusicService extends Service {
         @Override
         public void onMediaPeriodReleased(int windowIndex, MediaSource.MediaPeriodId mediaPeriodId) {
             Log.i(TAG, "onMediaPeriodReleased: " + windowIndex);
-//            isComplete = true;
         }
 
         @Override
@@ -217,6 +229,12 @@ public class MusicService extends Service {
 
     private class MusicManager extends IMusicInterface.Stub {
 
+        MusicManager() {
+            if (mediaSource == null) {
+                prepareMediaSourcesInner(new ContentHelper(MusicService.this).getMusic());
+            }
+        }
+
         private MediaSource[] createMediaSources(Collection<SongInfo> songInfos) {
             if (songInfos == null) {
                 Log.i(TAG, "song is null");
@@ -273,6 +291,21 @@ public class MusicService extends Service {
             return mediaSource;
         }
 
+        private void prepareMediaSourcesInner(List<SongInfo> songInfos) {
+            if (songInfos == null) {
+                Log.i(TAG, "song is null");
+                return;
+            } else {
+                mSongInfos.clear();
+            }
+
+            mSongInfos.addAll(songInfos);
+
+            mediaSource = /*mediaSources.length == 1 ? mediaSources[0] : */new ConcatenatingMediaSource(createMediaSources(songInfos));
+
+            mediaSource.addEventListener(new Handler(player.getPlaybackLooper()), new DefaultMediaSourceEventListener());
+        }
+
         @Override
         public void prepareMediaSources(List<SongInfo> songInfos) throws RemoteException {
 
@@ -281,11 +314,7 @@ public class MusicService extends Service {
                 throw new IllegalArgumentException("song is null");
             }
 
-            mSongInfos.addAll(songInfos);
-
-            mediaSource = /*mediaSources.length == 1 ? mediaSources[0] : */new ConcatenatingMediaSource(createMediaSources(songInfos));
-
-            mediaSource.addEventListener(new Handler(player.getPlaybackLooper()), new DefaultMediaSourceEventListener());
+            prepareMediaSourcesInner(songInfos);
 
         }
 
@@ -406,7 +435,12 @@ public class MusicService extends Service {
         @Override
         public void play() throws RemoteException {
             checkPlayerNotNull();
-            if (mediaSource != null && getPlaybackState() == Player.STATE_READY) {
+
+            if (mediaSource != null) {
+                if (getPlaybackState() == Player.STATE_ENDED
+                        || getPlaybackState() == Player.STATE_IDLE) {
+                    player.prepare(mediaSource);
+                }
                 player.setPlayWhenReady(true);
             }
         }
@@ -414,9 +448,8 @@ public class MusicService extends Service {
         @Override
         public void playIndex(int index) throws RemoteException {
             checkPlayerNotNull();
-            player.setPlayWhenReady(true);
-            player.prepare(mediaSource);
             player.seekToDefaultPosition(index);
+            play();
         }
 
         @Override
@@ -429,14 +462,12 @@ public class MusicService extends Service {
         public void next() throws RemoteException {
             checkPlayerNotNull();
             seekToIndex(getNextWindowIndex(), 0);
-            play();
         }
 
         @Override
         public void previous() throws RemoteException {
             checkPlayerNotNull();
             seekToIndex(getPreviousWindowIndex(), 0);
-            play();
         }
 
         @Override
@@ -456,21 +487,27 @@ public class MusicService extends Service {
         }
 
         @Override
+        public void setPlayMode(int playMode) throws RemoteException {
+            checkPlayerNotNull();
+            if (playMode != PLAY_MODE_SHUFFLE) {
+                player.setRepeatMode(playMode);
+            } else {
+                player.setRepeatMode(PLAY_MODE_ALL);
+                player.setShuffleModeEnabled(true);
+            }
+            mPlayMode = playMode;
+        }
+
+        @Override
+        public int getPlayMode() throws RemoteException {
+            checkPlayerNotNull();
+            return mPlayMode;
+        }
+
+        @Override
         public int getPlaybackState() throws RemoteException {
             checkPlayerNotNull();
             return player.getPlaybackState();
-        }
-
-        @Override
-        public void setRepeatMode(int repeatMode) throws RemoteException {
-            checkPlayerNotNull();
-            player.setRepeatMode(repeatMode);
-        }
-
-        @Override
-        public int getRepeatMode() throws RemoteException {
-            checkPlayerNotNull();
-            return player.getRepeatMode();
         }
 
         @Override
@@ -483,12 +520,14 @@ public class MusicService extends Service {
         public void seekTo(long positionMs) throws RemoteException {
             checkPlayerNotNull();
             player.seekTo(positionMs);
+            play();
         }
 
         @Override
         public void seekToIndex(int windowIndex, long positionMs) throws RemoteException {
             checkPlayerNotNull();
             player.seekTo(windowIndex, positionMs);
+            play();
         }
 
         @Override
