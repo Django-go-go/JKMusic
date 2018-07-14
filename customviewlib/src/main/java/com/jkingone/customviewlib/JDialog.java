@@ -98,16 +98,6 @@ public class JDialog extends FrameLayout {
             }
         });
 
-//        mShadowEnterAnimation = new AlphaAnimation(0, 1);
-//        mShadowEnterAnimation.setDuration(200);
-//        mShadowEnterAnimation.setInterpolator(new DecelerateInterpolator());
-//        mShadowEnterAnimation.setFillAfter(true);
-//
-//        mShadowExitAnimation = new AlphaAnimation(1, 0);
-//        mShadowExitAnimation.setDuration(200);
-//        mShadowExitAnimation.setInterpolator(new DecelerateInterpolator());
-//        mShadowExitAnimation.setFillAfter(true);
-
         ViewConfiguration configuration = ViewConfiguration.get(context);
         mTouchSlop = configuration.getScaledTouchSlop();
         mMinYVelocity = configuration.getScaledMinimumFlingVelocity();
@@ -343,12 +333,12 @@ public class JDialog extends FrameLayout {
         if (mVelocityTracker == null) {
             mVelocityTracker = VelocityTracker.obtain();
         }
+        mVelocityTracker.addMovement(event);
+        mVelocityTracker.computeCurrentVelocity(1000);
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 mLastY = mDownY = event.getY();
-                mVelocityTracker.clear();
-                mVelocityTracker.addMovement(event);
                 break;
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
@@ -358,12 +348,29 @@ public class JDialog extends FrameLayout {
                 if (mLocation == Gravity.TOP) {
                     mScrollDistance = Math.abs(mContainerView.getBottom() - mOriginBottom);
                 }
-                if (mScrollDistance > SCROLL_DIS) {
+
+                float velocity = mVelocityTracker.getYVelocity();
+
+                boolean back = false;
+
+                if (mLocation == Gravity.BOTTOM) {
+                    back = velocity > 0 && Math.abs(velocity) > mMinYVelocity * 25;
+                }
+
+                if (mLocation == Gravity.TOP) {
+                    back = velocity < 0 && Math.abs(velocity) > mMinYVelocity * 25;
+                }
+
+                back = back || mScrollDistance > SCROLL_DIS;
+
+                if (back) {
                     scrollToBack();
                 } else {
                     scrollToCorrect();
                 }
+
                 if (mVelocityTracker != null) {
+                    mVelocityTracker.clear();
                     mVelocityTracker.recycle();
                     mVelocityTracker = null;
                 }
@@ -371,9 +378,6 @@ public class JDialog extends FrameLayout {
             case MotionEvent.ACTION_MOVE:
                 float curY = event.getY();
                 float touchDis = Math.abs(curY - mDownY);
-
-                mVelocityTracker.addMovement(event);
-                mVelocityTracker.computeCurrentVelocity(1000);
 
                 boolean canScroll = (mDownY <= curY && mLocation == Gravity.BOTTOM)
                         || (mDownY >= curY && mLocation == Gravity.TOP);
@@ -391,10 +395,6 @@ public class JDialog extends FrameLayout {
                     mContainerView.offsetTopAndBottom((int) dis);
                     mShadowView.setAlpha(mAlpha);
                     mLastY = curY;
-
-                    if (Math.abs(mVelocityTracker.getYVelocity()) >= mMinYVelocity * 25) {
-                        scrollToBack();
-                    }
                 }
                 break;
         }

@@ -212,33 +212,32 @@ public class PlayFragment extends LazyFragment {
     public void onMenuClick() {
         if (mJDialog == null) {
             mJDialog = new JDialog(mBaseActivity);
-//            mJDialog.setContentView(R.layout.test, Gravity.CENTER);
-//
-//            List<String> strings = new ArrayList<>();
-//            for (int i = 0; i < 10; i++) {
-//                strings.add("index : " + i);
-//            }
-//            final ListView listView = new ListView(mBaseActivity);
-//            listView.setAdapter(new ArrayAdapter<>(mBaseActivity, android.R.layout.simple_list_item_1, strings));
-//            mJDialog.setContentView(listView);
-//            mJDialog.setCheckScroll(new JDialog.CheckScroll() {
-//                @Override
-//                public boolean canScrollVertically() {
-//                    return listView.canScrollVertically(-1);
-//                }
-//            });
 
-            createDialogView();
-            mJDialog.setContentView(dialogView);
+            List<String> strings = new ArrayList<>();
+            for (int i = 0; i < 10; i++) {
+                strings.add("index : " + i);
+            }
+            final ListView listView = new ListView(mBaseActivity);
+            listView.setAdapter(new ArrayAdapter<>(mBaseActivity, android.R.layout.simple_list_item_1, strings));
+            mJDialog.setContentView(listView);
             mJDialog.setCheckScroll(new JDialog.CheckScroll() {
                 @Override
                 public boolean canScrollVertically() {
-                    return mRecyclerView.canScrollVertically(-1);
+                    return listView.canScrollVertically(-1);
                 }
             });
+
+//            createDialogView();
+//            mJDialog.setContentView(dialogView);
+//            mJDialog.setCheckScroll(new JDialog.CheckScroll() {
+//                @Override
+//                public boolean canScrollVertically() {
+//                    return mRecyclerView.canScrollVertically(-1);
+//                }
+//            });
         }
-        mPlayListAdapter.setPlayPosition(mBaseActivity.getMusicManagerService().getCurrentWindowIndex());
-        mRecyclerView.scrollToPosition(mBaseActivity.getMusicManagerService().getCurrentWindowIndex());
+//        mPlayListAdapter.setPlayPosition(mBaseActivity.getMusicManagerService().getCurrentWindowIndex());
+//        mRecyclerView.scrollToPosition(mBaseActivity.getMusicManagerService().getCurrentWindowIndex());
         mJDialog.show();
     }
 
