@@ -10,6 +10,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.jkingone.jkmusic.MusicApi;
+import com.jkingone.jkmusic.api.TopListApi;
 import com.jkingone.jkmusic.entity.NetSong;
 import com.jkingone.jkmusic.entity.SearchSong;
 import com.jkingone.jkmusic.entity.Song;
@@ -39,7 +40,7 @@ public final class RemoteData {
 
     public Call<List<TopList>> getTopList() {
         Retrofit retrofit = createRetrofit(convertFactoryForTopList());
-        MusicApi api = retrofit.create(MusicApi.class);
+        TopListApi api = retrofit.create(TopListApi.class);
         return api.getTopList();
     }
 
@@ -57,7 +58,7 @@ public final class RemoteData {
 
     public Call<List<Song>> getSongFromTopList(int type) {
         Retrofit retrofit = createRetrofit(convertFactoryForSongFromTopList());
-        MusicApi api = retrofit.create(MusicApi.class);
+        TopListApi api = retrofit.create(TopListApi.class);
         return api.getSongFromTopList(type);
     }
 
@@ -67,10 +68,10 @@ public final class RemoteData {
         return api.getSong(id);
     }
 
-    public Call<List<SongList>> getHotSongList(int num) {
+    public Call<List<SongList>> getHotSongList() {
         Retrofit retrofit = createRetrofit(convertFactoryForHotSongList());
         MusicApi api = retrofit.create(MusicApi.class);
-        return api.getHotSongList(num);
+        return api.getHotSongList();
     }
 
     public Call<List<SongList>> getTagSongList(String tag) {

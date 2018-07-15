@@ -14,5 +14,13 @@ public abstract class BaseFragment<P extends BasePresenter> extends LazyFragment
         mPresenter = createPresenter();
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mPresenter != null) {
+            mPresenter.detachView();
+        }
+    }
+
     public abstract P createPresenter();
 }

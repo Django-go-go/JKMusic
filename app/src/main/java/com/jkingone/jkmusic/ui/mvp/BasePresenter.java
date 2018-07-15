@@ -18,7 +18,9 @@ public abstract class BasePresenter<V extends BaseContract.BaseView, M extends B
     }
 
     protected void attachView(V view){
-        mViewRef = new WeakReference<V>(view);
+        if (view != null) {
+            mViewRef = new WeakReference<V>(view);
+        }
     }
 
     protected V getView(){

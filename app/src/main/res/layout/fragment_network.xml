@@ -9,9 +9,9 @@
     <com.jkingone.customviewlib.PagerSlidingTabStrip
         android:id="@+id/pagerStrip"
         android:background="@color/colorPrimary"
-        app:containerPadding="2dp"
+        app:containerPadding="1dp"
         app:tabPadding="2dp"
-        app:tabTextSize="16sp"
+        app:tabTextSize="14sp"
         app:tabTextColor="@color/white"
         app:indicatorHeight="1dp"
         app:indicatorColor="@color/white"

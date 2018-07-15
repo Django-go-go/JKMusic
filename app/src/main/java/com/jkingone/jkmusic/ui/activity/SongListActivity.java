@@ -92,7 +92,7 @@ public class SongListActivity extends BaseActivity<SongListPresenter> implements
     private void initTopList() {
         mPresenter.getSongFromTopList(Integer.parseInt(mTopList.getType()));
         Picasso.get()
-                .load(mTopList.getPic_s192())
+                .load(mTopList.getPicS192())
                 .resize(ScreenUtils.getScreenWidth(this), DensityUtils.dp2px(this, 256))
                 .centerCrop()
                 .into(mImageViewCover);

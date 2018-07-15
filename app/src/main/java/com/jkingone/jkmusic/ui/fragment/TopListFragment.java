@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.jkingone.commonlib.Utils.DensityUtils;
 import com.jkingone.commonlib.Utils.ScreenUtils;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.adapter.HeadAndFootRecycleAdapter;
@@ -25,6 +27,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -61,13 +64,13 @@ public class TopListFragment extends BaseFragment<TopListFragPresenter> implemen
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.recycle_universal, container, false);
 
         mUnbinder = ButterKnife.bind(this, view);
 
-        mRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 6, GridLayoutManager.VERTICAL, false));
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         mRecyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
             @Override
             public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
@@ -102,9 +105,7 @@ public class TopListFragment extends BaseFragment<TopListFragPresenter> implemen
         return new TopListFragPresenter(this);
     }
 
-    class TopListAdapter extends HeadAndFootRecycleAdapter {
-
-        private static final int TYPE_CONTENT = 2;
+    class TopListAdapter extends RecyclerView.Adapter<TopListAdapter.VH> {
 
         private LayoutInflater mInflater;
         private Context mContext;
@@ -116,97 +117,60 @@ public class TopListFragment extends BaseFragment<TopListFragPresenter> implemen
             mList = list;
         }
 
+        @NonNull
         @Override
-        public RecyclerView.ViewHolder onCreateContentViewHolder(ViewGroup parent, int viewType) {
-            switch (viewType) {
+        public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            return new VH(mInflater.inflate(R.layout.item_grid_toplist, parent, false));
+        }
 
-                case TYPE_CONTENT:
-                    return new VH(mInflater.inflate(R.layout.item_grid_toplist, parent, false));
-
-                default:
-                    throw new IllegalArgumentException("no Type");
+        @Override
+        public void onBindViewHolder(@NonNull VH vh, final int position) {
+            TopList topList = mList.get(position);
+            List<TopList.Content> contents = topList.getContent();
+            List<String> strings = new ArrayList<>();
+            for (TopList.Content content : contents) {
+                strings.add(content.getTitle() + " - " + content.getTitle());
             }
-        }
 
-        @Override
-        public int getItemContentCount() {
-            return mList.size();
-        }
-
-        @Override
-        public int getItemContentViewType(int position) {
-            return TYPE_CONTENT;
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position) {
-            if (holder instanceof VH) {
-                VH vh = (VH) holder;
-                TopList topList = mList.get(position);
-                vh.textView.setText(topList.getName());
-                vh.imageView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (mList.get(position) != null){
-                            Intent intent = new Intent(mContext, SongListActivity.class);
-                            intent.putExtra(SongListActivity.TYPE_TOPLIST, mList.get(position));
-                            startActivity(intent);
-                        }
-                    }
-                });
-
-                int w = ScreenUtils.getScreenWidth(mContext);
-
-                int h = w / 3;
-
-                int pos = position + 1;
-
-                if (pos % 5 == 1 || pos % 5 == 2) {
-                    if (topList.getPic_s210() != null) {
-                        Picasso.get().load(topList.getPic_s210())
-                                .resize(w / 3 * 2, h)
-                                .centerCrop()
-                                .into(vh.imageView);
-                    }
-                } else {
-                    if (topList.getPic_s260() != null) {
-                        Picasso.get().load(topList.getPic_s260())
-                                .resize(w / 3, h)
-                                .centerCrop()
-                                .into(vh.imageView);
-                    }
+            vh.textView1.setText(strings.get(0));
+            vh.textView2.setText(strings.get(1));
+            vh.textView3.setText(strings.get(2));
+            vh.textView4.setText(strings.get(3));
+            vh.imageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+//                    if (mList.get(position) != null){
+//                        Intent intent = new Intent(mContext, SongListActivity.class);
+//                        intent.putExtra(SongListActivity.TYPE_TOPLIST, mList.get(position));
+//                        startActivity(intent);
+//                    }
                 }
-            }
+            });
+
+            int px = DensityUtils.dp2px(mContext, 128);
+
+            Picasso.get().load(topList.getPicS260())
+                    .resize(px, px)
+                    .centerCrop()
+                    .into(vh.imageView);
         }
 
         @Override
-        public void onAttachedToRecyclerView(RecyclerView recyclerView) {
-            super.onAttachedToRecyclerView(recyclerView);
-            RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
-            if (layoutManager instanceof GridLayoutManager){
-                GridLayoutManager manager = (GridLayoutManager) layoutManager;
-                manager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
-                    @Override
-                    public int getSpanSize(int position) {
-                        if (getItemViewType(position) == TYPE_CONTENT){
-                            int pos = position + 1;
-                            if (pos % 5 == 1 || pos % 5 == 2) {
-                                return 3;
-                            } else {
-                                return 2;
-                            }
-                        }
-                        return 6;
-                    }
-                });
-            }
+        public int getItemCount() {
+            return mList.size();
         }
 
         class VH extends RecyclerView.ViewHolder {
             @BindView(R.id.iv_item)
             ImageView imageView;
-            @BindView(R.id.tv_item)
-            TextView textView;
+            @BindView(R.id.tv_item_1)
+            TextView textView1;
+            @BindView(R.id.tv_item_2)
+            TextView textView2;
+            @BindView(R.id.tv_item_3)
+            TextView textView3;
+            @BindView(R.id.tv_item_4)
+            TextView textView4;
 
             VH(View itemView) {
                 super(itemView);

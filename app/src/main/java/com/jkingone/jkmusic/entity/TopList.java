@@ -3,37 +3,169 @@ package com.jkingone.jkmusic.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.annotations.SerializedName;
+
+import java.util.List;
+
 /**
  * Created by Administrator on 2017/9/8.
  */
 
+//public class TopList implements Parcelable {
+//    private String name;
+//    private String type;
+//    private String comment;
+//    private String picS210;
+//    private String picS260;
+//    private String picS192;
+//    private String picS444;
+//
+//    public TopList(String name, String type, String comment, String picS210, String picS260, String picS192, String picS444) {
+//        this.name = name;
+//        this.type = type;
+//        this.comment = comment;
+//        this.picS210 = picS210;
+//        this.picS260 = picS260;
+//        this.picS192 = picS192;
+//        this.picS444 = picS444;
+//    }
+//
+//    protected TopList(Parcel in) {
+//        name = in.readString();
+//        type = in.readString();
+//        comment = in.readString();
+//        picS210 = in.readString();
+//        picS260 = in.readString();
+//        picS192 = in.readString();
+//        picS444 = in.readString();
+//    }
+//
+//    public static final Creator<TopList> CREATOR = new Creator<TopList>() {
+//        @Override
+//        public TopList createFromParcel(Parcel in) {
+//            return new TopList(in);
+//        }
+//
+//        @Override
+//        public TopList[] newArray(int size) {
+//            return new TopList[size];
+//        }
+//    };
+//
+//    public String getPicS192() {
+//        return picS192;
+//    }
+//
+//    public void setPicS192(String picS192) {
+//        this.picS192 = picS192;
+//    }
+//
+//    public String getPicS444() {
+//        return picS444;
+//    }
+//
+//    public void setPicS444(String picS444) {
+//        this.picS444 = picS444;
+//    }
+//
+//    public String getName() {
+//        return name;
+//    }
+//
+//    public void setName(String name) {
+//        this.name = name;
+//    }
+//
+//    public String getType() {
+//        return type;
+//    }
+//
+//    public void setType(String type) {
+//        this.type = type;
+//    }
+//
+//    public String getComment() {
+//        return comment;
+//    }
+//
+//    public void setComment(String comment) {
+//        this.comment = comment;
+//    }
+//
+//    public String getPicS210() {
+//        return picS210;
+//    }
+//
+//    public void setPicS210(String picS210) {
+//        this.picS210 = picS210;
+//    }
+//
+//    public String getPicS260() {
+//        return picS260;
+//    }
+//
+//    public void setPicS260(String picS260) {
+//        this.picS260 = picS260;
+//    }
+//
+//    @Override
+//    public String toString() {
+//        return "TopList{" +
+//                "name='" + name + '\'' +
+//                ", type='" + type + '\'' +
+//                ", comment='" + comment + '\'' +
+//                ", picS210='" + picS210 + '\'' +
+//                ", picS260='" + picS260 + '\'' +
+//                ", picS192='" + picS192 + '\'' +
+//                ", picS444='" + picS444 + '\'' +
+//                '}';
+//    }
+//
+//    @Override
+//    public int describeContents() {
+//        return 0;
+//    }
+//
+//    @Override
+//    public void writeToParcel(Parcel dest, int flags) {
+//        dest.writeString(name);
+//        dest.writeString(type);
+//        dest.writeString(comment);
+//        dest.writeString(picS210);
+//        dest.writeString(picS260);
+//        dest.writeString(picS192);
+//        dest.writeString(picS444);
+//    }
+//
+//
+//}
+
+
 public class TopList implements Parcelable {
+
     private String name;
     private String type;
+    private int count;
     private String comment;
-    private String pic_s210;
-    private String pic_s260;
-    private String pic_s192;
-    private String pic_s444;
-
-    public TopList(String name, String type, String comment, String pic_s210, String pic_s260, String pic_s192, String pic_s444) {
-        this.name = name;
-        this.type = type;
-        this.comment = comment;
-        this.pic_s210 = pic_s210;
-        this.pic_s260 = pic_s260;
-        this.pic_s192 = pic_s192;
-        this.pic_s444 = pic_s444;
-    }
+    @SerializedName("pic_s192")
+    private String picS192;
+    @SerializedName("pic_s444")
+    private String picS444;
+    @SerializedName("pic_s260")
+    private String picS260;
+    @SerializedName("pic_s210")
+    private String picS210;
+    private List<Content> content;
 
     protected TopList(Parcel in) {
         name = in.readString();
         type = in.readString();
+        count = in.readInt();
         comment = in.readString();
-        pic_s210 = in.readString();
-        pic_s260 = in.readString();
-        pic_s192 = in.readString();
-        pic_s444 = in.readString();
+        picS192 = in.readString();
+        picS444 = in.readString();
+        picS260 = in.readString();
+        picS210 = in.readString();
     }
 
     public static final Creator<TopList> CREATOR = new Creator<TopList>() {
@@ -48,73 +180,75 @@ public class TopList implements Parcelable {
         }
     };
 
-    public String getPic_s192() {
-        return pic_s192;
+    public void setName(String name) {
+        this.name = name;
     }
-
-    public void setPic_s192(String pic_s192) {
-        this.pic_s192 = pic_s192;
-    }
-
-    public String getPic_s444() {
-        return pic_s444;
-    }
-
-    public void setPic_s444(String pic_s444) {
-        this.pic_s444 = pic_s444;
-    }
-
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getType() {
-        return type;
-    }
 
     public void setType(String type) {
         this.type = type;
     }
-
-    public String getComment() {
-        return comment;
+    public String getType() {
+        return type;
     }
+
+
+    public void setCount(int count) {
+        this.count = count;
+    }
+    public int getCount() {
+        return count;
+    }
+
 
     public void setComment(String comment) {
         this.comment = comment;
     }
-
-    public String getPic_s210() {
-        return pic_s210;
+    public String getComment() {
+        return comment;
     }
 
-    public void setPic_s210(String pic_s210) {
-        this.pic_s210 = pic_s210;
+
+    public void setPicS192(String picS192) {
+        this.picS192 = picS192;
+    }
+    public String getPicS192() {
+        return picS192;
     }
 
-    public String getPic_s260() {
-        return pic_s260;
+
+    public void setPicS444(String picS444) {
+        this.picS444 = picS444;
+    }
+    public String getPicS444() {
+        return picS444;
     }
 
-    public void setPic_s260(String pic_s260) {
-        this.pic_s260 = pic_s260;
+
+    public void setPicS260(String picS260) {
+        this.picS260 = picS260;
+    }
+    public String getPicS260() {
+        return picS260;
     }
 
-    @Override
-    public String toString() {
-        return "TopList{" +
-                "name='" + name + '\'' +
-                ", type='" + type + '\'' +
-                ", comment='" + comment + '\'' +
-                ", pic_s210='" + pic_s210 + '\'' +
-                ", pic_s260='" + pic_s260 + '\'' +
-                ", pic_s192='" + pic_s192 + '\'' +
-                ", pic_s444='" + pic_s444 + '\'' +
-                '}';
+
+    public void setPicS210(String picS210) {
+        this.picS210 = picS210;
+    }
+    public String getPicS210() {
+        return picS210;
+    }
+
+
+    public void setContent(List<Content> content) {
+        this.content = content;
+    }
+    public List<Content> getContent() {
+        return content;
     }
 
     @Override
@@ -126,10 +260,65 @@ public class TopList implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(name);
         dest.writeString(type);
+        dest.writeInt(count);
         dest.writeString(comment);
-        dest.writeString(pic_s210);
-        dest.writeString(pic_s260);
-        dest.writeString(pic_s192);
-        dest.writeString(pic_s444);
+        dest.writeString(picS192);
+        dest.writeString(picS444);
+        dest.writeString(picS260);
+        dest.writeString(picS210);
     }
+
+    public static class Content implements Parcelable {
+
+        private String title;
+        private String author;
+
+        protected Content(Parcel in) {
+            title = in.readString();
+            author = in.readString();
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(title);
+            dest.writeString(author);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        public static final Creator<Content> CREATOR = new Creator<Content>() {
+            @Override
+            public Content createFromParcel(Parcel in) {
+                return new Content(in);
+            }
+
+            @Override
+            public Content[] newArray(int size) {
+                return new Content[size];
+            }
+        };
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+        public String getTitle() {
+            return title;
+        }
+
+        public void setAuthor(String author) {
+            this.author = author;
+        }
+        public String getAuthor() {
+            return author;
+        }
+
+    }
+
 }
+
+
+
+
