@@ -10,7 +10,11 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.jkingone.jkmusic.MusicApi;
+import com.jkingone.jkmusic.UrlString;
+import com.jkingone.jkmusic.api.AlbumApi;
+import com.jkingone.jkmusic.api.SongListApi;
 import com.jkingone.jkmusic.api.TopListApi;
+import com.jkingone.jkmusic.entity.AlbumList;
 import com.jkingone.jkmusic.entity.NetSong;
 import com.jkingone.jkmusic.entity.SearchSong;
 import com.jkingone.jkmusic.entity.Song;
@@ -38,6 +42,12 @@ import retrofit2.Retrofit;
 public final class RemoteData {
     public static final String TAG = "RemoteData";
 
+    public Call<List<AlbumList>> getAlbumList(int offset, int limit) {
+        Retrofit retrofit = createRetrofit(convertFactoryForAlbumList());
+        AlbumApi api = retrofit.create(AlbumApi.class);
+        return api.getAlbumList(offset, limit);
+    }
+
     public Call<List<TopList>> getTopList() {
         Retrofit retrofit = createRetrofit(convertFactoryForTopList());
         TopListApi api = retrofit.create(TopListApi.class);
@@ -46,13 +56,13 @@ public final class RemoteData {
 
     public Call<List<SongList>> getSongList(int size, int no) {
         Retrofit retrofit = createRetrofit(convertFactoryForSongList());
-        MusicApi api = retrofit.create(MusicApi.class);
+        SongListApi api = retrofit.create(SongListApi.class);
         return api.getSongList(size, no);
     }
 
     public Call<List<Song>> getSongFromSongList(String id) {
         Retrofit retrofit = createRetrofit(convertFactoryForSongFromSongList());
-        MusicApi api = retrofit.create(MusicApi.class);
+        SongListApi api = retrofit.create(SongListApi.class);
         return api.getSongFromSongList(id);
     }
 
@@ -70,13 +80,13 @@ public final class RemoteData {
 
     public Call<List<SongList>> getHotSongList() {
         Retrofit retrofit = createRetrofit(convertFactoryForHotSongList());
-        MusicApi api = retrofit.create(MusicApi.class);
+        SongListApi api = retrofit.create(SongListApi.class);
         return api.getHotSongList();
     }
 
     public Call<List<SongList>> getTagSongList(String tag) {
         Retrofit retrofit = createRetrofit(convertFactoryForTagSongList());
-        MusicApi api = retrofit.create(MusicApi.class);
+        SongListApi api = retrofit.create(SongListApi.class);
         return api.getTagSongList(tag);
     }
 
@@ -460,6 +470,36 @@ public final class RemoteData {
                         List<String> banners = new ArrayList<>();
                         banners.add(s);
                         return banners;
+                    }
+                };
+            }
+        };
+    }
+
+    private Converter.Factory convertFactoryForAlbumList() {
+        return new Converter.Factory() {
+            @Nullable
+            @Override
+            public Converter<ResponseBody, ?> responseBodyConverter(Type type, final Annotation[] annotations, Retrofit retrofit) {
+                return new Converter<ResponseBody, List<AlbumList>>() {
+                    @Override
+                    public List<AlbumList> convert(@NonNull ResponseBody value) throws IOException {
+                        Gson gson = new Gson();
+                        String s = value.string();
+                        JsonArray array = new JsonParser().parse(s)
+                                .getAsJsonObject()
+                                .getAsJsonObject("plaze_album_list")
+                                .getAsJsonObject("RM").getAsJsonObject("album_list")
+                                .getAsJsonArray("list");
+
+                        List<AlbumList> albumLists = new ArrayList<>();
+                        Log.i(TAG, "convert: " + s);
+                        for (JsonElement song : array) {
+                            if (song != null) {
+                                albumLists.add(gson.fromJson(song, AlbumList.class));
+                            }
+                        }
+                        return albumLists;
                     }
                 };
             }

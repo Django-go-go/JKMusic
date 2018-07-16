@@ -1,4 +1,4 @@
-package com.jkingone.jkmusic.data.remote;
+package com.jkingone.jkmusic;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;

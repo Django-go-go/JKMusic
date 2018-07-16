@@ -93,15 +93,6 @@ public class ClassifySongListActivity extends BaseActivity<ClassifySongListPrese
         });
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mRecyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
-            @Override
-            public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-                outRect.left = 8;
-                outRect.right = 8;
-                outRect.top = 8;
-                outRect.bottom = 8;
-            }
-        });
 
         mImageView_back.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -186,9 +177,9 @@ public class ClassifySongListActivity extends BaseActivity<ClassifySongListPrese
             holder.textView_name.setText("标签: " + mList.get(position).getTag());
             holder.textView_title.setText(mList.get(position).getTitle());
             holder.textView_desc.setText(mList.get(position).getDesc());
-            if (mList.get(position).getPic_300() != null) {
+            if (mList.get(position).getPic300() != null) {
                 Picasso.get()
-                        .load(mList.get(position).getPic_300())
+                        .load(mList.get(position).getPic300())
                         .placeholder(R.drawable.music)
                         .resize(DensityUtils.dp2px(mContext, 128), DensityUtils.dp2px(mContext, 128))
                         .centerCrop()

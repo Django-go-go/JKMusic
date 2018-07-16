@@ -18,7 +18,7 @@ public class SongInfo implements Parcelable {
     private long size; // 歌曲大小 8
     private String url; // 歌曲路径 5
     private String picUrl;
-    private int type = Constant.TYPE_LOCAL;
+    private int type;
 
     public SongInfo() {
         super();

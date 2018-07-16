@@ -1,4 +1,4 @@
-package com.jkingone.jkmusic.data.remote;
+package com.jkingone.jkmusic;
 
 /**
  * Created by Administrator on 2017/9/8.
@@ -6,58 +6,12 @@ package com.jkingone.jkmusic.data.remote;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 
 public class UrlString {
 
     public static final String FORMAT = "json";
     public static final String BASE = "http://tingapi.ting.baidu.com/v1/restserver/ting?from=android&version=5.6.5.6&format=" + FORMAT;
 
-    /**
-     * 唱片专辑
-     *
-     * @author Sanron
-     */
-    public static class Album {
-
-        /**
-         * 推荐唱片
-         *
-         * @param offset 偏移量
-         * @param limmit 获取数量
-         * @return
-         */
-        public static String recommendAlbum(int offset, int limmit) {
-            StringBuffer sb = new StringBuffer(BASE);
-            sb.append("&method=").append("baidu.ting.plaza.getRecommendAlbum")
-                    .append("&offset=").append(offset)
-                    .append("&limit=").append(limmit);
-            return sb.toString();
-        }
-
-        /**
-         * 唱片信息
-         *
-         * @param albumid 唱片id
-         * @return
-         */
-        public static String albumInfo(String albumid) {
-            StringBuffer sb = new StringBuffer(BASE);
-            sb.append("&method=").append("baidu.ting.album.getAlbumInfo")
-                    .append("&album_id=").append(albumid);
-            return sb.toString();
-        }
-    }
 
 
     /**

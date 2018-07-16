@@ -1,0 +1,528 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:padding="6dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <FrameLayout
+                android:id="@+id/frame_china_man"
+                android:background="@drawable/selector_rect_widget"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize">
+
+                <TextView
+                    android:textColor="@color/black"
+                    android:padding="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start|center_vertical"
+                    android:gravity="center_vertical"
+                    android:text="华语男歌手" />
+
+                <ImageView
+                    android:padding="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|center_vertical"
+                    android:src="@drawable/music" />
+
+                <View
+                    android:paddingStart="4dp"
+                    android:paddingEnd="4dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.2dp"
+                    android:layout_gravity="bottom"
+                    android:background="@color/gray" />
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/frame_china_woman"
+                android:background="@drawable/selector_rect_widget"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize">
+
+                <TextView
+                    android:textColor="@color/black"
+                    android:padding="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start|center_vertical"
+                    android:gravity="center_vertical"
+                    android:text="华语女歌手" />
+
+                <ImageView
+                    android:padding="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|center_vertical"
+                    android:src="@drawable/music" />
+
+                <View
+                    android:paddingStart="4dp"
+                    android:paddingEnd="4dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.2dp"
+                    android:layout_gravity="bottom"
+                    android:background="@color/gray" />
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/frame_china_group"
+                android:background="@drawable/selector_rect_widget"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize">
+
+                <TextView
+                    android:textColor="@color/black"
+                    android:padding="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start|center_vertical"
+                    android:gravity="center_vertical"
+                    android:text="华语组合" />
+
+                <ImageView
+                    android:padding="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|center_vertical"
+                    android:src="@drawable/music" />
+
+                <View
+                    android:paddingStart="4dp"
+                    android:paddingEnd="4dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.2dp"
+                    android:layout_gravity="bottom"
+                    android:background="@color/gray" />
+
+            </FrameLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:padding="6dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <FrameLayout
+                android:id="@+id/frame_un_man"
+                android:background="@drawable/selector_rect_widget"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize">
+
+                <TextView
+                    android:textColor="@color/black"
+                    android:padding="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start|center_vertical"
+                    android:gravity="center_vertical"
+                    android:text="欧美男歌手" />
+
+                <ImageView
+                    android:padding="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|center_vertical"
+                    android:src="@drawable/music" />
+
+                <View
+                    android:paddingStart="4dp"
+                    android:paddingEnd="4dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.2dp"
+                    android:layout_gravity="bottom"
+                    android:background="@color/gray" />
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/frame_un_woman"
+                android:background="@drawable/selector_rect_widget"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize">
+
+                <TextView
+                    android:textColor="@color/black"
+                    android:padding="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start|center_vertical"
+                    android:gravity="center_vertical"
+                    android:text="欧美女歌手" />
+
+                <ImageView
+                    android:padding="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|center_vertical"
+                    android:src="@drawable/music" />
+
+                <View
+                    android:paddingStart="4dp"
+                    android:paddingEnd="4dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.2dp"
+                    android:layout_gravity="bottom"
+                    android:background="@color/gray" />
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/frame_un_group"
+                android:background="@drawable/selector_rect_widget"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize">
+
+                <TextView
+                    android:textColor="@color/black"
+                    android:padding="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start|center_vertical"
+                    android:gravity="center_vertical"
+                    android:text="欧美组合" />
+
+                <ImageView
+                    android:padding="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|center_vertical"
+                    android:src="@drawable/music" />
+
+                <View
+                    android:paddingStart="4dp"
+                    android:paddingEnd="4dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.2dp"
+                    android:layout_gravity="bottom"
+                    android:background="@color/gray" />
+
+            </FrameLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:padding="6dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <FrameLayout
+                android:id="@+id/frame_japan_man"
+                android:background="@drawable/selector_rect_widget"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize">
+
+                <TextView
+                    android:textColor="@color/black"
+                    android:padding="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start|center_vertical"
+                    android:gravity="center_vertical"
+                    android:text="日本男歌手" />
+
+                <ImageView
+                    android:padding="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|center_vertical"
+                    android:src="@drawable/music" />
+
+                <View
+                    android:paddingStart="4dp"
+                    android:paddingEnd="4dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.2dp"
+                    android:layout_gravity="bottom"
+                    android:background="@color/gray" />
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/frame_japan_woman"
+                android:background="@drawable/selector_rect_widget"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize">
+
+                <TextView
+                    android:textColor="@color/black"
+                    android:padding="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start|center_vertical"
+                    android:gravity="center_vertical"
+                    android:text="日本女歌手" />
+
+                <ImageView
+                    android:padding="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|center_vertical"
+                    android:src="@drawable/music" />
+
+                <View
+                    android:paddingStart="4dp"
+                    android:paddingEnd="4dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.2dp"
+                    android:layout_gravity="bottom"
+                    android:background="@color/gray" />
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/frame_japan_group"
+                android:background="@drawable/selector_rect_widget"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize">
+
+                <TextView
+                    android:textColor="@color/black"
+                    android:padding="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start|center_vertical"
+                    android:gravity="center_vertical"
+                    android:text="日本组合" />
+
+                <ImageView
+                    android:padding="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|center_vertical"
+                    android:src="@drawable/music" />
+
+                <View
+                    android:paddingStart="4dp"
+                    android:paddingEnd="4dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.2dp"
+                    android:layout_gravity="bottom"
+                    android:background="@color/gray" />
+
+            </FrameLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:padding="6dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <FrameLayout
+                android:id="@+id/frame_korea_man"
+                android:background="@drawable/selector_rect_widget"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize">
+
+                <TextView
+                    android:textColor="@color/black"
+                    android:padding="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start|center_vertical"
+                    android:gravity="center_vertical"
+                    android:text="棒子男歌手" />
+
+                <ImageView
+                    android:padding="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|center_vertical"
+                    android:src="@drawable/music" />
+
+                <View
+                    android:paddingStart="4dp"
+                    android:paddingEnd="4dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.2dp"
+                    android:layout_gravity="bottom"
+                    android:background="@color/gray" />
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/frame_korea_woman"
+                android:background="@drawable/selector_rect_widget"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize">
+
+                <TextView
+                    android:textColor="@color/black"
+                    android:padding="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start|center_vertical"
+                    android:gravity="center_vertical"
+                    android:text="棒子女歌手" />
+
+                <ImageView
+                    android:padding="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|center_vertical"
+                    android:src="@drawable/music" />
+
+                <View
+                    android:paddingStart="4dp"
+                    android:paddingEnd="4dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.2dp"
+                    android:layout_gravity="bottom"
+                    android:background="@color/gray" />
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/frame_korea_group"
+                android:background="@drawable/selector_rect_widget"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize">
+
+                <TextView
+                    android:textColor="@color/black"
+                    android:padding="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start|center_vertical"
+                    android:gravity="center_vertical"
+                    android:text="棒子组合" />
+
+                <ImageView
+                    android:padding="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|center_vertical"
+                    android:src="@drawable/music" />
+
+                <View
+                    android:paddingStart="4dp"
+                    android:paddingEnd="4dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.2dp"
+                    android:layout_gravity="bottom"
+                    android:background="@color/gray" />
+
+            </FrameLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:padding="6dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <FrameLayout
+                android:id="@+id/frame_other_man"
+                android:background="@drawable/selector_rect_widget"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize">
+
+                <TextView
+                    android:textColor="@color/black"
+                    android:padding="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start|center_vertical"
+                    android:gravity="center_vertical"
+                    android:text="其他男歌手" />
+
+                <ImageView
+                    android:padding="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|center_vertical"
+                    android:src="@drawable/music" />
+
+                <View
+                    android:paddingStart="4dp"
+                    android:paddingEnd="4dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.2dp"
+                    android:layout_gravity="bottom"
+                    android:background="@color/gray" />
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/frame_other_woman"
+                android:background="@drawable/selector_rect_widget"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize">
+
+                <TextView
+                    android:textColor="@color/black"
+                    android:padding="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start|center_vertical"
+                    android:gravity="center_vertical"
+                    android:text="其他女歌手" />
+
+                <ImageView
+                    android:padding="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|center_vertical"
+                    android:src="@drawable/music" />
+
+                <View
+                    android:paddingStart="4dp"
+                    android:paddingEnd="4dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.2dp"
+                    android:layout_gravity="bottom"
+                    android:background="@color/gray" />
+
+            </FrameLayout>
+
+            <FrameLayout
+                android:id="@+id/frame_other_group"
+                android:background="@drawable/selector_rect_widget"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize">
+
+                <TextView
+                    android:textColor="@color/black"
+                    android:padding="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start|center_vertical"
+                    android:gravity="center_vertical"
+                    android:text="其他组合" />
+
+                <ImageView
+                    android:padding="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|center_vertical"
+                    android:src="@drawable/music" />
+
+                <View
+                    android:paddingStart="4dp"
+                    android:paddingEnd="4dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.2dp"
+                    android:layout_gravity="bottom"
+                    android:background="@color/gray" />
+
+            </FrameLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+</android.support.v4.widget.NestedScrollView>

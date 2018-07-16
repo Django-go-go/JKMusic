@@ -1,12 +1,10 @@
 package com.jkingone.jkmusic.ui.fragment;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -16,18 +14,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.jkingone.commonlib.Utils.DensityUtils;
-import com.jkingone.commonlib.Utils.ScreenUtils;
 import com.jkingone.jkmusic.R;
-import com.jkingone.jkmusic.adapter.HeadAndFootRecycleAdapter;
 import com.jkingone.jkmusic.entity.TopList;
-import com.jkingone.jkmusic.ui.activity.SongListActivity;
 import com.jkingone.jkmusic.ui.mvp.contract.TopListFragContract;
 import com.jkingone.jkmusic.ui.mvp.TopListFragPresenter;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -71,15 +65,6 @@ public class TopListFragment extends BaseFragment<TopListFragPresenter> implemen
         mUnbinder = ButterKnife.bind(this, view);
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        mRecyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
-            @Override
-            public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-                outRect.right = 8;
-                outRect.top = 8;
-                outRect.left = 8;
-                outRect.bottom = 8;
-            }
-        });
 
         return view;
     }
@@ -120,7 +105,7 @@ public class TopListFragment extends BaseFragment<TopListFragPresenter> implemen
         @NonNull
         @Override
         public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new VH(mInflater.inflate(R.layout.item_grid_toplist, parent, false));
+            return new VH(mInflater.inflate(R.layout.item_list_toplist, parent, false));
         }
 
         @Override

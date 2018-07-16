@@ -10,6 +10,11 @@ import retrofit2.http.GET;
 import retrofit2.http.Query;
 
 public interface TopListApi {
+
+    //==============================================================================================
+    // 榜单
+    //==============================================================================================
+
     @GET("ting?method=baidu.ting.billboard.billList")
     Call<List<Song>> getSongFromTopList(@Query("type") int type);
 

@@ -4,9 +4,12 @@
     xmlns:card_view="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="128dp"
-    android:foreground="@drawable/shadow_rect_widget">
+    android:paddingStart="4dp"
+    android:paddingEnd="4dp"
+    android:background="@drawable/shadow_rect_widget">
 
-    <com.jkingone.customviewlib.CircleImageView
+    <com.jkingone.customviewlib.RoundedImageView
+        android:layout_marginTop="4dp"
         android:layout_alignParentBottom="true"
         android:id="@+id/iv_item"
         android:layout_width="128dp"
@@ -14,6 +17,7 @@
         android:scaleType="centerCrop" />
 
     <LinearLayout
+        android:layout_marginTop="4dp"
         android:layout_marginStart="4dp"
         android:padding="4dp"
         android:orientation="vertical"

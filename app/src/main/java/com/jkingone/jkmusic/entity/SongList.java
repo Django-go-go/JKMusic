@@ -3,31 +3,35 @@ package com.jkingone.jkmusic.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Created by Administrator on 2017/9/10.
  */
 
 public class SongList implements Parcelable {
-    private String listid;
+    @SerializedName("listId")
+    private String listId;
     private String title;
-    private String pic_300;
+    @SerializedName("pic_300")
+    private String pic300;
     private String pic;
     private String tag;
     private String desc;
 
-    public SongList(String listid, String title, String pic_300, String pic, String tag, String desc) {
-        this.listid = listid;
+    public SongList(String listId, String title, String pic300, String pic, String tag, String desc) {
+        this.listId = listId;
         this.title = title;
-        this.pic_300 = pic_300;
+        this.pic300 = pic300;
         this.pic = pic;
         this.tag = tag;
         this.desc = desc;
     }
 
     protected SongList(Parcel in) {
-        listid = in.readString();
+        listId = in.readString();
         title = in.readString();
-        pic_300 = in.readString();
+        pic300 = in.readString();
         pic = in.readString();
         tag = in.readString();
         desc = in.readString();
@@ -45,12 +49,12 @@ public class SongList implements Parcelable {
         }
     };
 
-    public String getListid() {
-        return listid;
+    public String getListId() {
+        return listId;
     }
 
-    public void setListid(String listid) {
-        this.listid = listid;
+    public void setListId(String listId) {
+        this.listId = listId;
     }
 
     public String getTitle() {
@@ -61,12 +65,12 @@ public class SongList implements Parcelable {
         this.title = title;
     }
 
-    public String getPic_300() {
-        return pic_300;
+    public String getPic300() {
+        return pic300;
     }
 
-    public void setPic_300(String pic_300) {
-        this.pic_300 = pic_300;
+    public void setPic300(String pic300) {
+        this.pic300 = pic300;
     }
 
     public String getTag() {
@@ -96,9 +100,9 @@ public class SongList implements Parcelable {
     @Override
     public String toString() {
         return "SongList{" +
-                "listid='" + listid + '\'' +
+                "listId='" + listId + '\'' +
                 ", title='" + title + '\'' +
-                ", pic_300='" + pic_300 + '\'' +
+                ", pic300='" + pic300 + '\'' +
                 ", pic='" + pic + '\'' +
                 ", tag='" + tag + '\'' +
                 ", desc='" + desc + '\'' +
@@ -112,9 +116,9 @@ public class SongList implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(listid);
+        dest.writeString(listId);
         dest.writeString(title);
-        dest.writeString(pic_300);
+        dest.writeString(pic300);
         dest.writeString(pic);
         dest.writeString(tag);
         dest.writeString(desc);

@@ -48,7 +48,7 @@ public class SongListAdapter extends HeadAndFootRecycleAdapter {
         mInflater = LayoutInflater.from(mContext);
 
         w = ScreenUtils.getScreenWidth(mContext);
-        h = DensityUtils.dp2px(mContext, 8) + DensityUtils.sp2px(mContext, 48);
+        h = DensityUtils.dp2px(mContext, 8) + DensityUtils.sp2px(mContext, 42);
 
         addHeaderView(createHeadView());
         addFooterView(createFootView());
@@ -57,7 +57,7 @@ public class SongListAdapter extends HeadAndFootRecycleAdapter {
     private View createHeadView() {
         View view = LayoutInflater.from(mContext).inflate(R.layout.item_grid_songlist_head, null, false);
         view.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT,
-                RecyclerView.LayoutParams.WRAP_CONTENT));
+                DensityUtils.dp2px(mContext, 150)));
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -120,8 +120,8 @@ public class SongListAdapter extends HeadAndFootRecycleAdapter {
 
             contentViewHolder.mTextView.setText(songList.getTitle());
 
-            if (songList.getPic_300() != null) {
-                Picasso.get().load(songList.getPic_300())
+            if (songList.getPic300() != null) {
+                Picasso.get().load(songList.getPic300())
                         .placeholder(R.drawable.music)
                         .resize(w/col, w/col)
                         .centerCrop()
@@ -187,7 +187,7 @@ public class SongListAdapter extends HeadAndFootRecycleAdapter {
             super(itemView);
             ButterKnife.bind(this, itemView);
             mTextView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, h));
-            mImageView.setLayoutParams(new LinearLayout.LayoutParams(w / 2, w / 2));
+            itemView.setLayoutParams(new LinearLayout.LayoutParams(w / 2, w / 2 + h));
         }
     }
 }

@@ -100,9 +100,9 @@ public class SongListActivity extends BaseActivity<SongListPresenter> implements
     }
 
     private void initSongList() {
-        mPresenter.getSongFromSongList(mSongList.getListid());
+        mPresenter.getSongFromSongList(mSongList.getListId());
         Picasso.get()
-                .load(mSongList.getPic_300())
+                .load(mSongList.getPic300())
                 .resize(ScreenUtils.getScreenWidth(this), DensityUtils.dp2px(this, 256))
                 .centerCrop()
                 .into(mImageViewCover);

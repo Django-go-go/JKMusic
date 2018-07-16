@@ -1,6 +1,7 @@
 package com.jkingone.jkmusic.ui.fragment;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -69,19 +70,11 @@ public class SongListFragment extends BaseFragment<SongListFragPresenter> implem
     public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.recycle_universal, container, false);
+        view.setBackgroundColor(Color.WHITE);
 
         mUnbinder = ButterKnife.bind(this, view);
 
         mRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2, GridLayoutManager.VERTICAL, false));
-        mRecyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
-            @Override
-            public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-                outRect.right = 8;
-                outRect.top = 8;
-                outRect.left = 8;
-                outRect.bottom = 8;
-            }
-        });
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {

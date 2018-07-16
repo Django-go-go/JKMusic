@@ -1,4 +1,4 @@
-package com.jkingone.jkmusic.data.remote;
+package com.jkingone.jkmusic;
 
 /**
  * Created by Administrator on 2017/9/13.

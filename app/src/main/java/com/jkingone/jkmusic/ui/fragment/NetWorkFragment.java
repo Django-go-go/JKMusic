@@ -7,7 +7,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -61,10 +60,11 @@ public class NetWorkFragment extends LazyFragment {
     private static class MyPagerAdapter extends FragmentPagerAdapter {
 
         private Fragment[] mFragments = {
+                ArtistFragment.newInstance("ArtistFragment"),
+                AlbumListFragment.newInstance("AlbumListFragment"),
                 SongListFragment.newInstance("SongListFragment"),
-                TopListFragment.newInstance("TopListFragment"),
-                PlaceholderFragment.newInstance("3"),};
-        private String[] titles = {"歌单", "排行榜", "视频"};
+                TopListFragment.newInstance("TopListFragment")};
+        private String[] titles = {"歌手", "唱片", "歌单", "排行榜"};
 
         MyPagerAdapter(FragmentManager fm/*, boolean isVisible*/) {
             super(fm/*, isVisible*/);
