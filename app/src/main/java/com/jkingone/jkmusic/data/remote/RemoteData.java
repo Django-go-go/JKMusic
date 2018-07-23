@@ -12,9 +12,11 @@ import com.google.gson.JsonParser;
 import com.jkingone.jkmusic.MusicApi;
 import com.jkingone.jkmusic.UrlString;
 import com.jkingone.jkmusic.api.AlbumApi;
+import com.jkingone.jkmusic.api.ArtistApi;
 import com.jkingone.jkmusic.api.SongListApi;
 import com.jkingone.jkmusic.api.TopListApi;
 import com.jkingone.jkmusic.entity.AlbumList;
+import com.jkingone.jkmusic.entity.ArtistList;
 import com.jkingone.jkmusic.entity.NetSong;
 import com.jkingone.jkmusic.entity.SearchSong;
 import com.jkingone.jkmusic.entity.Song;
@@ -42,35 +44,7 @@ import retrofit2.Retrofit;
 public final class RemoteData {
     public static final String TAG = "RemoteData";
 
-    public Call<List<AlbumList>> getAlbumList(int offset, int limit) {
-        Retrofit retrofit = createRetrofit(convertFactoryForAlbumList());
-        AlbumApi api = retrofit.create(AlbumApi.class);
-        return api.getAlbumList(offset, limit);
-    }
 
-    public Call<List<TopList>> getTopList() {
-        Retrofit retrofit = createRetrofit(convertFactoryForTopList());
-        TopListApi api = retrofit.create(TopListApi.class);
-        return api.getTopList();
-    }
-
-    public Call<List<SongList>> getSongList(int size, int no) {
-        Retrofit retrofit = createRetrofit(convertFactoryForSongList());
-        SongListApi api = retrofit.create(SongListApi.class);
-        return api.getSongList(size, no);
-    }
-
-    public Call<List<Song>> getSongFromSongList(String id) {
-        Retrofit retrofit = createRetrofit(convertFactoryForSongFromSongList());
-        SongListApi api = retrofit.create(SongListApi.class);
-        return api.getSongFromSongList(id);
-    }
-
-    public Call<List<Song>> getSongFromTopList(int type) {
-        Retrofit retrofit = createRetrofit(convertFactoryForSongFromTopList());
-        TopListApi api = retrofit.create(TopListApi.class);
-        return api.getSongFromTopList(type);
-    }
 
     public Call<Song> getSong(String id) {
         Retrofit retrofit = createRetrofit(convertFactoryForSong());
@@ -84,11 +58,7 @@ public final class RemoteData {
         return api.getHotSongList();
     }
 
-    public Call<List<SongList>> getTagSongList(String tag) {
-        Retrofit retrofit = createRetrofit(convertFactoryForTagSongList());
-        SongListApi api = retrofit.create(SongListApi.class);
-        return api.getTagSongList(tag);
-    }
+
 
 
     public Call<List<SearchSong>> getSearchSong(String query) {
@@ -182,114 +152,7 @@ public final class RemoteData {
                 .build();
     }
 
-    private Converter.Factory convertFactoryForSongList() {
-        return new Converter.Factory() {
-            @Nullable
-            @Override
-            public Converter<ResponseBody, List<SongList>> responseBodyConverter(Type type, final Annotation[] annotations, Retrofit retrofit) {
-                return new Converter<ResponseBody, List<SongList>>() {
-                    @Override
-                    public List<SongList> convert(@NonNull ResponseBody value) throws IOException {
-                        Gson gson = new Gson();
-                        String s = value.string();
-                        JsonArray array = new JsonParser().parse(s).getAsJsonObject().getAsJsonArray("content");
-                        List<SongList> songs = new ArrayList<>();
-                        for (JsonElement song : array) {
-                            if (song != null) {
-                                songs.add(gson.fromJson(song, SongList.class));
-                                Log.i(TAG, "convert: " + song);
-                            }
-                        }
-                        return songs;
-                    }
-                };
-            }
-        };
-    }
 
-    private Converter.Factory convertFactoryForTopList() {
-        return new Converter.Factory() {
-            @Nullable
-            @Override
-            public Converter<ResponseBody, ?> responseBodyConverter(Type type, final Annotation[] annotations, Retrofit retrofit) {
-                return new Converter<ResponseBody, List<TopList>>() {
-                    @Override
-                    public List<TopList> convert(ResponseBody value) throws IOException {
-                        Gson gson = new Gson();
-                        String s = value.string();
-                        JsonArray array = new JsonParser().parse(s).getAsJsonObject().getAsJsonArray("content");
-                        List<TopList> songs = new ArrayList<>();
-                        Log.i(TAG, "convert: " + s);
-                        for (JsonElement song : array) {
-                            if (song != null) {
-                                songs.add(gson.fromJson(song, TopList.class));
-                                Log.i(TAG, "convert: " + song);
-                            } else {
-                                Log.i(TAG, "convert: convertFactoryForTopList null");
-                            }
-                        }
-                        return songs;
-                    }
-                };
-            }
-        };
-    }
-
-    private Converter.Factory convertFactoryForSongFromSongList() {
-        return new Converter.Factory() {
-            @Nullable
-            @Override
-            public Converter<ResponseBody, List<Song>> responseBodyConverter(Type type, final Annotation[] annotations, Retrofit retrofit) {
-                return new Converter<ResponseBody, List<Song>>() {
-                    @Override
-                    public List<Song> convert(ResponseBody value) throws IOException {
-                        Gson gson = new Gson();
-                        String s = value.string();
-                        JsonArray array = new JsonParser().parse(s).getAsJsonObject().getAsJsonArray("content");
-                        List<Song> songs = new ArrayList<>();
-                        Log.i(TAG, "convert: " + s);
-                        for (JsonElement song : array) {
-                            if (song != null) {
-                                songs.add(gson.fromJson(song, Song.class));
-                                Log.i(TAG, "convert: " + song);
-                            } else {
-                                Log.i(TAG, "convert: convertFactoryForTopList null");
-                            }
-                        }
-                        return songs;
-                    }
-                };
-            }
-        };
-    }
-
-    private Converter.Factory convertFactoryForSongFromTopList() {
-        return new Converter.Factory() {
-            @Nullable
-            @Override
-            public Converter<ResponseBody, ?> responseBodyConverter(Type type, final Annotation[] annotations, Retrofit retrofit) {
-                return new Converter<ResponseBody, List<Song>>() {
-                    @Override
-                    public List<Song> convert(ResponseBody value) throws IOException {
-                        Gson gson = new Gson();
-                        String s = value.string();
-                        JsonArray array = new JsonParser().parse(s).getAsJsonObject().getAsJsonArray("song_list");
-                        List<Song> songs = new ArrayList<>();
-                        Log.i(TAG, "convert: " + s);
-                        for (JsonElement song : array) {
-                            if (song != null) {
-                                songs.add(gson.fromJson(song, Song.class));
-                                Log.i(TAG, "convert: " + song);
-                            } else {
-                                Log.i(TAG, "convert: convertFactoryForTopList null");
-                            }
-                        }
-                        return songs;
-                    }
-                };
-            }
-        };
-    }
 
     private Converter.Factory convertFactoryForSong() {
         return new Converter.Factory() {
@@ -347,33 +210,7 @@ public final class RemoteData {
         };
     }
 
-    private Converter.Factory convertFactoryForTagSongList() {
-        return new Converter.Factory() {
-            @Nullable
-            @Override
-            public Converter<ResponseBody, ?> responseBodyConverter(Type type, final Annotation[] annotations, Retrofit retrofit) {
-                return new Converter<ResponseBody, List<SongList>>() {
-                    @Override
-                    public List<SongList> convert(ResponseBody value) throws IOException {
-                        Gson gson = new Gson();
-                        String s = value.string();
-                        JsonArray array = new JsonParser().parse(s).getAsJsonObject().getAsJsonArray("content");
-                        List<SongList> songs = new ArrayList<>();
-                        Log.i(TAG, "convert: convertFactoryForHotSongList " + s);
-                        for (JsonElement song : array) {
-                            if (song != null) {
-                                songs.add(gson.fromJson(song, SongList.class));
-                                Log.i(TAG, "convert: " + song);
-                            } else {
-                                Log.i(TAG, "convert: convertFactoryForTopList null");
-                            }
-                        }
-                        return songs;
-                    }
-                };
-            }
-        };
-    }
+
 
     private Converter.Factory convertFactoryForSearchSong() {
         return new Converter.Factory() {
@@ -476,34 +313,8 @@ public final class RemoteData {
         };
     }
 
-    private Converter.Factory convertFactoryForAlbumList() {
-        return new Converter.Factory() {
-            @Nullable
-            @Override
-            public Converter<ResponseBody, ?> responseBodyConverter(Type type, final Annotation[] annotations, Retrofit retrofit) {
-                return new Converter<ResponseBody, List<AlbumList>>() {
-                    @Override
-                    public List<AlbumList> convert(@NonNull ResponseBody value) throws IOException {
-                        Gson gson = new Gson();
-                        String s = value.string();
-                        JsonArray array = new JsonParser().parse(s)
-                                .getAsJsonObject()
-                                .getAsJsonObject("plaze_album_list")
-                                .getAsJsonObject("RM").getAsJsonObject("album_list")
-                                .getAsJsonArray("list");
 
-                        List<AlbumList> albumLists = new ArrayList<>();
-                        Log.i(TAG, "convert: " + s);
-                        for (JsonElement song : array) {
-                            if (song != null) {
-                                albumLists.add(gson.fromJson(song, AlbumList.class));
-                            }
-                        }
-                        return albumLists;
-                    }
-                };
-            }
-        };
-    }
+
+
 
 }

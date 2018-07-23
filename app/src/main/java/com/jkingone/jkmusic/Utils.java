@@ -27,6 +27,10 @@ import java.util.List;
 
 public class Utils {
 
+    public static boolean checkStringNotNull(String string) {
+        return string != null && string.trim().length() != 0;
+    }
+
     public static int getNextRepeatMode(int mode) {
         if (mode == MusicService.PLAY_MODE_ALL) {
             return MusicService.PLAY_MODE_ONE;
@@ -105,6 +109,10 @@ public class Utils {
     }
 
     public static List<SongInfo> songToSongInfo(List<Song> songs) {
+        if (songs == null) {
+            return null;
+        }
+
         List<SongInfo> songInfos = new ArrayList<>();
         for (Song song : songs) {
             SongInfo songInfo = new SongInfo();

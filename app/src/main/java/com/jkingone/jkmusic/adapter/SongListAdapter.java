@@ -10,9 +10,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.jkingone.commonlib.Utils.DensityUtils;
-import com.jkingone.commonlib.Utils.ScreenUtils;
-import com.jkingone.customviewlib.LoadView;
+import com.jkingone.common.Utils.DensityUtils;
+import com.jkingone.common.Utils.ScreenUtils;
+import com.jkingone.jkmusic.Utils;
+import com.jkingone.ui.customview.FootLoadView;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.entity.SongList;
 import com.squareup.picasso.Picasso;
@@ -28,13 +29,13 @@ import butterknife.ButterKnife;
 
 public class SongListAdapter extends HeadAndFootRecycleAdapter {
 
-    private static final String TAG = "SongListAdapter";
+    public static final String TAG = "SongListAdapter";
 
     private LayoutInflater mInflater;
     private Context mContext;
     private List<SongList> mList;
 
-    private LoadView mLoadView;
+    private FootLoadView mFootLoadView;
 
     private static final int TYPE_CONTENT = 2;
 
@@ -70,29 +71,21 @@ public class SongListAdapter extends HeadAndFootRecycleAdapter {
     }
 
     private View createFootView() {
-        mLoadView = new LoadView(mContext);
-        mLoadView.setMinimumHeight(100);
-        mLoadView.setVisibility(View.VISIBLE);
-        mLoadView.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, 120));
-        return mLoadView;
+        mFootLoadView = new FootLoadView(mContext);
+        mFootLoadView.setLayoutParams(new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, DensityUtils.dp2px(mContext, 48)));
+        return mFootLoadView;
     }
 
-    public void startLoad() {
-        mLoadView.setVisibility(View.VISIBLE);
-        mLoadView.start();
-    }
-
-    public void stopLoad() {
-        mLoadView.setVisibility(View.INVISIBLE);
-        mLoadView.stop();
+    public FootLoadView getFootLoadView() {
+        return mFootLoadView;
     }
 
     @Override
     public RecyclerView.ViewHolder onCreateContentViewHolder(ViewGroup parent, int viewType) {
-        switch (viewType){
+        switch (viewType) {
 
             case TYPE_CONTENT:
-                View convertView = mInflater.inflate(R.layout.item_grid_songlist, parent, false);
+                View convertView = mInflater.inflate(R.layout.item_universal, parent, false);
                 return new ContentViewHolder(convertView);
 
             default:
@@ -113,34 +106,32 @@ public class SongListAdapter extends HeadAndFootRecycleAdapter {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
 
-        if (holder instanceof ContentViewHolder){
+        if (holder instanceof ContentViewHolder) {
 
             ContentViewHolder contentViewHolder = (ContentViewHolder) holder;
             SongList songList = mList.get(position - 1);
 
             contentViewHolder.mTextView.setText(songList.getTitle());
 
-            if (songList.getPic300() != null) {
+            if (Utils.checkStringNotNull(songList.getPic300())) {
                 Picasso.get().load(songList.getPic300())
-                        .placeholder(R.drawable.music)
-                        .resize(w/col, w/col)
+                        .resize(w / col, w / col)
                         .centerCrop()
-                        .tag(mContext)
+                        .tag(TAG)
                         .into(contentViewHolder.mImageView);
 
-            } else if (songList.getPic() != null){
+            } else if (Utils.checkStringNotNull(songList.getPic())) {
                 Picasso.get().load(songList.getPic())
-                        .placeholder(R.drawable.music)
-                        .resize(w/col, w/col)
+                        .resize(w / col, w / col)
                         .centerCrop()
-                        .tag(mContext)
+                        .tag(TAG)
                         .into(contentViewHolder.mImageView);
             }
 
             contentViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (mContentOnClickListener != null){
+                    if (mContentOnClickListener != null) {
                         mContentOnClickListener.contentOnClick(position - 1);
                     }
                 }
@@ -153,12 +144,12 @@ public class SongListAdapter extends HeadAndFootRecycleAdapter {
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
         RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
-        if (layoutManager instanceof GridLayoutManager){
+        if (layoutManager instanceof GridLayoutManager) {
             GridLayoutManager manager = (GridLayoutManager) layoutManager;
             manager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
                 @Override
                 public int getSpanSize(int position) {
-                    if (getItemViewType(position) != TYPE_CONTENT){
+                    if (getItemViewType(position) != TYPE_CONTENT) {
                         return 2;
                     }
                     return 1;
@@ -173,7 +164,7 @@ public class SongListAdapter extends HeadAndFootRecycleAdapter {
         mContentOnClickListener = contentOnClickListener;
     }
 
-    public interface ContentOnClickListener{
+    public interface ContentOnClickListener {
         void contentOnClick(int pos);
     }
 

@@ -22,23 +22,25 @@ import android.view.ViewGroup;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Scroller;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.google.android.exoplayer2.C;
-import com.jkingone.commonlib.Utils.ImageUtils;
-import com.jkingone.commonlib.Utils.ScreenUtils;
-import com.jkingone.commonlib.Utils.TimeUtils;
-import com.jkingone.customviewlib.PicassoBackground;
+import com.jkingone.common.Utils.ImageUtils;
+import com.jkingone.common.Utils.ScreenUtils;
+import com.jkingone.common.Utils.TimeUtils;
+import com.jkingone.jkmusic.ui.base.BaseActivity;
 import com.jkingone.jkmusic.Constant;
 import com.jkingone.jkmusic.MusicBroadcastReceiver;
 import com.jkingone.jkmusic.MusicManagerService;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.entity.SongInfo;
 import com.jkingone.jkmusic.ui.fragment.PlayFragment;
-import com.jkingone.jkmusic.ui.mvp.BasePresenter;
+import com.jkingone.jkmusic.ui.mvp.base.BasePresenter;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 import com.squareup.picasso.Transformation;
 
 import java.lang.reflect.Field;
@@ -58,7 +60,7 @@ public class PlayActivity extends BaseActivity {
     private static final String TAG = "PlayActivity";
 
     @BindView(R.id.root)
-    PicassoBackground mViewRoot;
+    LinearLayout mViewBackground;
     @BindView(R.id.toolbar)
     Toolbar mToolbar;
     @BindView(R.id.pager)
@@ -320,7 +322,35 @@ public class PlayActivity extends BaseActivity {
                         return mCurSongInfo.getPicUrl();
                     }
                 })
-                .into(mViewRoot);
+                .into(new Target() {
+
+                    private Handler mHandler = new Handler();
+                    private Runnable mLastCallback =null;
+                    @Override
+                    public void onBitmapLoaded(final Bitmap bitmap, Picasso.LoadedFrom from) {
+                        if (mLastCallback != null) {
+                            mHandler.removeCallbacks(mLastCallback);
+                        }
+                        Runnable curCallback = new Runnable() {
+                            @Override
+                            public void run() {
+                                mViewBackground.setBackground(new BitmapDrawable(getResources(), bitmap));
+                            }
+                        };
+                        mHandler.postDelayed(curCallback, 1000);
+                        mLastCallback = curCallback;
+                    }
+
+                    @Override
+                    public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+
+                    }
+
+                    @Override
+                    public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+                    }
+                });
         Picasso.get()
                 .load(mCurSongInfo.getPicUrl())
                 .placeholder(R.drawable.music)

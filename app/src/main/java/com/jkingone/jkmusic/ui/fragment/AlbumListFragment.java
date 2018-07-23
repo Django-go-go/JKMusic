@@ -4,40 +4,32 @@ package com.jkingone.jkmusic.ui.fragment;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.os.TestLooperManager;
 import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.jkingone.commonlib.Utils.DensityUtils;
-import com.jkingone.commonlib.Utils.ScreenUtils;
-import com.jkingone.customviewlib.PicassoBackground;
+import com.jkingone.common.Utils.DensityUtils;
 import com.jkingone.jkmusic.R;
+import com.jkingone.jkmusic.Utils;
 import com.jkingone.jkmusic.entity.AlbumList;
-import com.jkingone.jkmusic.ui.mvp.AlbumPresenter;
-import com.jkingone.jkmusic.ui.mvp.contract.AlbumContract;
+import com.jkingone.jkmusic.ui.base.BaseFragment;
+import com.jkingone.jkmusic.ui.mvp.AlbumListPresenter;
+import com.jkingone.jkmusic.ui.mvp.contract.AlbumListContract;
+import com.jkingone.ui.customview.ContentLoadView;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.security.auth.Destroyable;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class AlbumListFragment extends BaseFragment<AlbumPresenter> implements AlbumContract.ViewCallback {
+public class AlbumListFragment extends BaseFragment<AlbumListPresenter> implements AlbumListContract.ViewCallback {
 
     public static AlbumListFragment newInstance(String... params) {
         AlbumListFragment fragment = new AlbumListFragment();
@@ -45,14 +37,18 @@ public class AlbumListFragment extends BaseFragment<AlbumPresenter> implements A
         return fragment;
     }
 
-    @BindView(R.id.recycle_album)
+    @BindView(R.id.recycle_universal)
     RecyclerView mRecyclerView;
+    @BindView(R.id.content_universal)
+    ContentLoadView mContentLoadView;
 
     private List<AlbumList> mAlbumLists = new ArrayList<>();
     private AlbumAdapter mAlbumAdapter;
 
     private int offset = 0;
     private static final int LIMIT = 30;
+
+    private static final String TAG = "AlbumListFragment";
 
     @Override
     protected void onLazyLoadOnce() {
@@ -61,7 +57,7 @@ public class AlbumListFragment extends BaseFragment<AlbumPresenter> implements A
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_album, container, false);
+        View view = inflater.inflate(R.layout.layout_load_universal_notoolbar, container, false);
         ButterKnife.bind(this, view);
         StaggeredGridLayoutManager manager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(manager);
@@ -78,9 +74,11 @@ public class AlbumListFragment extends BaseFragment<AlbumPresenter> implements A
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
                 StaggeredGridLayoutManager manager = (StaggeredGridLayoutManager) recyclerView.getLayoutManager();
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+
+                    Picasso.get().resumeTag(TAG);
+
                     int[] pos = new int[manager.getSpanCount()];
                     manager.findLastVisibleItemPositions(pos);
                     int max = pos[0];
@@ -89,24 +87,39 @@ public class AlbumListFragment extends BaseFragment<AlbumPresenter> implements A
                             max = value;
                         }
                     }
-                    if (max == manager.getItemCount() - 5 && manager.getChildCount() > 0) {
+                    if (max == manager.getItemCount() - 1 && manager.getChildCount() > 0) {
                         offset += LIMIT;
                         mPresenter.getAlbumList(offset, LIMIT);
                     }
+                } else {
+                    Picasso.get().pauseTag(TAG);
                 }
-                manager.invalidateSpanAssignments();
+            }
+        });
+        mContentLoadView.setLoadRetryListener(new ContentLoadView.LoadRetryListener() {
+            @Override
+            public void onRetry() {
+                mContentLoadView.postLoading();
+                mPresenter.getAlbumList(offset, LIMIT);
             }
         });
         return view;
     }
 
     @Override
-    public AlbumPresenter createPresenter() {
-        return new AlbumPresenter(this);
+    public AlbumListPresenter createPresenter() {
+        return new AlbumListPresenter(this);
     }
 
     @Override
-    public void getAlbumList(List<AlbumList> albumLists) {
+    public void showAlbumList(List<AlbumList> albumLists) {
+        if (albumLists == null) {
+            mContentLoadView.postLoadFail();
+            return;
+        }
+
+        mContentLoadView.postLoadComplete();
+
         mAlbumLists.addAll(albumLists);
         if (mAlbumAdapter == null) {
             mAlbumAdapter = new AlbumAdapter(getContext());
@@ -140,10 +153,14 @@ public class AlbumListFragment extends BaseFragment<AlbumPresenter> implements A
                 mLayoutParams = new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, DensityUtils.dp2px(mContext, 120));
             }
             holder.itemView.setLayoutParams(mLayoutParams);
-            Picasso.get().load(albumList.getPicBig())
-                    .resize(DensityUtils.dp2px(mContext, 120), DensityUtils.dp2px(mContext, 120))
-                    .centerCrop()
-                    .into(holder.mImageView);
+            if (Utils.checkStringNotNull(albumList.getPicBig())) {
+                Picasso.get().
+                        load(albumList.getPicBig())
+                        .resize(DensityUtils.dp2px(mContext, 120), DensityUtils.dp2px(mContext, 120))
+                        .centerCrop()
+                        .tag(TAG)
+                        .into(holder.mImageView);
+            }
             holder.mTextView.setText(albumList.getPublishTime());
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

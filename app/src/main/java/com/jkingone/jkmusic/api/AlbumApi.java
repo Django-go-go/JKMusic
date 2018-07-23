@@ -7,6 +7,7 @@ import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
+import retrofit2.http.Headers;
 import retrofit2.http.Query;
 
 public interface AlbumApi {
@@ -19,10 +20,12 @@ public interface AlbumApi {
      */
 
     @GET("ting?method=baidu.ting.plaza.getRecommendAlbum")
+    @Headers("User-Agent:Mozilla")
     Call<List<AlbumList>> getAlbumList(@Query("offset") int offset, @Query("limit") int limit);
 
 
     @GET("ting?method=baidu.ting.album.getAlbumInfo")
+    @Headers("User-Agent:Mozilla")
     Call<Album> getAlbumInfo(@Query("album_id") String albumId);
 
 }

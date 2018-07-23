@@ -5,9 +5,9 @@
     android:paddingEnd="2dp"
     android:paddingStart="2dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="@drawable/shadow_rect_widget">
+    android:background="@drawable/shadow_rect">
 
-    <com.jkingone.customviewlib.RoundedImageView
+    <com.jkingone.ui.customview.RoundedImageView
         app:type="round"
         app:radius="6dp"
         android:layout_marginTop="4dp"

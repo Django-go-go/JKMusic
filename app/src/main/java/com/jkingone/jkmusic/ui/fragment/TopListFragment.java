@@ -1,7 +1,7 @@
 package com.jkingone.jkmusic.ui.fragment;
 
 import android.content.Context;
-import android.graphics.Rect;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -13,11 +13,15 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.jkingone.commonlib.Utils.DensityUtils;
+import com.jkingone.common.Utils.DensityUtils;
 import com.jkingone.jkmusic.R;
+import com.jkingone.jkmusic.Utils;
 import com.jkingone.jkmusic.entity.TopList;
+import com.jkingone.jkmusic.ui.activity.SongAndTopListActivity;
+import com.jkingone.jkmusic.ui.base.BaseFragment;
 import com.jkingone.jkmusic.ui.mvp.contract.TopListFragContract;
 import com.jkingone.jkmusic.ui.mvp.TopListFragPresenter;
+import com.jkingone.ui.customview.ContentLoadView;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -33,14 +37,12 @@ import butterknife.Unbinder;
 
 public class TopListFragment extends BaseFragment<TopListFragPresenter> implements TopListFragContract.ViewCallback {
 
-    private List<TopList> mList;
-
-    private TopListAdapter mListAdapter;
-
     private Unbinder mUnbinder;
 
     @BindView(R.id.recycle_universal)
     RecyclerView mRecyclerView;
+    @BindView(R.id.content_universal)
+    ContentLoadView mContentLoadView;
 
     public static TopListFragment newInstance(String... params) {
         TopListFragment fragment = new TopListFragment();
@@ -50,9 +52,7 @@ public class TopListFragment extends BaseFragment<TopListFragPresenter> implemen
 
     @Override
     protected void onLazyLoadOnce() {
-        if (mList == null) {
-            mPresenter.loadData();
-        }
+        mPresenter.loadData();
     }
 
 
@@ -60,7 +60,7 @@ public class TopListFragment extends BaseFragment<TopListFragPresenter> implemen
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.recycle_universal, container, false);
+        View view = inflater.inflate(R.layout.layout_load_universal_notoolbar, container, false);
 
         mUnbinder = ButterKnife.bind(this, view);
 
@@ -70,19 +70,30 @@ public class TopListFragment extends BaseFragment<TopListFragPresenter> implemen
     }
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        mUnbinder.unbind();
+    }
+
+    @Override
     public void showView(List<TopList> topLists) {
-        if (mList == null) {
-            mList = new ArrayList<>();
-        } else {
-            mList.clear();
+        if (topLists == null) {
+            mContentLoadView.postLoadFail();
+            return;
         }
+        if (topLists.size() == 0) {
+            mContentLoadView.postLoadNoData();
+            return;
+        }
+        mContentLoadView.postLoadComplete();
+        List<TopList> mList = new ArrayList<>();
         for (TopList topList : topLists) {
             if (!topList.getType().equals("105")) {
                 mList.add(topList);
             }
         }
-        mListAdapter = new TopListAdapter(getContext(), mList);
-        mRecyclerView.setAdapter(mListAdapter);
+        TopListAdapter listAdapter = new TopListAdapter(getContext(), mList);
+        mRecyclerView.setAdapter(listAdapter);
     }
 
     @Override
@@ -121,23 +132,26 @@ public class TopListFragment extends BaseFragment<TopListFragPresenter> implemen
             vh.textView2.setText(strings.get(1));
             vh.textView3.setText(strings.get(2));
             vh.textView4.setText(strings.get(3));
-            vh.imageView.setOnClickListener(new View.OnClickListener() {
+            vh.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-//                    if (mList.get(position) != null){
-//                        Intent intent = new Intent(mContext, SongListActivity.class);
-//                        intent.putExtra(SongListActivity.TYPE_TOPLIST, mList.get(position));
-//                        startActivity(intent);
-//                    }
+                    if (mList.get(position) != null){
+                        Intent intent = new Intent(mContext, SongAndTopListActivity.class);
+                        intent.putExtra(SongAndTopListActivity.TYPE_TOP_LIST, mList.get(position));
+                        startActivity(intent);
+                    }
                 }
             });
 
             int px = DensityUtils.dp2px(mContext, 128);
 
-            Picasso.get().load(topList.getPicS260())
-                    .resize(px, px)
-                    .centerCrop()
-                    .into(vh.imageView);
+            if (Utils.checkStringNotNull(topList.getPicS260())) {
+                Picasso.get().load(topList.getPicS260())
+                        .resize(px, px)
+                        .centerCrop()
+                        .into(vh.imageView);
+            }
+
         }
 
         @Override

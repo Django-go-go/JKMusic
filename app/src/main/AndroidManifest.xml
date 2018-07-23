@@ -3,9 +3,9 @@
     package="com.jkingone.jkmusic">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:name=".MusicApplication"
@@ -24,25 +24,28 @@
         </activity>
         <activity android:name=".ui.activity.PlayActivity" />
         <activity android:name=".ui.activity.ClassifySongListActivity" />
-        <activity android:name=".ui.activity.SongListActivity"/>
+        <activity android:name=".ui.activity.SongAndTopListActivity" />
 
         <service
             android:name=".service.MusicService"
-            android:process=":remote"
             android:enabled="true"
-            android:exported="true"/>
-
-        <service android:name=".media.MusicDownloadService"
+            android:exported="true"
+            android:process=":remote" />
+        <service
+            android:name=".media.MusicDownloadService"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.google.android.exoplayer.downloadService.action.INIT"/>
-                <category android:name="android.intent.category.DEFAULT"/>
+                <action android:name="com.google.android.exoplayer.downloadService.action.INIT" />
+
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </service>
+        <service
+            android:name="com.google.android.exoplayer2.scheduler.PlatformScheduler$PlatformSchedulerService"
+            android:exported="true"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
 
-        <service android:name="com.google.android.exoplayer2.scheduler.PlatformScheduler$PlatformSchedulerService"
-            android:permission="android.permission.BIND_JOB_SERVICE"
-            android:exported="true"/>
+        <activity android:name=".ui.activity.ArtistListActivity"></activity>
     </application>
 
 </manifest>

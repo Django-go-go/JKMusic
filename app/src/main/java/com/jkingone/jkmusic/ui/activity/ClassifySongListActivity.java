@@ -21,10 +21,12 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.jkingone.commonlib.Utils.DensityUtils;
-import com.jkingone.commonlib.Utils.ScreenUtils;
+import com.jkingone.common.Utils.DensityUtils;
+import com.jkingone.common.Utils.ScreenUtils;
 import com.jkingone.jkmusic.R;
-import com.jkingone.customviewlib.WaveView;
+import com.jkingone.jkmusic.ui.base.BaseActivity;
+import com.jkingone.ui.customview.ContentLoadView;
+import com.jkingone.ui.customview.WaveView;
 import com.jkingone.jkmusic.entity.SongList;
 import com.jkingone.jkmusic.ui.mvp.contract.ClassifySongListContract;
 import com.jkingone.jkmusic.ui.mvp.ClassifySongListPresenter;
@@ -36,7 +38,8 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class ClassifySongListActivity extends BaseActivity<ClassifySongListPresenter> implements ClassifySongListContract.ViewCallBack {
+public class ClassifySongListActivity extends BaseActivity<ClassifySongListPresenter>
+        implements ClassifySongListContract.ViewCallBack {
 
     @BindView(R.id.recycle_universal)
     RecyclerView mRecyclerView;
@@ -49,6 +52,8 @@ public class ClassifySongListActivity extends BaseActivity<ClassifySongListPrese
     WaveView mClassifyView;
     @BindView(R.id.iv_back)
     ImageView mImageView_back;
+    @BindView(R.id.content_universal)
+    ContentLoadView mContentLoadView;
 
     private String tag = "华语";
 
@@ -66,6 +71,7 @@ public class ClassifySongListActivity extends BaseActivity<ClassifySongListPrese
         setContentView(R.layout.activity_classify_songlist);
         ButterKnife.bind(this);
         initView();
+        mContentLoadView.postLoading();
         mPresenter.loadData(tag);
     }
 
@@ -130,9 +136,15 @@ public class ClassifySongListActivity extends BaseActivity<ClassifySongListPrese
             }
         });
 
+        mContentLoadView.setLoadRetryListener(new ContentLoadView.LoadRetryListener() {
+            @Override
+            public void onRetry() {
+                mContentLoadView.postLoading();
+                mPresenter.loadData(tag);
+            }
+        });
+
     }
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -142,6 +154,12 @@ public class ClassifySongListActivity extends BaseActivity<ClassifySongListPrese
 
     @Override
     public void showView(List<SongList> classifySongLists) {
+        if (classifySongLists == null) {
+            mContentLoadView.postLoadFail();
+            return;
+        } else {
+            mContentLoadView.postLoadComplete();
+        }
         mRecyclerView.setAdapter(new ClassifySongListAdapter(this, classifySongLists));
     }
 
@@ -164,28 +182,32 @@ public class ClassifySongListActivity extends BaseActivity<ClassifySongListPrese
 
         @Override
         public void onBindViewHolder(@NonNull VH holder, final int position) {
-            holder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (mList.get(position) != null){
-                        Intent intent = new Intent(mContext, SongListActivity.class);
-                        intent.putExtra(SongListActivity.TYPE_SONGLIST, mList.get(position));
-                        startActivity(intent);
+
+            final SongList songList = mList.get(position);
+
+            if (songList != null) {
+                holder.itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                            Intent intent = new Intent(mContext, SongAndTopListActivity.class);
+                            intent.putExtra(SongAndTopListActivity.TYPE_SONG_LIST, mList.get(position));
+                            startActivity(intent);
                     }
+                });
+                holder.textView_name.setText("标签: " + songList.getTag());
+                holder.textView_title.setText(songList.getTitle());
+                holder.textView_desc.setText(songList.getDesc());
+                if (songList.getPic300() != null) {
+                    Picasso.get()
+                            .load(songList.getPic300())
+                            .placeholder(R.drawable.music)
+                            .resize(DensityUtils.dp2px(mContext, 128), DensityUtils.dp2px(mContext, 128))
+                            .centerCrop()
+                            .tag(mContext)
+                            .into(holder.imageView);
                 }
-            });
-            holder.textView_name.setText("标签: " + mList.get(position).getTag());
-            holder.textView_title.setText(mList.get(position).getTitle());
-            holder.textView_desc.setText(mList.get(position).getDesc());
-            if (mList.get(position).getPic300() != null) {
-                Picasso.get()
-                        .load(mList.get(position).getPic300())
-                        .placeholder(R.drawable.music)
-                        .resize(DensityUtils.dp2px(mContext, 128), DensityUtils.dp2px(mContext, 128))
-                        .centerCrop()
-                        .tag(mContext)
-                        .into(holder.imageView);
             }
+
 
         }
 
@@ -243,6 +265,7 @@ public class ClassifySongListActivity extends BaseActivity<ClassifySongListPrese
                     mPresenter.loadData(tag);
                     mToolbar.setTitle("分类歌单•" + tag);
                     mClassifyView.startReverse();
+                    mContentLoadView.postLoading();
                 }
             });
         }

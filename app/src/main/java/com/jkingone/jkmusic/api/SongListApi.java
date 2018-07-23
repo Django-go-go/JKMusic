@@ -7,6 +7,7 @@ import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
+import retrofit2.http.Headers;
 import retrofit2.http.Query;
 
 public interface SongListApi {
@@ -20,6 +21,7 @@ public interface SongListApi {
      * http://tingapi.ting.baidu.com/v1/restserver/ting?method=baidu.ting.diy.getHotGeDanAndOfficial
      */
     @GET("ting?method=baidu.ting.diy.getHotGeDanAndOfficial")
+    @Headers("User-Agent:Mozilla")
     Call<List<SongList>> getHotSongList();
 
     /**
@@ -29,6 +31,7 @@ public interface SongListApi {
      * http://tingapi.ting.baidu.com/v1/restserver/ting?method=baidu.ting.diy.gedan&page_size=10&page_no=1
      */
     @GET("ting?method=baidu.ting.diy.gedan")
+    @Headers("User-Agent:Mozilla")
     Call<List<SongList>> getSongList(@Query("page_size") int page_size, @Query("page_no") int page_no);
 
     /**
@@ -37,6 +40,7 @@ public interface SongListApi {
      * http://tingapi.ting.baidu.com/v1/restserver/ting?method=baidu.ting.diy.search&page_size=10&page_no=1&query=华语
      */
     @GET("ting?&method=baidu.ting.diy.search&page_size=100")
+    @Headers("User-Agent:Mozilla")
     Call<List<SongList>> getTagSongList(@Query("query") String tag);
 
     /**
@@ -45,11 +49,13 @@ public interface SongListApi {
      * http://tingapi.ting.baidu.com/v1/restserver/ting?method=baidu.ting.diy.gedanInfo&listid=
      */
     @GET("ting?method=baidu.ting.diy.gedanInfo")
+    @Headers("User-Agent:Mozilla")
     Call<List<Song>> getSongFromSongList(@Query("listid") String id);
 
     /**
      * 歌单分类
      */
     @GET("ting?method=baidu.ting.diy.gedanCategory")
+    @Headers("User-Agent:Mozilla")
     Call<List<String>> geSongListCategory();
 }

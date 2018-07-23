@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="48dp">
 
-    <com.jkingone.customviewlib.RoundedImageView
+    <com.jkingone.ui.customview.RoundedImageView
         app:type="round"
         app:radius="4dp"
         android:id="@+id/iv_cover"

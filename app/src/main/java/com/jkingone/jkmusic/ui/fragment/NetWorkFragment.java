@@ -11,7 +11,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.jkingone.customviewlib.PagerSlidingTabStrip;
+import com.jkingone.jkmusic.ui.base.LazyFragment;
+import com.jkingone.ui.customview.PagerSlidingTabStrip;
 import com.jkingone.jkmusic.R;
 
 import butterknife.BindView;
@@ -60,7 +61,7 @@ public class NetWorkFragment extends LazyFragment {
     private static class MyPagerAdapter extends FragmentPagerAdapter {
 
         private Fragment[] mFragments = {
-                ArtistFragment.newInstance("ArtistFragment"),
+                ArtistListFragment.newInstance("ArtistListFragment"),
                 AlbumListFragment.newInstance("AlbumListFragment"),
                 SongListFragment.newInstance("SongListFragment"),
                 TopListFragment.newInstance("TopListFragment")};

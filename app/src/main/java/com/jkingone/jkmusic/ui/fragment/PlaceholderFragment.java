@@ -1,18 +1,7 @@
 package com.jkingone.jkmusic.ui.fragment;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
-import android.os.Build;
 import android.os.Bundle;
-import android.renderscript.RSRuntimeException;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -22,13 +11,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.jkingone.commonlib.Utils.ImageUtils;
 import com.jkingone.jkmusic.R;
-import com.jkingone.jkmusic.data.local.ContentHelper;
 import com.jkingone.jkmusic.ui.activity.PlayActivity;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
+import com.jkingone.jkmusic.ui.base.LazyFragment;
 
 public class PlaceholderFragment extends LazyFragment {
     public static final String TAG = "PlaceholderFragment";

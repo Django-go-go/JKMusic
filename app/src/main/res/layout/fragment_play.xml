@@ -8,7 +8,7 @@
     android:background="@drawable/selector_line_frag"
     tools:context="com.jkingone.jkmusic.ui.fragment.PlayFragment">
 
-    <com.jkingone.customviewlib.TouchViewPager
+    <com.jkingone.ui.customview.TouchViewPager
         android:id="@+id/pager"
         android:layout_weight="1"
         android:layout_width="0dp"
@@ -18,7 +18,7 @@
     <ImageView
         android:padding="8dp"
         android:id="@+id/iv_play"
-        android:background="@drawable/shadow_oval_widget"
+        android:background="@drawable/shadow_oval"
         android:layout_gravity="center_vertical"
         android:src="@drawable/music"
         android:layout_width="wrap_content"
@@ -27,7 +27,7 @@
     <ImageView
         android:padding="8dp"
         android:id="@+id/iv_menu"
-        android:background="@drawable/shadow_oval_widget"
+        android:background="@drawable/shadow_oval"
         android:layout_gravity="center_vertical"
         android:src="@drawable/music"
         android:layout_width="wrap_content"

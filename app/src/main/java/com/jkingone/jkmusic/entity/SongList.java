@@ -10,7 +10,7 @@ import com.google.gson.annotations.SerializedName;
  */
 
 public class SongList implements Parcelable {
-    @SerializedName("listId")
+    @SerializedName("listid")
     private String listId;
     private String title;
     @SerializedName("pic_300")

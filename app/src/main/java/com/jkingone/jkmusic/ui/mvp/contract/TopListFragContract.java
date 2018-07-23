@@ -1,8 +1,11 @@
 package com.jkingone.jkmusic.ui.mvp.contract;
 
 import com.jkingone.jkmusic.entity.TopList;
+import com.jkingone.jkmusic.ui.mvp.base.BaseContract;
 
 import java.util.List;
+
+import retrofit2.Call;
 
 public interface TopListFragContract {
 
@@ -11,6 +14,6 @@ public interface TopListFragContract {
     }
 
     interface Model extends BaseContract.BaseModel {
-
+        Call<List<TopList>> getTopList();
     }
 }

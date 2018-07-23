@@ -1,5 +1,4 @@
 package com.jkingone.jkmusic.ui.activity;
-import android.graphics.Color;
 import android.support.design.widget.NavigationView;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -15,10 +14,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.jkingone.commonlib.Utils.PermissionUtils;
-import com.jkingone.commonlib.Utils.ScreenUtils;
+import com.jkingone.common.Utils.PermissionUtils;
+import com.jkingone.common.Utils.ScreenUtils;
 import com.jkingone.jkmusic.R;
-import com.jkingone.jkmusic.ui.mvp.BasePresenter;
+import com.jkingone.jkmusic.ui.base.BaseActivity;
+import com.jkingone.jkmusic.ui.mvp.base.BasePresenter;
 import com.jkingone.jkmusic.ui.fragment.NetWorkFragment;
 import com.jkingone.jkmusic.ui.fragment.PlaceholderFragment;
 
@@ -52,7 +52,7 @@ public class MainActivity extends BaseActivity {
 
         ScreenUtils.setTranslucent(this);
 
-        setContentView(R.layout.activity_navigation_drawer);
+        setContentView(R.layout.activity_main);
 
 		ButterKnife.bind(this);
 

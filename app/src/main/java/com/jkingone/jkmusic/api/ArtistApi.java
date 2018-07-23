@@ -1,47 +1,62 @@
 package com.jkingone.jkmusic.api;
 
+import com.jkingone.jkmusic.entity.Artist;
+import com.jkingone.jkmusic.entity.ArtistList;
+
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.http.GET;
+import retrofit2.http.HEAD;
+import retrofit2.http.Header;
+import retrofit2.http.Headers;
+import retrofit2.http.Query;
+
 public interface ArtistApi {
     /**
      * 全部地区
      */
-    public static final int AREA_ALL = 1;
+    int AREA_ALL = 1;
     /**
      * 华语
      */
-    public static final int AREA_CHINA = 2;
+    int AREA_CHINA = 2;
     /**
      * 欧美
      */
-    public static final int AREA_EU = 3;
+    int AREA_EU = 3;
     /**
      * 韩国
      */
-    public static final int AREA_KOREA = 4;
+    int AREA_KOREA = 4;
     /**
      * 日本
      */
-    public static final int AREA_JAPAN = 5;
+    int AREA_JAPAN = 5;
     /**
      * 其他
      */
-    public static final int AREA_OTHER = 6;
+    int AREA_OTHER = 6;
 
     /**
      * 无选择
      */
-    public static final int SEX_NONE = 10;
+    int SEX_NONE = 10;
     /**
      * 男性
-     */
-    public static final int SEX_MALE = 11;
+     */int SEX_MALE = 11;
     /**
      * 女性
      */
-    public static final int SEX_FEMALE = 12;
+    int SEX_FEMALE = 12;
     /**
      * 组合
      */
-    public static final int SEX_GROUP = 13;
+    int SEX_GROUP = 13;
+
+    int ORDER_HOT = 14;
+
+    int ORDER_ID = 15;
 
     /**
      * 获取艺术家列表
@@ -54,65 +69,35 @@ public interface ArtistApi {
      * @param abc    艺术家名首字母：a-z,other其他
      * http://tingapi.ting.baidu.com/v1/restserver/ting?method=baidu.ting.artist.getList&offset=0&limit=100&area=0&sex=0&order=1&abc=
      */
-    public String artistList(int offset, int limit, int area, int sex, int order, String abc);
-//    {
-//        StringBuffer sb = new StringBuffer(BASE);
-//        sb.append("&method=").append("baidu.ting.artist.getList");
-//        sb.append("&offset=").append(offset);
-//        sb.append("&limit=").append(limit);
-//        sb.append("&area=").append(area);
-//        sb.append("&sex=").append(sex);
-//        sb.append("&order=").append(order);//暂时不清楚order排序
-//        if (abc != null && !abc.trim().equals("")) {
-//            sb.append("&abc=").append(abc);
-//        }
-//        return sb.toString();
-//    }
+    @GET("ting?method=baidu.ting.artist.getList")
+    @Headers("User-Agent:Mozilla")
+    Call<List<ArtistList>> getArtistList(@Query("offset")int offset, @Query("limit")int limit, @Query("area")int area,
+                                         @Query("sex")int sex, @Query("order")int order, @Query("abc")String abc);
 
-    /**
-     * 热门艺术家
-     *
-     * @param offset 偏移量
-     * @param limit  获取数量
-     * @return
-     */
-//    public static String hotArtist(int offset, int limit) {
-//        return artistList(offset, limit, 0, 0, 1, null);
-//    }
 
     /**
      * 艺术家歌曲
      *
-     * @param tinguid  tinguid
-     * @param artistid 艺术家id
+     * @param tingUid  tinguid
+     * @param artistId 艺术家id
      * @param offset   偏移量
      * @param limit    获取数量
      * http://tingapi.ting.baidu.com/v1/restserver/ting?method=baidu.ting.artist.getSongList&tinguid=&artistid=&offset=&limits=
      */
-//    public static String artistSongList(String tinguid, String artistid, int offset, int limit)
-// {
-//        StringBuffer sb = new StringBuffer(BASE);
-//        sb.append("&method=").append("baidu.ting.artist.getSongList")
-//                .append("&order=2")
-//                .append("&tinguid=").append(tinguid)
-//                .append("&artistid=").append(artistid)
-//                .append("&offset=").append(offset)
-//                .append("&limits=").append(limit);
-//        return sb.toString();
-//    }
+    @GET("ting?method=baidu.ting.artist.getSongList")
+    @Headers("User-Agent:Mozilla")
+    Call<List<Artist.Songlist>> getArtistSongList(@Query("tinguid")String tingUid, @Query("artistid")String artistId,
+                                                  @Query("offset")int offset, @Query("limits")int limit);
+
 
     /**
      * 艺术家信息
      *
-     * @param tinguid  tinguid
-     * @param artistid 艺术家id
-     * @return
+     * @param tingUid  tinguid
+     * @param artistId 艺术家id
+     * http://tingapi.ting.baidu.com/v1/restserver/ting?method=baidu.ting.artist.getinfo&tinguid=2517&artistid=88
      */
-//    public static String artistInfo(String tinguid, String artistid) {
-//        StringBuffer sb = new StringBuffer(BASE);
-//        sb.append("&method=").append("baidu.ting.artist.getinfo")
-//                .append("&tinguid=").append(tinguid)
-//                .append("&artistid=").append(artistid);
-//        return sb.toString();
-//    }
+    @GET("ting?method=baidu.ting.artist.getinfo")
+    @Headers("User-Agent:Mozilla")
+    Call<Artist.ArtistInfo> getArtistInfo(@Query("tinguid")String tingUid, @Query("artistid")String artistId);
 }
