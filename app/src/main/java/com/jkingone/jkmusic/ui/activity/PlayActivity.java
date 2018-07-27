@@ -27,10 +27,17 @@ import android.widget.Scroller;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.bumptech.glide.load.Transformation;
+import com.bumptech.glide.load.engine.Resource;
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.google.android.exoplayer2.C;
 import com.jkingone.common.utils.ImageUtils;
 import com.jkingone.common.utils.ScreenUtils;
 import com.jkingone.common.utils.TimeUtils;
+import com.jkingone.jkmusic.GlideApp;
 import com.jkingone.jkmusic.ui.base.BaseActivity;
 import com.jkingone.jkmusic.Constant;
 import com.jkingone.jkmusic.MusicBroadcastReceiver;
@@ -39,11 +46,9 @@ import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.entity.SongInfo;
 import com.jkingone.jkmusic.ui.fragment.PlayFragment;
 import com.jkingone.jkmusic.ui.mvp.base.BasePresenter;
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
-import com.squareup.picasso.Transformation;
 
 import java.lang.reflect.Field;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -305,12 +310,21 @@ public class PlayActivity extends BaseActivity {
     private void updateViewPager(int pos) {
         View view = instantiateView(mViewPager, pos);
         mImageViewAlbum = view.findViewById(R.id.iv_pager_album);
-        Picasso.get()
+
+        GlideApp.with(this)
+                .asBitmap()
                 .load(mCurSongInfo.getPicUrl())
-                .transform(new Transformation() {
+                .override(ScreenUtils.getScreenWidth(this) / 2)
+                .into(mImageViewAlbum);
+
+        GlideApp.with(this)
+                .asBitmap()
+                .load(mCurSongInfo.getPicUrl())
+                .override(ScreenUtils.getScreenWidth(this) / 2)
+                .transform(new BitmapTransformation() {
                     @Override
-                    public Bitmap transform(Bitmap source) {
-                        Bitmap bitmap = ImageUtils.blurBitmap(source, 25, 8, PlayActivity.this, true);
+                    protected Bitmap transform(@NonNull BitmapPool pool, @NonNull Bitmap toTransform, int outWidth, int outHeight) {
+                        Bitmap bitmap = ImageUtils.blurBitmap(toTransform, 25, 8, PlayActivity.this, true);
                         BitmapDrawable bitmapDrawable = new BitmapDrawable(getResources(), bitmap);
                         ColorDrawable colorDrawable = new ColorDrawable(Color.parseColor("#85403b3b"));
                         LayerDrawable layerDrawable = new LayerDrawable(new Drawable[]{bitmapDrawable, colorDrawable});
@@ -318,45 +332,31 @@ public class PlayActivity extends BaseActivity {
                     }
 
                     @Override
-                    public String key() {
-                        return mCurSongInfo.getPicUrl();
+                    public void updateDiskCacheKey(MessageDigest messageDigest) {
+
                     }
                 })
-                .into(new Target() {
+                .into(new SimpleTarget<Bitmap>() {
 
                     private Handler mHandler = new Handler();
                     private Runnable mLastCallback =null;
+
                     @Override
-                    public void onBitmapLoaded(final Bitmap bitmap, Picasso.LoadedFrom from) {
+                    public void onResourceReady(final Bitmap resource, Transition<? super Bitmap> transition) {
                         if (mLastCallback != null) {
                             mHandler.removeCallbacks(mLastCallback);
                         }
                         Runnable curCallback = new Runnable() {
                             @Override
                             public void run() {
-                                mViewBackground.setBackground(new BitmapDrawable(getResources(), bitmap));
+                                mViewBackground.setBackground(new BitmapDrawable(getResources(), resource));
                             }
                         };
                         mHandler.postDelayed(curCallback, 1000);
                         mLastCallback = curCallback;
                     }
-
-                    @Override
-                    public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-
-                    }
-
-                    @Override
-                    public void onPrepareLoad(Drawable placeHolderDrawable) {
-
-                    }
                 });
-        Picasso.get()
-                .load(mCurSongInfo.getPicUrl())
-                .placeholder(R.drawable.music)
-                .centerCrop()
-                .resize(ScreenUtils.getScreenWidth(this) / 2, ScreenUtils.getScreenWidth(this) / 2)
-                .into(mImageViewAlbum);
+
         mToolbar.setTitle(mCurSongInfo.getTitle());
         mToolbar.setSubtitle(mCurSongInfo.getArtist());
 

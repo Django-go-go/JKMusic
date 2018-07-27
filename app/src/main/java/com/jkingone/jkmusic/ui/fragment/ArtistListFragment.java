@@ -18,6 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.jkingone.common.utils.DensityUtils;
+import com.jkingone.jkmusic.GlideApp;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.api.ArtistApi;
 import com.jkingone.jkmusic.entity.ArtistList;
@@ -26,7 +27,6 @@ import com.jkingone.jkmusic.ui.base.BaseFragment;
 import com.jkingone.jkmusic.ui.mvp.ArtistListPresenter;
 import com.jkingone.jkmusic.ui.mvp.contract.ArtistListContract;
 import com.jkingone.ui.widget.ContentLoadView;
-import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -244,10 +244,11 @@ public class ArtistListFragment extends BaseFragment<ArtistListPresenter> implem
         public void onBindViewHolder(@NonNull HotViewHolder holder, int position) {
             ArtistList artistList = mData.get(position);
             holder.mTextView.setText(artistList.getName());
-            Picasso.get()
+
+            GlideApp.with(ArtistListFragment.this)
+                    .asBitmap()
+                    .override(w)
                     .load(artistList.getAvatarBig())
-                    .centerCrop()
-                    .resize(w, w)
                     .into(holder.mImageView);
         }
 

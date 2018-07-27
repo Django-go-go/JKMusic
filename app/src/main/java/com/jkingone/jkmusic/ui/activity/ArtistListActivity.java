@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import com.jkingone.common.utils.DensityUtils;
 import com.jkingone.common.utils.ScreenUtils;
+import com.jkingone.jkmusic.GlideApp;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.Utils;
 import com.jkingone.jkmusic.api.ArtistApi;
@@ -25,7 +26,6 @@ import com.jkingone.jkmusic.ui.fragment.ArtistListFragment;
 import com.jkingone.jkmusic.ui.mvp.ArtistListPresenter;
 import com.jkingone.jkmusic.ui.mvp.contract.ArtistListContract;
 import com.jkingone.ui.widget.ContentLoadView;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -151,13 +151,11 @@ public class ArtistListActivity extends BaseActivity<ArtistListPresenter> implem
             ArtistList artistList = mArtistLists.get(position);
             if (artistList != null) {
                 holder.mTextView.setText(artistList.getName());
-                if (Utils.checkStringNotNull(artistList.getAvatarBig())) {
-                    Picasso.get()
-                            .load(artistList.getAvatarBig())
-                            .resize(DensityUtils.dp2px(mContext, 64), DensityUtils.dp2px(mContext, 64))
-                            .centerCrop()
-                            .into(holder.mImageView);
-                }
+                GlideApp.with(ArtistListActivity.this)
+                        .asBitmap()
+                        .load(artistList.getAvatarBig())
+                        .override(DensityUtils.dp2px(mContext, 64))
+                        .into(holder.mImageView);
             }
         }
 

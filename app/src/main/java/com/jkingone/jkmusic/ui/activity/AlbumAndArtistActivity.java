@@ -34,8 +34,6 @@ import com.jkingone.jkmusic.ui.mvp.AlbumAndArtistPresenter;
 import com.jkingone.jkmusic.ui.mvp.contract.AlbumAndArtistContract;
 import com.jkingone.ui.widget.ContentLoadView;
 import com.jkingone.ui.widget.PagerSlidingTabStrip;
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,8 +64,8 @@ public class AlbumAndArtistActivity extends BaseActivity<AlbumAndArtistPresenter
     private RecyclerView mRecyclerView;
     private View mViewInfo;
 
-    @BindView(R.id.app_bar)
-    AppBarLayout mAppBarLayout;
+//    @BindView(R.id.app_bar)
+//    AppBarLayout mAppBarLayout;
     @BindView(R.id.pager_strip)
     PagerSlidingTabStrip mPagerSlidingTabStrip;
     @BindView(R.id.viewpager)
@@ -117,32 +115,30 @@ public class AlbumAndArtistActivity extends BaseActivity<AlbumAndArtistPresenter
         }
         Album.AlbumInfo albumInfo = album.getAlbumInfo();
         if (Utils.checkStringNotNull(albumInfo.getPicS1000())) {
-            Picasso.get()
-                    .load(album.getAlbumInfo().getPicS1000())
-                    .resize(ScreenUtils.getScreenWidth(this), DensityUtils.dp2px(this, 400))
-                    .centerCrop()
-                    .into(new Target() {
-                        @Override
-                        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                            mAppBarLayout.setBackground(new BitmapDrawable(AlbumAndArtistActivity.this.getResources(), bitmap));
-                        }
-
-                        @Override
-                        public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-
-                        }
-
-                        @Override
-                        public void onPrepareLoad(Drawable placeHolderDrawable) {
-
-                        }
-                    });
+//            Picasso.get()
+//                    .load(album.getAlbumInfo().getPicS1000())
+//                    .resize(ScreenUtils.getScreenWidth(this), DensityUtils.dp2px(this, 400))
+//                    .centerCrop()
+//                    .into(mImageViewCover);
+//                    .into(new Target() {
+//                        @Override
+//                        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+//                            mAppBarLayout.setBackground(new BitmapDrawable(AlbumAndArtistActivity.this.getResources(), bitmap));
+//                        }
+//
+//                        @Override
+//                        public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+//
+//                        }
+//
+//                        @Override
+//                        public void onPrepareLoad(Drawable placeHolderDrawable) {
+//
+//                        }
+//                    });
         }
 
-        LogUtils.i("data====>" + album.getSongList());
-
         List<SongInfo> songs = Utils.AlbumSongToSongInfo(album.getSongList());
-
 
         if (songs == null || songs.size() == 0) {
             mContentLoadView.postLoadNoData();
@@ -161,10 +157,10 @@ public class AlbumAndArtistActivity extends BaseActivity<AlbumAndArtistPresenter
         LogUtils.i("showArtist" + artistInfo);
 
         if (Utils.checkStringNotNull(artistInfo.getAvatarS1000())) {
-            Picasso.get().load(artistInfo.getAvatarS1000())
-                    .resize(ScreenUtils.getScreenWidth(this), DensityUtils.dp2px(this, 400))
-                    .centerCrop()
-                    .into(mImageViewCover);
+//            Picasso.get().load(artistInfo.getAvatarS1000())
+//                    .resize(ScreenUtils.getScreenWidth(this), DensityUtils.dp2px(this, 400))
+//                    .centerCrop()
+//                    .into(mImageViewCover);
         }
     }
 

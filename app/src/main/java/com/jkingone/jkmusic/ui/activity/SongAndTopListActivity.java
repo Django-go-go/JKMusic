@@ -7,6 +7,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -17,11 +18,12 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.jkingone.common.utils.DensityUtils;
-import com.jkingone.common.utils.LogUtils;
 import com.jkingone.common.utils.ScreenUtils;
+import com.jkingone.jkmusic.GlideApp;
 import com.jkingone.jkmusic.R;
-import com.jkingone.jkmusic.Utils;
 import com.jkingone.jkmusic.entity.SongInfo;
 import com.jkingone.jkmusic.entity.SongList;
 import com.jkingone.jkmusic.entity.TopList;
@@ -29,8 +31,6 @@ import com.jkingone.jkmusic.ui.base.BaseActivity;
 import com.jkingone.jkmusic.ui.mvp.contract.SongAndTopListContract;
 import com.jkingone.jkmusic.ui.mvp.SongAndTopListPresenter;
 import com.jkingone.ui.widget.ContentLoadView;
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -227,45 +227,38 @@ public class SongAndTopListActivity extends BaseActivity<SongAndTopListPresenter
         }
 
         private void bindSongList(final HeadViewHolder headViewHolder) {
-            if (Utils.checkStringNotNull(mSongList.getPic300())) {
-                Picasso.get()
-                        .load(mSongList.getPic300())
-                        .resize(DensityUtils.dp2px(SongAndTopListActivity.this, 128),
-                                DensityUtils.dp2px(SongAndTopListActivity.this, 128))
-                        .centerCrop()
-                        .into(new Target() {
-                            @Override
-                            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                                headViewHolder.mImageViewCover.setImageBitmap(bitmap);
 
-                                Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
-                                    @Override
-                                    public void onGenerated(@NonNull Palette palette) {
-                                        int color = palette.getMutedColor(Color.LTGRAY);
-                                        if (color == Color.LTGRAY) {
-                                            color = palette.getVibrantColor(Color.LTGRAY);
-                                        }
-                                        headViewHolder.itemView.setBackgroundColor(color);
-                                        mToolbarDrawable = new ColorDrawable(color);
-                                        mToolbar.setBackground(mToolbarDrawable);
+            GlideApp.with(SongAndTopListActivity.this)
+                    .asBitmap()
+                    .load(mSongList.getPic300())
+                    .override(DensityUtils.dp2px(SongAndTopListActivity.this, 128))
+                    .into(new SimpleTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(Bitmap bitmap, Transition<? super Bitmap> transition) {
+                            headViewHolder.mImageViewCover.setImageBitmap(bitmap);
+
+                            Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
+                                @Override
+                                public void onGenerated(@NonNull Palette palette) {
+                                    int color = palette.getMutedColor(Color.LTGRAY);
+                                    if (color == Color.LTGRAY) {
+                                        color = palette.getVibrantColor(Color.LTGRAY);
                                     }
-                                });
-                            }
+                                    headViewHolder.itemView.setBackgroundColor(color);
+                                    mToolbarDrawable = new ColorDrawable(color);
+                                    mToolbar.setBackground(mToolbarDrawable);
+                                }
+                            });
+                        }
 
-                            @Override
-                            public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-                                headViewHolder.itemView.setBackgroundColor(Color.LTGRAY);
-                                headViewHolder.mImageViewCover.setImageResource(R.drawable.music_large);
-                                mToolbarDrawable = new ColorDrawable(Color.LTGRAY);
-                                mToolbar.setBackground(mToolbarDrawable);
-                            }
-
-                            @Override
-                            public void onPrepareLoad(Drawable placeHolderDrawable) {
-
-                            }
-                        });
-            }
+                        @Override
+                        public void onLoadFailed(@Nullable Drawable errorDrawable) {
+                            headViewHolder.itemView.setBackgroundColor(Color.LTGRAY);
+                            headViewHolder.mImageViewCover.setImageResource(R.drawable.music_large);
+                            mToolbarDrawable = new ColorDrawable(Color.LTGRAY);
+                            mToolbar.setBackground(mToolbarDrawable);
+                        }
+                    });
 
             headViewHolder.mTextViewName.setText(mSongList.getTitle());
             headViewHolder.mTextViewTitle.setText(mSongList.getTag());
@@ -273,46 +266,37 @@ public class SongAndTopListActivity extends BaseActivity<SongAndTopListPresenter
         }
 
         private void bindTopList(final HeadViewHolder headViewHolder) {
-            if (Utils.checkStringNotNull(mTopList.getPicS192())) {
-                Picasso.get()
-                        .load(mTopList.getPicS192())
-                        .resize(DensityUtils.dp2px(SongAndTopListActivity.this, 128),
-                                DensityUtils.dp2px(SongAndTopListActivity.this, 128))
-                        .centerCrop()
-                        .into(new Target() {
-                            @Override
-                            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+            GlideApp.with(SongAndTopListActivity.this)
+                    .asBitmap()
+                    .load(mTopList.getPicS192())
+                    .override(DensityUtils.dp2px(SongAndTopListActivity.this, 128))
+                    .into(new SimpleTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(Bitmap bitmap, Transition<? super Bitmap> transition) {
+                            headViewHolder.mImageViewCover.setImageBitmap(bitmap);
 
-                                headViewHolder.mImageViewCover.setImageBitmap(bitmap);
-
-                                Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
-                                    @Override
-                                    public void onGenerated(@NonNull Palette palette) {
-                                        int color = palette.getMutedColor(Color.LTGRAY);
-                                        if (color == Color.LTGRAY) {
-                                            color = palette.getVibrantColor(Color.LTGRAY);
-                                        }
-                                        headViewHolder.itemView.setBackgroundColor(color);
-                                        mToolbarDrawable = new ColorDrawable(color);
-                                        mToolbar.setBackground(mToolbarDrawable);
+                            Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
+                                @Override
+                                public void onGenerated(@NonNull Palette palette) {
+                                    int color = palette.getMutedColor(Color.LTGRAY);
+                                    if (color == Color.LTGRAY) {
+                                        color = palette.getVibrantColor(Color.LTGRAY);
                                     }
-                                });
-                            }
+                                    headViewHolder.itemView.setBackgroundColor(color);
+                                    mToolbarDrawable = new ColorDrawable(color);
+                                    mToolbar.setBackground(mToolbarDrawable);
+                                }
+                            });
+                        }
 
-                            @Override
-                            public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-                                headViewHolder.itemView.setBackgroundColor(Color.LTGRAY);
-                                headViewHolder.mImageViewCover.setImageResource(R.drawable.music_large);
-                                mToolbarDrawable = new ColorDrawable(Color.LTGRAY);
-                                mToolbar.setBackground(mToolbarDrawable);
-                            }
-
-                            @Override
-                            public void onPrepareLoad(Drawable placeHolderDrawable) {
-
-                            }
-                        });
-            }
+                        @Override
+                        public void onLoadFailed(@Nullable Drawable errorDrawable) {
+                            headViewHolder.itemView.setBackgroundColor(Color.LTGRAY);
+                            headViewHolder.mImageViewCover.setImageResource(R.drawable.music_large);
+                            mToolbarDrawable = new ColorDrawable(Color.LTGRAY);
+                            mToolbar.setBackground(mToolbarDrawable);
+                        }
+                    });
 
             headViewHolder.mTextViewName.setText(mTopList.getName());
             headViewHolder.mTextViewComment.setText(mTopList.getComment());

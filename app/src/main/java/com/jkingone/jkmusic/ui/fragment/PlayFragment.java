@@ -19,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.jkingone.common.utils.DensityUtils;
+import com.jkingone.jkmusic.GlideApp;
 import com.jkingone.jkmusic.ui.base.LazyFragment;
 import com.jkingone.ui.widget.JDialog;
 import com.jkingone.jkmusic.Constant;
@@ -30,7 +31,6 @@ import com.jkingone.jkmusic.entity.SongInfo;
 import com.jkingone.jkmusic.service.MusicService;
 import com.jkingone.jkmusic.ui.base.BaseActivity;
 import com.jkingone.jkmusic.ui.activity.PlayActivity;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -340,11 +340,10 @@ public class PlayFragment extends LazyFragment {
         mImageViewCover = view.findViewById(R.id.iv_cover);
         mTextViewSinger = view.findViewById(R.id.tv_singer);
         mTextViewSongName = view.findViewById(R.id.tv_songName);
-        Picasso.get()
+        GlideApp.with(this)
+                .asBitmap()
                 .load(mCurSongInfo.getPicUrl())
-                .centerCrop()
-                .resize(DensityUtils.dp2px(mBaseActivity, 48), DensityUtils.dp2px(mBaseActivity, 48))
-                .placeholder(R.drawable.music)
+                .override(DensityUtils.dp2px(mBaseActivity, 48))
                 .into(mImageViewCover);
         mTextViewSinger.setText(mCurSongInfo.getArtist());
         mTextViewSongName.setText(mCurSongInfo.getTitle());

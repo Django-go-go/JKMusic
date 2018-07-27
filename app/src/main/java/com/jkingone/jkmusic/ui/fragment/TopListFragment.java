@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.jkingone.common.utils.DensityUtils;
+import com.jkingone.jkmusic.GlideApp;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.Utils;
 import com.jkingone.jkmusic.entity.TopList;
@@ -22,7 +23,6 @@ import com.jkingone.jkmusic.ui.base.BaseFragment;
 import com.jkingone.jkmusic.ui.mvp.contract.TopListFragContract;
 import com.jkingone.jkmusic.ui.mvp.TopListFragPresenter;
 import com.jkingone.ui.widget.ContentLoadView;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -150,15 +150,11 @@ public class TopListFragment extends BaseFragment<TopListFragPresenter> implemen
                 }
             });
 
-            int px = DensityUtils.dp2px(mContext, 128);
-
-            if (Utils.checkStringNotNull(topList.getPicS260())) {
-                Picasso.get().load(topList.getPicS260())
-                        .resize(px, px)
-                        .centerCrop()
-                        .into(vh.imageView);
-            }
-
+            GlideApp.with(TopListFragment.this)
+                    .asBitmap()
+                    .load(topList.getPicS260())
+                    .override(DensityUtils.dp2px(mContext, 128))
+                    .into(vh.imageView);
         }
 
         @Override

@@ -2,6 +2,7 @@
 <com.jkingone.ui.widget.ContentLoadView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/content_common"
+    android:background="@color/white"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 

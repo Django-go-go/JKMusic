@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import com.jkingone.common.utils.DensityUtils;
 import com.jkingone.common.utils.ScreenUtils;
+import com.jkingone.jkmusic.GlideApp;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.Utils;
 import com.jkingone.jkmusic.adapter.LoadMoreRecycleAdapter;
@@ -27,7 +28,6 @@ import com.jkingone.jkmusic.ui.base.BaseFragment;
 import com.jkingone.jkmusic.ui.mvp.contract.SongListFragContract;
 import com.jkingone.jkmusic.ui.mvp.SongListFragPresenter;
 import com.jkingone.ui.widget.ContentLoadView;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,8 +41,6 @@ import butterknife.Unbinder;
  */
 
 public class SongListFragment extends BaseFragment<SongListFragPresenter> implements SongListFragContract.ViewCallback {
-
-    private static final String TAG = "SongListFragment";
 
     @BindView(R.id.recycle_common)
     RecyclerView mRecyclerView;
@@ -88,11 +86,6 @@ public class SongListFragment extends BaseFragment<SongListFragPresenter> implem
                         mRecycleAdapter.mFootLoadView.postLoading();
                         mPresenter.getSongList(SIZE, offset);
                     }
-                }
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    Picasso.get().resumeTag(TAG);
-                } else {
-                    Picasso.get().pauseTag(TAG);
                 }
             }
         });
@@ -221,18 +214,19 @@ public class SongListFragment extends BaseFragment<SongListFragPresenter> implem
 
                 contentViewHolder.mTextView.setText(songList.getTitle());
 
-                if (Utils.checkStringNotNull(songList.getPic300())) {
-                    Picasso.get().load(songList.getPic300())
-                            .resize(w / col, w / col)
-                            .centerCrop()
-                            .tag(TAG)
-                            .into(contentViewHolder.mImageView);
 
+
+                if (Utils.checkStringNotNull(songList.getPic300())) {
+                    GlideApp.with(SongListFragment.this)
+                            .asBitmap()
+                            .override(w / col, w / col)
+                            .load(songList.getPic300())
+                            .into(contentViewHolder.mImageView);
                 } else if (Utils.checkStringNotNull(songList.getPic())) {
-                    Picasso.get().load(songList.getPic())
-                            .resize(w / col, w / col)
-                            .centerCrop()
-                            .tag(TAG)
+                    GlideApp.with(SongListFragment.this)
+                            .asBitmap()
+                            .override(w / col, w / col)
+                            .load(songList.getPic())
                             .into(contentViewHolder.mImageView);
                 }
 

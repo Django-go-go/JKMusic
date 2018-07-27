@@ -23,6 +23,7 @@ import android.widget.TextView;
 
 import com.jkingone.common.utils.DensityUtils;
 import com.jkingone.common.utils.ScreenUtils;
+import com.jkingone.jkmusic.GlideApp;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.ui.base.BaseActivity;
 import com.jkingone.ui.widget.ContentLoadView;
@@ -30,7 +31,6 @@ import com.jkingone.ui.widget.WaveView;
 import com.jkingone.jkmusic.entity.SongList;
 import com.jkingone.jkmusic.ui.mvp.contract.ClassifySongListContract;
 import com.jkingone.jkmusic.ui.mvp.ClassifySongListPresenter;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -197,15 +197,11 @@ public class ClassifySongListActivity extends BaseActivity<ClassifySongListPrese
                 holder.textView_name.setText("标签: " + songList.getTag());
                 holder.textView_title.setText(songList.getTitle());
                 holder.textView_desc.setText(songList.getDesc());
-                if (songList.getPic300() != null) {
-                    Picasso.get()
-                            .load(songList.getPic300())
-                            .placeholder(R.drawable.music)
-                            .resize(DensityUtils.dp2px(mContext, 128), DensityUtils.dp2px(mContext, 128))
-                            .centerCrop()
-                            .tag(mContext)
-                            .into(holder.imageView);
-                }
+                GlideApp.with(ClassifySongListActivity.this)
+                        .asBitmap()
+                        .load(songList.getPic300())
+                        .override(DensityUtils.dp2px(mContext, 128))
+                        .into(holder.imageView);
             }
 
 

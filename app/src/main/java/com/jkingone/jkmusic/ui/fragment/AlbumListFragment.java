@@ -2,13 +2,13 @@ package com.jkingone.jkmusic.ui.fragment;
 
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -20,17 +20,21 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.jkingone.common.utils.ScreenUtils;
+import com.jkingone.jkmusic.GlideApp;
+import com.jkingone.jkmusic.JkGlideApp;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.Utils;
 import com.jkingone.jkmusic.entity.AlbumList;
-import com.jkingone.jkmusic.ui.activity.AlbumAndArtistActivity;
 import com.jkingone.jkmusic.ui.base.BaseFragment;
 import com.jkingone.jkmusic.ui.mvp.AlbumListPresenter;
 import com.jkingone.jkmusic.ui.mvp.contract.AlbumListContract;
 import com.jkingone.ui.widget.ContentLoadView;
-import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,8 +61,6 @@ public class AlbumListFragment extends BaseFragment<AlbumListPresenter> implemen
     private int offset = 0;
     private static final int LIMIT = 30;
 
-    private static final String TAG = "AlbumListFragment";
-
     @Override
     protected void onLazyLoadOnce() {
         mPresenter.getAlbumList(offset, LIMIT);
@@ -84,9 +86,6 @@ public class AlbumListFragment extends BaseFragment<AlbumListPresenter> implemen
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 StaggeredGridLayoutManager manager = (StaggeredGridLayoutManager) recyclerView.getLayoutManager();
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-
-                    Picasso.get().resumeTag(TAG);
-
                     int[] pos = new int[manager.getSpanCount()];
                     manager.findLastVisibleItemPositions(pos);
                     int max = pos[0];
@@ -99,8 +98,6 @@ public class AlbumListFragment extends BaseFragment<AlbumListPresenter> implemen
                         offset += LIMIT;
                         mPresenter.getAlbumList(offset, LIMIT);
                     }
-                } else {
-                    Picasso.get().pauseTag(TAG);
                 }
             }
         });
@@ -155,46 +152,39 @@ public class AlbumListFragment extends BaseFragment<AlbumListPresenter> implemen
         @Override
         public void onBindViewHolder(@NonNull final AlbumViewHolder holder, final int position) {
             AlbumList albumList = mAlbumLists.get(position);
-            if (Utils.checkStringNotNull(albumList.getPicRadio())) {
-                Picasso.get().
-                        load(albumList.getPicRadio())
-                        .resize(mWidth, mWidth)
-                        .centerCrop()
-                        .tag(TAG)
-                        .into(new Target() {
-                            @Override
-                            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                                holder.mImageView.setImageBitmap(bitmap);
-                                Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
-                                    @Override
-                                    public void onGenerated(@NonNull Palette palette) {
-                                        int color = palette.getLightMutedColor(Color.LTGRAY);
-                                        ((CardView)holder.itemView).setCardBackgroundColor(color);
-                                    }
-                                });
-                            }
 
-                            @Override
-                            public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-                                ((CardView)holder.itemView).setCardBackgroundColor(Color.LTGRAY);
-                                holder.mImageView.setImageResource(R.drawable.music_large);
-                            }
+            GlideApp.with(AlbumListFragment.this)
+                    .asBitmap()
+                    .load(albumList.getPicRadio())
+                    .centerCrop()
+                    .override(mWidth, mWidth)
+                    .into(new SimpleTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
+                            holder.mImageView.setImageBitmap(resource);
+                            Palette.from(resource).generate(new Palette.PaletteAsyncListener() {
+                                @Override
+                                public void onGenerated(@NonNull Palette palette) {
+                                    int color = palette.getLightMutedColor(Color.LTGRAY);
+                                    ((CardView) holder.itemView).setCardBackgroundColor(color);
+                                }
+                            });
+                        }
 
-                            @Override
-                            public void onPrepareLoad(Drawable placeHolderDrawable) {
-
-                            }
-                        });
-            }
+                        @Override
+                        public void onLoadFailed(@Nullable Drawable errorDrawable) {
+                            ((CardView) holder.itemView).setCardBackgroundColor(Color.LTGRAY);
+                        }
+                    });
             holder.mTextViewTitle.setText(albumList.getTitle());
             holder.mTextViewAuthor.setText(albumList.getAuthor());
             holder.mTextViewPublish.setText(albumList.getPublishTime());
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(AlbumListFragment.this.getContext(), AlbumAndArtistActivity.class);
-                    intent.putExtra(AlbumAndArtistActivity.TYPE_ALBUM, mAlbumLists.get(position));
-                    startActivity(intent);
+//                    Intent intent = new Intent(AlbumListFragment.this.getContext(), AlbumAndArtistActivity.class);
+//                    intent.putExtra(AlbumAndArtistActivity.TYPE_ALBUM, mAlbumLists.get(position));
+//                    startActivity(intent);
                 }
             });
         }
