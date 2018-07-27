@@ -1,36 +1,34 @@
 package com.jkingone.jkmusic.ui.activity;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.os.Bundle;
-import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.v7.graphics.Palette;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.jkingone.common.Utils.DensityUtils;
-import com.jkingone.common.Utils.ScreenUtils;
+import com.jkingone.common.utils.DensityUtils;
+import com.jkingone.common.utils.LogUtils;
+import com.jkingone.common.utils.ScreenUtils;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.Utils;
-import com.jkingone.jkmusic.adapter.HeadAndFootRecycleAdapter;
 import com.jkingone.jkmusic.entity.SongInfo;
 import com.jkingone.jkmusic.entity.SongList;
 import com.jkingone.jkmusic.entity.TopList;
 import com.jkingone.jkmusic.ui.base.BaseActivity;
 import com.jkingone.jkmusic.ui.mvp.contract.SongAndTopListContract;
 import com.jkingone.jkmusic.ui.mvp.SongAndTopListPresenter;
-import com.jkingone.ui.customview.ContentLoadView;
-import com.squareup.picasso.Callback;
+import com.jkingone.ui.widget.ContentLoadView;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -42,51 +40,47 @@ import butterknife.ButterKnife;
 
 public class SongAndTopListActivity extends BaseActivity<SongAndTopListPresenter> implements SongAndTopListContract.ViewCallback {
 
-    private static final String TAG = "SongAndTopListActivity";
-
     public static final String TYPE_SONG_LIST = "song_list";
     public static final String TYPE_TOP_LIST = "top_list";
 
-    private List<SongInfo> mMp3Infos = new ArrayList<>();
+    private String mType;
+
+    private List<SongInfo> mSongInfos = new ArrayList<>();
 
     private TopList mTopList;
     private SongList mSongList;
 
-    @BindView(R.id.collapsing_toolbar)
-    CollapsingToolbarLayout mCollapsingToolbarLayout;
-    @BindView(R.id.app_bar)
-    AppBarLayout mAppBarLayout;
-    @BindView(R.id.toolbar)
+    private SongAdapter mSongAdapter;
+
+    private Drawable mToolbarDrawable;
+
+    private int mHeight = 0;
+
+    @BindView(R.id.toolbar_common)
     Toolbar mToolbar;
 
-    @BindView(R.id.iv_coverimage)
-    ImageView mImageViewCover;
-    @BindView(R.id.tv_title)
-    TextView mTextViewTitle;
-    @BindView(R.id.tv_name)
-    TextView mTextViewName;
-    @BindView(R.id.tv_comment)
-    TextView mTextViewComment;
-
-    @BindView(R.id.recycle_universal)
+    @BindView(R.id.recycle_common)
     RecyclerView mRecyclerView;
-    @BindView(R.id.content_universal)
+    @BindView(R.id.content_common)
     ContentLoadView mContentLoadView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_songlist_or_toplist);
+        setContentView(R.layout.common_root_overlay);
         ScreenUtils.setTranslucent(this);
         ButterKnife.bind(this);
 
-        setSupportActionBar(mToolbar);
-
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mAppBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+        mContentLoadView.setLoadRetryListener(new ContentLoadView.LoadRetryListener() {
             @Override
-            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
-                Log.i(TAG, "onOffsetChanged: " + verticalOffset);
+            public void onRetry() {
+                if (TYPE_SONG_LIST.equals(mType)) {
+                    mPresenter.getSongFromSongList(mSongList.getListId());
+                    return;
+                }
+                if (TYPE_TOP_LIST.equals(mType)) {
+                    mPresenter.getSongFromTopList(Integer.parseInt(mTopList.getType()));
+                }
             }
         });
 
@@ -95,80 +89,50 @@ public class SongAndTopListActivity extends BaseActivity<SongAndTopListPresenter
         if (intent != null) {
             mSongList = intent.getParcelableExtra(TYPE_SONG_LIST);
             if (mSongList != null) {
-                initSongList();
+                mType = TYPE_SONG_LIST;
+                mPresenter.getSongFromSongList(mSongList.getListId());
+                mToolbar.setTitle("歌单");
             }
 
             mTopList = intent.getParcelableExtra(TYPE_TOP_LIST);
             if (mTopList != null){
-                initTopList();
+                mType = TYPE_TOP_LIST;
+                mPresenter.getSongFromTopList(Integer.parseInt(mTopList.getType()));
+                mToolbar.setTitle("榜单");
             }
         }
 
-        mContentLoadView.setLoadRetryListener(new ContentLoadView.LoadRetryListener() {
+        setSupportActionBar(mToolbar);
+        mToolbar.bringToFront();
+        mToolbar.setBackground(null);
+
+        mHeight = DensityUtils.dp2px(this, 160);
+
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mSongAdapter = new SongAdapter();
+        mRecyclerView.setAdapter(mSongAdapter);
+
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            int scrollY = 0;
             @Override
-            public void onRetry() {
-                if (mSongList != null) {
-                    mPresenter.getSongFromSongList(mSongList.getListId());
-                }
-                if (mTopList != null) {
-                    mPresenter.getSongFromTopList(Integer.parseInt(mTopList.getType()));
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                scrollY += dy;
+                if (mToolbarDrawable != null) {
+                    if (scrollY >= 0 && scrollY <= mHeight) {
+                        int alpha = scrollY * 255 / mHeight;
+                        mToolbarDrawable.setAlpha(alpha);
+                    } else {
+                        mToolbarDrawable.setAlpha(255);
+                    }
                 }
             }
+
         });
     }
 
     @Override
     public SongAndTopListPresenter createPresenter() {
         return new SongAndTopListPresenter(this);
-    }
-
-    private void initTopList() {
-        mPresenter.getSongFromTopList(Integer.parseInt(mTopList.getType()));
-        if (Utils.checkStringNotNull(mTopList.getPicS192())) {
-            Picasso.get()
-                    .load(mTopList.getPicS192())
-                    .resize(DensityUtils.dp2px(this, 128), DensityUtils.dp2px(this, 128))
-                    .centerCrop()
-                    .into(mImageViewCover);
-            Picasso.get()
-                    .load(mTopList.getPicS192())
-                    .resize(DensityUtils.dp2px(this, 128), DensityUtils.dp2px(this, 128))
-                    .centerCrop()
-                    .into(new Target() {
-                        @Override
-                        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-
-                        }
-
-                        @Override
-                        public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-
-                        }
-
-                        @Override
-                        public void onPrepareLoad(Drawable placeHolderDrawable) {
-
-                        }
-                    });
-        }
-
-        mTextViewName.setText(mTopList.getName());
-        mTextViewComment.setText(mTopList.getComment());
-    }
-
-    private void initSongList() {
-        mPresenter.getSongFromSongList(mSongList.getListId());
-        if (Utils.checkStringNotNull(mSongList.getPic300())) {
-            Picasso.get()
-                    .load(mSongList.getPic300())
-                    .resize(DensityUtils.dp2px(this, 128), DensityUtils.dp2px(this, 128))
-                    .centerCrop()
-                    .into(mImageViewCover);
-        }
-
-        mTextViewName.setText(mSongList.getTitle());
-        mTextViewTitle.setText(mSongList.getTag());
-        mTextViewComment.setText(mSongList.getDesc());
     }
 
     @Override
@@ -181,43 +145,67 @@ public class SongAndTopListActivity extends BaseActivity<SongAndTopListPresenter
             mContentLoadView.postLoadNoData();
             return;
         }
+        mSongInfos.clear();
+        mSongInfos.addAll(songInfos);
         mContentLoadView.postLoadComplete();
-        mRecyclerView.setAdapter(new SongAdapter(this, songInfos));
+        if (mSongAdapter != null) {
+            mSongAdapter.notifyDataSetChanged();
+        } else {
+            mSongAdapter = new SongAdapter();
+            mRecyclerView.setAdapter(mSongAdapter);
+        }
     }
 
-    class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongViewHolder> {
+    class SongAdapter extends RecyclerView.Adapter {
 
-        private Context mContext;
-        private List<SongInfo> mSongs;
-
-        SongAdapter(Context context, List<SongInfo> songs) {
-            mContext = context;
-            mSongs = songs;
-        }
+        private static final int TYPE_HEAD = 1;
+        private static final int TYPE_CONTENT = 2;
 
         @NonNull
         @Override
-        public SongViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new SongViewHolder(LayoutInflater.from(mContext).inflate(R.layout.item_list_songinfo, parent, false));
+        public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            if (viewType == TYPE_HEAD) {
+                return new HeadViewHolder(LayoutInflater.from(SongAndTopListActivity.this).inflate(R.layout.activity_songlist_or_toplist_head, parent, false));
+            }
+            if (viewType == TYPE_CONTENT) {
+                return new SongViewHolder(LayoutInflater.from(SongAndTopListActivity.this).inflate(R.layout.item_list_song, parent, false));
+            }
+            throw new IllegalStateException("no type");
         }
 
         @Override
-        public void onBindViewHolder(@NonNull SongViewHolder holder, int position) {
-            SongInfo songInfo = mSongs.get(position);
-            holder.tv_singer.setText(songInfo.getArtist());
-            holder.tv_songName.setText(songInfo.getTitle());
-            holder.tv_position.setText(String.valueOf(position + 1));
-            holder.iv_action.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+            if (holder instanceof HeadViewHolder) {
+                final HeadViewHolder headViewHolder = (HeadViewHolder) holder;
+                if (TYPE_SONG_LIST.equals(mType)) {
+                    bindSongList(headViewHolder);
+                    return;
                 }
-            });
-            holder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+                if (TYPE_TOP_LIST.equals(mType)) {
+                    bindTopList(headViewHolder);
+                }
+                return;
+            }
 
-                }
-            });
+            if (holder instanceof SongViewHolder) {
+                position -= 1;
+                SongInfo songInfo = mSongInfos.get(position);
+                SongViewHolder songViewHolder = (SongViewHolder) holder;
+                songViewHolder.tv_singer.setText(songInfo.getArtist());
+                songViewHolder.tv_songName.setText(songInfo.getTitle());
+                songViewHolder.tv_position.setText(String.valueOf(position + 1));
+                songViewHolder.iv_action.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                    }
+                });
+                songViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                    }
+                });
+            }
         }
 
         @Override
@@ -226,8 +214,124 @@ public class SongAndTopListActivity extends BaseActivity<SongAndTopListPresenter
         }
 
         @Override
+        public int getItemViewType(int position) {
+            if (position == 0) {
+                return TYPE_HEAD;
+            }
+            return TYPE_CONTENT;
+        }
+
+        @Override
         public int getItemCount() {
-            return mSongs.size();
+            return mSongInfos.size() + 1;
+        }
+
+        private void bindSongList(final HeadViewHolder headViewHolder) {
+            if (Utils.checkStringNotNull(mSongList.getPic300())) {
+                Picasso.get()
+                        .load(mSongList.getPic300())
+                        .resize(DensityUtils.dp2px(SongAndTopListActivity.this, 128),
+                                DensityUtils.dp2px(SongAndTopListActivity.this, 128))
+                        .centerCrop()
+                        .into(new Target() {
+                            @Override
+                            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                                headViewHolder.mImageViewCover.setImageBitmap(bitmap);
+
+                                Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
+                                    @Override
+                                    public void onGenerated(@NonNull Palette palette) {
+                                        int color = palette.getMutedColor(Color.LTGRAY);
+                                        if (color == Color.LTGRAY) {
+                                            color = palette.getVibrantColor(Color.LTGRAY);
+                                        }
+                                        headViewHolder.itemView.setBackgroundColor(color);
+                                        mToolbarDrawable = new ColorDrawable(color);
+                                        mToolbar.setBackground(mToolbarDrawable);
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+                                headViewHolder.itemView.setBackgroundColor(Color.LTGRAY);
+                                headViewHolder.mImageViewCover.setImageResource(R.drawable.music_large);
+                                mToolbarDrawable = new ColorDrawable(Color.LTGRAY);
+                                mToolbar.setBackground(mToolbarDrawable);
+                            }
+
+                            @Override
+                            public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+                            }
+                        });
+            }
+
+            headViewHolder.mTextViewName.setText(mSongList.getTitle());
+            headViewHolder.mTextViewTitle.setText(mSongList.getTag());
+            headViewHolder.mTextViewComment.setText(mSongList.getDesc());
+        }
+
+        private void bindTopList(final HeadViewHolder headViewHolder) {
+            if (Utils.checkStringNotNull(mTopList.getPicS192())) {
+                Picasso.get()
+                        .load(mTopList.getPicS192())
+                        .resize(DensityUtils.dp2px(SongAndTopListActivity.this, 128),
+                                DensityUtils.dp2px(SongAndTopListActivity.this, 128))
+                        .centerCrop()
+                        .into(new Target() {
+                            @Override
+                            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+
+                                headViewHolder.mImageViewCover.setImageBitmap(bitmap);
+
+                                Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
+                                    @Override
+                                    public void onGenerated(@NonNull Palette palette) {
+                                        int color = palette.getMutedColor(Color.LTGRAY);
+                                        if (color == Color.LTGRAY) {
+                                            color = palette.getVibrantColor(Color.LTGRAY);
+                                        }
+                                        headViewHolder.itemView.setBackgroundColor(color);
+                                        mToolbarDrawable = new ColorDrawable(color);
+                                        mToolbar.setBackground(mToolbarDrawable);
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+                                headViewHolder.itemView.setBackgroundColor(Color.LTGRAY);
+                                headViewHolder.mImageViewCover.setImageResource(R.drawable.music_large);
+                                mToolbarDrawable = new ColorDrawable(Color.LTGRAY);
+                                mToolbar.setBackground(mToolbarDrawable);
+                            }
+
+                            @Override
+                            public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+                            }
+                        });
+            }
+
+            headViewHolder.mTextViewName.setText(mTopList.getName());
+            headViewHolder.mTextViewComment.setText(mTopList.getComment());
+        }
+
+        class HeadViewHolder extends RecyclerView.ViewHolder {
+            @BindView(R.id.iv_coverimage)
+            ImageView mImageViewCover;
+            @BindView(R.id.tv_title)
+            TextView mTextViewTitle;
+            @BindView(R.id.tv_name)
+            TextView mTextViewName;
+            @BindView(R.id.tv_comment)
+            TextView mTextViewComment;
+
+            HeadViewHolder(View itemView) {
+                super(itemView);
+                ButterKnife.bind(this, itemView);
+            }
         }
 
         class SongViewHolder extends RecyclerView.ViewHolder {

@@ -12,18 +12,6 @@ import retrofit2.http.Query;
 
 public interface SongListApi {
 
-    //==============================================================================================
-    // 歌单
-    //==============================================================================================
-
-    /**
-     * 热门歌单
-     * http://tingapi.ting.baidu.com/v1/restserver/ting?method=baidu.ting.diy.getHotGeDanAndOfficial
-     */
-    @GET("ting?method=baidu.ting.diy.getHotGeDanAndOfficial")
-    @Headers("User-Agent:Mozilla")
-    Call<List<SongList>> getHotSongList();
-
     /**
      * 歌单
      * @param page_no   页码

@@ -22,7 +22,7 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.jkingone.jkmusic.IMusicInterface;
-import com.jkingone.jkmusic.data.local.ContentHelper;
+import com.jkingone.jkmusic.ContentHelper;
 import com.jkingone.jkmusic.entity.SongInfo;
 import com.jkingone.jkmusic.media.JExoPlayerHelper;
 

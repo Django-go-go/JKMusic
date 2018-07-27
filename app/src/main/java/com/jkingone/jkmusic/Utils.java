@@ -12,7 +12,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
-import com.google.android.exoplayer2.Player;
+import com.jkingone.jkmusic.entity.Album;
 import com.jkingone.jkmusic.entity.Song;
 import com.jkingone.jkmusic.entity.SongInfo;
 import com.jkingone.jkmusic.service.MusicService;
@@ -118,8 +118,24 @@ public class Utils {
             SongInfo songInfo = new SongInfo();
             songInfo.setUrl(song.getUrl());
             songInfo.setArtist(song.getAuthor());
-            songInfo.setPicUrl(song.getPic_big());
-            songInfo.setId(song.getSong_id());
+            songInfo.setPicUrl(song.getPicBig());
+            songInfo.setId(song.getSongId());
+            songInfo.setTitle(song.getTitle());
+            songInfos.add(songInfo);
+        }
+        return songInfos;
+    }
+
+    public static List<SongInfo> AlbumSongToSongInfo(List<Album.Song> songs) {
+        if (songs == null) {
+            return null;
+        }
+        List<SongInfo> songInfos = new ArrayList<>();
+        for (Album.Song song : songs) {
+            SongInfo songInfo = new SongInfo();
+            songInfo.setArtist(song.getAuthor());
+            songInfo.setPicUrl(song.getPicSmall());
+            songInfo.setId(song.getSongId());
             songInfo.setTitle(song.getTitle());
             songInfos.add(songInfo);
         }

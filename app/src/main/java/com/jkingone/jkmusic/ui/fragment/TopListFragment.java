@@ -13,7 +13,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.jkingone.common.Utils.DensityUtils;
+import com.jkingone.common.utils.DensityUtils;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.Utils;
 import com.jkingone.jkmusic.entity.TopList;
@@ -21,7 +21,7 @@ import com.jkingone.jkmusic.ui.activity.SongAndTopListActivity;
 import com.jkingone.jkmusic.ui.base.BaseFragment;
 import com.jkingone.jkmusic.ui.mvp.contract.TopListFragContract;
 import com.jkingone.jkmusic.ui.mvp.TopListFragPresenter;
-import com.jkingone.ui.customview.ContentLoadView;
+import com.jkingone.ui.widget.ContentLoadView;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -39,9 +39,9 @@ public class TopListFragment extends BaseFragment<TopListFragPresenter> implemen
 
     private Unbinder mUnbinder;
 
-    @BindView(R.id.recycle_universal)
+    @BindView(R.id.recycle_common)
     RecyclerView mRecyclerView;
-    @BindView(R.id.content_universal)
+    @BindView(R.id.content_common)
     ContentLoadView mContentLoadView;
 
     public static TopListFragment newInstance(String... params) {
@@ -60,11 +60,18 @@ public class TopListFragment extends BaseFragment<TopListFragPresenter> implemen
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.layout_load_universal_notoolbar, container, false);
+        View view = inflater.inflate(R.layout.common_root_none, container, false);
 
         mUnbinder = ButterKnife.bind(this, view);
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        mContentLoadView.setLoadRetryListener(new ContentLoadView.LoadRetryListener() {
+            @Override
+            public void onRetry() {
+                mPresenter.loadData();
+            }
+        });
 
         return view;
     }

@@ -1,5 +1,8 @@
 package com.jkingone.jkmusic.entity;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.SerializedName;
 
 /*
@@ -24,7 +27,7 @@ import com.google.gson.annotations.SerializedName;
  */
 
 
-public class ArtistList {
+public class ArtistList implements Parcelable {
 
     @SerializedName("avatar_middle")
     private String avatarMiddle;
@@ -46,6 +49,32 @@ public class ArtistList {
     private int albumsTotal;
     @SerializedName("songs_total")
     private int songsTotal;
+
+    protected ArtistList(Parcel in) {
+        avatarMiddle = in.readString();
+        avatarMini = in.readString();
+        avatarBig = in.readString();
+        avatarSmall = in.readString();
+        artistId = in.readString();
+        name = in.readString();
+        firstChar = in.readString();
+        tingUid = in.readString();
+        country = in.readString();
+        albumsTotal = in.readInt();
+        songsTotal = in.readInt();
+    }
+
+    public static final Creator<ArtistList> CREATOR = new Creator<ArtistList>() {
+        @Override
+        public ArtistList createFromParcel(Parcel in) {
+            return new ArtistList(in);
+        }
+
+        @Override
+        public ArtistList[] newArray(int size) {
+            return new ArtistList[size];
+        }
+    };
 
     public String getAvatarMiddle() {
         return avatarMiddle;
@@ -150,5 +179,25 @@ public class ArtistList {
                 ", albumsTotal=" + albumsTotal +
                 ", songsTotal=" + songsTotal +
                 '}';
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(avatarMiddle);
+        dest.writeString(avatarMini);
+        dest.writeString(avatarBig);
+        dest.writeString(avatarSmall);
+        dest.writeString(artistId);
+        dest.writeString(name);
+        dest.writeString(firstChar);
+        dest.writeString(tingUid);
+        dest.writeString(country);
+        dest.writeInt(albumsTotal);
+        dest.writeInt(songsTotal);
     }
 }

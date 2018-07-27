@@ -22,7 +22,7 @@
             app:popupTheme="@style/AppTheme.PopupOverlay" />
 
         <include
-            layout="@layout/layout_load_universal_notoolbar"
+            layout="@layout/common_root_none"
             android:layout_weight="1"
             android:layout_width="match_parent"
             android:layout_height="0dp"/>

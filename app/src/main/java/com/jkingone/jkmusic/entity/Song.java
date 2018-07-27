@@ -3,30 +3,34 @@ package com.jkingone.jkmusic.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Created by Administrator on 2017/9/11.
  */
 
 public class Song implements Parcelable {
-    private String song_id;
+    @SerializedName("song_id")
+    private String songId;
     private String title;
     private String author;
-    private String pic_big;
+    @SerializedName("pic_big")
+    private String picBig;
     private String url;
 
-    public Song(String song_id, String title, String author, String pic_big, String url) {
-        this.song_id = song_id;
+    public Song(String songId, String title, String author, String picBig, String url) {
+        this.songId = songId;
         this.title = title;
         this.author = author;
-        this.pic_big = pic_big;
+        this.picBig = picBig;
         this.url = url;
     }
 
     protected Song(Parcel in) {
-        song_id = in.readString();
+        songId = in.readString();
         title = in.readString();
         author = in.readString();
-        pic_big = in.readString();
+        picBig = in.readString();
         url = in.readString();
     }
 
@@ -42,12 +46,12 @@ public class Song implements Parcelable {
         }
     };
 
-    public String getSong_id() {
-        return song_id;
+    public String getSongId() {
+        return songId;
     }
 
-    public void setSong_id(String song_id) {
-        this.song_id = song_id;
+    public void setSongId(String songId) {
+        this.songId = songId;
     }
 
     public String getTitle() {
@@ -66,12 +70,12 @@ public class Song implements Parcelable {
         this.author = author;
     }
 
-    public String getPic_big() {
-        return pic_big;
+    public String getPicBig() {
+        return picBig;
     }
 
-    public void setPic_big(String pic_big) {
-        this.pic_big = pic_big;
+    public void setPicBig(String picBig) {
+        this.picBig = picBig;
     }
 
     public String getUrl() {
@@ -85,10 +89,10 @@ public class Song implements Parcelable {
     @Override
     public String toString() {
         return "Song{" +
-                "song_id='" + song_id + '\'' +
+                "songId='" + songId + '\'' +
                 ", title='" + title + '\'' +
                 ", author='" + author + '\'' +
-                ", pic_big='" + pic_big + '\'' +
+                ", picBig='" + picBig + '\'' +
                 ", url='" + url + '\'' +
                 '}';
     }
@@ -100,10 +104,10 @@ public class Song implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(song_id);
+        dest.writeString(songId);
         dest.writeString(title);
         dest.writeString(author);
-        dest.writeString(pic_big);
+        dest.writeString(picBig);
         dest.writeString(url);
     }
 }

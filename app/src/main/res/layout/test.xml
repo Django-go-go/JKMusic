@@ -43,7 +43,7 @@
     </android.support.design.widget.AppBarLayout>
 
     <include
-        layout="@layout/layout_load_universal_notoolbar"
+        layout="@layout/common_root_none"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>

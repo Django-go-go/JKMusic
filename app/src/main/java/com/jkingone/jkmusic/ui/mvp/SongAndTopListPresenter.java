@@ -1,7 +1,6 @@
 package com.jkingone.jkmusic.ui.mvp;
 
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -12,10 +11,8 @@ import com.jkingone.jkmusic.Utils;
 import com.jkingone.jkmusic.api.SongListApi;
 import com.jkingone.jkmusic.api.TopListApi;
 import com.jkingone.jkmusic.entity.Song;
-import com.jkingone.jkmusic.data.remote.RemoteData;
 import com.jkingone.jkmusic.ui.mvp.base.BasePresenter;
 import com.jkingone.jkmusic.ui.mvp.contract.SongAndTopListContract;
-import com.jkingone.jkmusic.ui.mvp.contract.SongListFragContract;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;

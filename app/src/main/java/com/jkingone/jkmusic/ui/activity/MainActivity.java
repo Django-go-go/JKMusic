@@ -14,8 +14,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.jkingone.common.Utils.PermissionUtils;
-import com.jkingone.common.Utils.ScreenUtils;
+import com.jkingone.common.utils.PermissionUtils;
+import com.jkingone.common.utils.ScreenUtils;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.ui.base.BaseActivity;
 import com.jkingone.jkmusic.ui.mvp.base.BasePresenter;

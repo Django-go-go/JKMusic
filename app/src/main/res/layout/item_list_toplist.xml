@@ -6,9 +6,9 @@
     android:layout_height="128dp"
     android:paddingStart="4dp"
     android:paddingEnd="4dp"
-    android:background="@drawable/shadow_rect">
+    android:background="@drawable/shadow_rect_normal">
 
-    <com.jkingone.ui.customview.RoundedImageView
+    <com.jkingone.ui.widget.RoundedImageView
         android:layout_marginTop="4dp"
         android:layout_alignParentBottom="true"
         android:id="@+id/iv_item"

@@ -21,12 +21,12 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.jkingone.common.Utils.DensityUtils;
-import com.jkingone.common.Utils.ScreenUtils;
+import com.jkingone.common.utils.DensityUtils;
+import com.jkingone.common.utils.ScreenUtils;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.ui.base.BaseActivity;
-import com.jkingone.ui.customview.ContentLoadView;
-import com.jkingone.ui.customview.WaveView;
+import com.jkingone.ui.widget.ContentLoadView;
+import com.jkingone.ui.widget.WaveView;
 import com.jkingone.jkmusic.entity.SongList;
 import com.jkingone.jkmusic.ui.mvp.contract.ClassifySongListContract;
 import com.jkingone.jkmusic.ui.mvp.ClassifySongListPresenter;
@@ -41,7 +41,7 @@ import butterknife.ButterKnife;
 public class ClassifySongListActivity extends BaseActivity<ClassifySongListPresenter>
         implements ClassifySongListContract.ViewCallBack {
 
-    @BindView(R.id.recycle_universal)
+    @BindView(R.id.recycle_common)
     RecyclerView mRecyclerView;
     @BindView(R.id.toolbar)
     Toolbar mToolbar;
@@ -52,7 +52,7 @@ public class ClassifySongListActivity extends BaseActivity<ClassifySongListPrese
     WaveView mClassifyView;
     @BindView(R.id.iv_back)
     ImageView mImageView_back;
-    @BindView(R.id.content_universal)
+    @BindView(R.id.content_common)
     ContentLoadView mContentLoadView;
 
     private String tag = "华语";

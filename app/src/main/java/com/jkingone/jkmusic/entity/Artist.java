@@ -166,6 +166,7 @@ public class Artist {
         public void setWeight(String weight) {
             this.weight = weight;
         }
+
         public String getWeight() {
             return weight;
         }
@@ -174,6 +175,7 @@ public class Artist {
         public void setNickname(String nickname) {
             this.nickname = nickname;
         }
+
         public String getNickname() {
             return nickname;
         }
@@ -182,6 +184,7 @@ public class Artist {
         public void setTingUid(String tingUid) {
             this.tingUid = tingUid;
         }
+
         public String getTingUid() {
             return tingUid;
         }
@@ -190,6 +193,7 @@ public class Artist {
         public void setStature(String stature) {
             this.stature = stature;
         }
+
         public String getStature() {
             return stature;
         }
@@ -198,6 +202,7 @@ public class Artist {
         public void setAvatarS500(String avatarS500) {
             this.avatarS500 = avatarS500;
         }
+
         public String getAvatarS500() {
             return avatarS500;
         }
@@ -206,6 +211,7 @@ public class Artist {
         public void setSource(String source) {
             this.source = source;
         }
+
         public String getSource() {
             return source;
         }
@@ -214,6 +220,7 @@ public class Artist {
         public void setListenNum(String listenNum) {
             this.listenNum = listenNum;
         }
+
         public String getListenNum() {
             return listenNum;
         }
@@ -222,6 +229,7 @@ public class Artist {
         public void setCollectNum(int collectNum) {
             this.collectNum = collectNum;
         }
+
         public int getCollectNum() {
             return collectNum;
         }
@@ -230,6 +238,7 @@ public class Artist {
         public void setHot(String hot) {
             this.hot = hot;
         }
+
         public String getHot() {
             return hot;
         }
@@ -238,6 +247,7 @@ public class Artist {
         public void setCommentNum(int commentNum) {
             this.commentNum = commentNum;
         }
+
         public int getCommentNum() {
             return commentNum;
         }
@@ -246,6 +256,7 @@ public class Artist {
         public void setArea(String area) {
             this.area = area;
         }
+
         public String getArea() {
             return area;
         }
@@ -254,6 +265,7 @@ public class Artist {
         public void setInfo(String info) {
             this.info = info;
         }
+
         public String getInfo() {
             return info;
         }
@@ -262,6 +274,7 @@ public class Artist {
         public void setFirstchar(String firstchar) {
             this.firstchar = firstchar;
         }
+
         public String getFirstchar() {
             return firstchar;
         }
@@ -270,6 +283,7 @@ public class Artist {
         public void setAvatarS180(String avatarS180) {
             this.avatarS180 = avatarS180;
         }
+
         public String getAvatarS180() {
             return avatarS180;
         }
@@ -277,6 +291,7 @@ public class Artist {
         public void setAvatarSmall(String avatarSmall) {
             this.avatarSmall = avatarSmall;
         }
+
         public String getAvatarSmall() {
             return avatarSmall;
         }
@@ -285,6 +300,7 @@ public class Artist {
         public void setAlbumsTotal(String albumsTotal) {
             this.albumsTotal = albumsTotal;
         }
+
         public String getAlbumsTotal() {
             return albumsTotal;
         }
@@ -293,6 +309,7 @@ public class Artist {
         public void setArtistId(String artistId) {
             this.artistId = artistId;
         }
+
         public String getArtistId() {
             return artistId;
         }
@@ -301,6 +318,7 @@ public class Artist {
         public void setConstellation(String constellation) {
             this.constellation = constellation;
         }
+
         public String getConstellation() {
             return constellation;
         }
@@ -309,6 +327,7 @@ public class Artist {
         public void setIsCollect(int isCollect) {
             this.isCollect = isCollect;
         }
+
         public int getIsCollect() {
             return isCollect;
         }
@@ -317,6 +336,7 @@ public class Artist {
         public void setIntro(String intro) {
             this.intro = intro;
         }
+
         public String getIntro() {
             return intro;
         }
@@ -325,6 +345,7 @@ public class Artist {
         public void setCompany(String company) {
             this.company = company;
         }
+
         public String getCompany() {
             return company;
         }
@@ -333,6 +354,7 @@ public class Artist {
         public void setCountry(String country) {
             this.country = country;
         }
+
         public String getCountry() {
             return country;
         }
@@ -341,6 +363,7 @@ public class Artist {
         public void setShareNum(int shareNum) {
             this.shareNum = shareNum;
         }
+
         public int getShareNum() {
             return shareNum;
         }
@@ -349,6 +372,7 @@ public class Artist {
         public void setBloodType(String bloodType) {
             this.bloodType = bloodType;
         }
+
         public String getBloodType() {
             return bloodType;
         }
@@ -357,6 +381,7 @@ public class Artist {
         public void setAvatarMiddle(String avatarMiddle) {
             this.avatarMiddle = avatarMiddle;
         }
+
         public String getAvatarMiddle() {
             return avatarMiddle;
         }
@@ -365,6 +390,7 @@ public class Artist {
         public void setMvTotal(int mvTotal) {
             this.mvTotal = mvTotal;
         }
+
         public int getMvTotal() {
             return mvTotal;
         }
@@ -373,6 +399,7 @@ public class Artist {
         public void setSongsTotal(String songsTotal) {
             this.songsTotal = songsTotal;
         }
+
         public String getSongsTotal() {
             return songsTotal;
         }
@@ -381,6 +408,7 @@ public class Artist {
         public void setBirth(String birth) {
             this.birth = birth;
         }
+
         public String getBirth() {
             return birth;
         }
@@ -389,6 +417,7 @@ public class Artist {
         public void setUrl(String url) {
             this.url = url;
         }
+
         public String getUrl() {
             return url;
         }
@@ -397,6 +426,7 @@ public class Artist {
         public void setGender(String gender) {
             this.gender = gender;
         }
+
         public String getGender() {
             return gender;
         }
@@ -405,6 +435,7 @@ public class Artist {
         public void setAvatarS1000(String avatarS1000) {
             this.avatarS1000 = avatarS1000;
         }
+
         public String getAvatarS1000() {
             return avatarS1000;
         }
@@ -413,6 +444,7 @@ public class Artist {
         public void setAvatarMini(String avatarMini) {
             this.avatarMini = avatarMini;
         }
+
         public String getAvatarMini() {
             return avatarMini;
         }
@@ -421,6 +453,7 @@ public class Artist {
         public void setAvatarBig(String avatarBig) {
             this.avatarBig = avatarBig;
         }
+
         public String getAvatarBig() {
             return avatarBig;
         }
@@ -429,6 +462,7 @@ public class Artist {
         public void setName(String name) {
             this.name = name;
         }
+
         public String getName() {
             return name;
         }
@@ -437,13 +471,54 @@ public class Artist {
         public void setAliasname(String aliasname) {
             this.aliasname = aliasname;
         }
+
         public String getAliasname() {
             return aliasname;
         }
 
+        @Override
+        public String toString() {
+            return "ArtistInfo{" +
+                    "weight='" + weight + '\'' +
+                    ", nickname='" + nickname + '\'' +
+                    ", tingUid='" + tingUid + '\'' +
+                    ", stature='" + stature + '\'' +
+                    ", avatarS500='" + avatarS500 + '\'' +
+                    ", source='" + source + '\'' +
+                    ", listenNum='" + listenNum + '\'' +
+                    ", collectNum=" + collectNum +
+                    ", hot='" + hot + '\'' +
+                    ", commentNum=" + commentNum +
+                    ", area='" + area + '\'' +
+                    ", info='" + info + '\'' +
+                    ", firstchar='" + firstchar + '\'' +
+                    ", avatarS180='" + avatarS180 + '\'' +
+                    ", avatarSmall='" + avatarSmall + '\'' +
+                    ", albumsTotal='" + albumsTotal + '\'' +
+                    ", artistId='" + artistId + '\'' +
+                    ", constellation='" + constellation + '\'' +
+                    ", isCollect=" + isCollect +
+                    ", intro='" + intro + '\'' +
+                    ", company='" + company + '\'' +
+                    ", country='" + country + '\'' +
+                    ", shareNum=" + shareNum +
+                    ", bloodType='" + bloodType + '\'' +
+                    ", avatarMiddle='" + avatarMiddle + '\'' +
+                    ", mvTotal=" + mvTotal +
+                    ", songsTotal='" + songsTotal + '\'' +
+                    ", birth='" + birth + '\'' +
+                    ", url='" + url + '\'' +
+                    ", gender='" + gender + '\'' +
+                    ", avatarS1000='" + avatarS1000 + '\'' +
+                    ", avatarMini='" + avatarMini + '\'' +
+                    ", avatarBig='" + avatarBig + '\'' +
+                    ", name='" + name + '\'' +
+                    ", aliasname='" + aliasname + '\'' +
+                    '}';
+        }
     }
 
-    public class Songlist {
+    public class Song {
 
         @SerializedName("artist_id")
         private String artistId;
@@ -497,6 +572,7 @@ public class Artist {
         public void setArtistId(String artistId) {
             this.artistId = artistId;
         }
+
         public String getArtistId() {
             return artistId;
         }
@@ -504,6 +580,7 @@ public class Artist {
         public void setLanguage(String language) {
             this.language = language;
         }
+
         public String getLanguage() {
             return language;
         }
@@ -511,6 +588,7 @@ public class Artist {
         public void setAlbumNo(String albumNo) {
             this.albumNo = albumNo;
         }
+
         public String getAlbumNo() {
             return albumNo;
         }
@@ -519,6 +597,7 @@ public class Artist {
         public void setVersions(String versions) {
             this.versions = versions;
         }
+
         public String getVersions() {
             return versions;
         }
@@ -527,6 +606,7 @@ public class Artist {
         public void setPicBig(String picBig) {
             this.picBig = picBig;
         }
+
         public String getPicBig() {
             return picBig;
         }
@@ -535,6 +615,7 @@ public class Artist {
         public void setPicSmall(String picSmall) {
             this.picSmall = picSmall;
         }
+
         public String getPicSmall() {
             return picSmall;
         }
@@ -543,6 +624,7 @@ public class Artist {
         public void setCountry(String country) {
             this.country = country;
         }
+
         public String getCountry() {
             return country;
         }
@@ -551,6 +633,7 @@ public class Artist {
         public void setArea(String area) {
             this.area = area;
         }
+
         public String getArea() {
             return area;
         }
@@ -559,6 +642,7 @@ public class Artist {
         public void setLrclink(String lrclink) {
             this.lrclink = lrclink;
         }
+
         public String getLrclink() {
             return lrclink;
         }
@@ -567,6 +651,7 @@ public class Artist {
         public void setHot(String hot) {
             this.hot = hot;
         }
+
         public String getHot() {
             return hot;
         }
@@ -575,6 +660,7 @@ public class Artist {
         public void setFileDuration(String fileDuration) {
             this.fileDuration = fileDuration;
         }
+
         public String getFileDuration() {
             return fileDuration;
         }
@@ -582,6 +668,7 @@ public class Artist {
         public void setHasMvMobile(int hasMvMobile) {
             this.hasMvMobile = hasMvMobile;
         }
+
         public int getHasMvMobile() {
             return hasMvMobile;
         }
@@ -590,6 +677,7 @@ public class Artist {
         public void setToneid(String toneid) {
             this.toneid = toneid;
         }
+
         public String getToneid() {
             return toneid;
         }
@@ -597,6 +685,7 @@ public class Artist {
         public void setInfo(String info) {
             this.info = info;
         }
+
         public String getInfo() {
             return info;
         }
@@ -605,6 +694,7 @@ public class Artist {
         public void setHasFilmtv(String hasFilmtv) {
             this.hasFilmtv = hasFilmtv;
         }
+
         public String getHasFilmtv() {
             return hasFilmtv;
         }
@@ -612,6 +702,7 @@ public class Artist {
         public void setSongId(String songId) {
             this.songId = songId;
         }
+
         public String getSongId() {
             return songId;
         }
@@ -620,6 +711,7 @@ public class Artist {
         public void setTitle(String title) {
             this.title = title;
         }
+
         public String getTitle() {
             return title;
         }
@@ -628,6 +720,7 @@ public class Artist {
         public void setTingUid(String tingUid) {
             this.tingUid = tingUid;
         }
+
         public String getTingUid() {
             return tingUid;
         }
@@ -636,6 +729,7 @@ public class Artist {
         public void setAuthor(String author) {
             this.author = author;
         }
+
         public String getAuthor() {
             return author;
         }
@@ -644,6 +738,7 @@ public class Artist {
         public void setAlbumId(String albumId) {
             this.albumId = albumId;
         }
+
         public String getAlbumId() {
             return albumId;
         }
@@ -652,6 +747,7 @@ public class Artist {
         public void setAlbumTitle(String albumTitle) {
             this.albumTitle = albumTitle;
         }
+
         public String getAlbumTitle() {
             return albumTitle;
         }
@@ -659,6 +755,7 @@ public class Artist {
         public void setHavehigh(int havehigh) {
             this.havehigh = havehigh;
         }
+
         public int getHavehigh() {
             return havehigh;
         }
@@ -667,6 +764,7 @@ public class Artist {
         public void setCharge(int charge) {
             this.charge = charge;
         }
+
         public int getCharge() {
             return charge;
         }
@@ -675,6 +773,7 @@ public class Artist {
         public void setHasMv(int hasMv) {
             this.hasMv = hasMv;
         }
+
         public int getHasMv() {
             return hasMv;
         }
@@ -682,6 +781,7 @@ public class Artist {
         public void setListenTotal(String listenTotal) {
             this.listenTotal = listenTotal;
         }
+
         public String getListenTotal() {
             return listenTotal;
         }
@@ -690,6 +790,7 @@ public class Artist {
         public void setPicRadio(String picRadio) {
             this.picRadio = picRadio;
         }
+
         public String getPicRadio() {
             return picRadio;
         }
@@ -698,6 +799,7 @@ public class Artist {
         public void setPicS500(String picS500) {
             this.picS500 = picS500;
         }
+
         public String getPicS500() {
             return picS500;
         }
@@ -706,6 +808,7 @@ public class Artist {
         public void setPicPremium(String picPremium) {
             this.picPremium = picPremium;
         }
+
         public String getPicPremium() {
             return picPremium;
         }
@@ -714,10 +817,46 @@ public class Artist {
         public void setPicHuge(String picHuge) {
             this.picHuge = picHuge;
         }
+
         public String getPicHuge() {
             return picHuge;
         }
 
+        @Override
+        public String toString() {
+            return "Song{" +
+                    "artistId='" + artistId + '\'' +
+                    ", language='" + language + '\'' +
+                    ", publishtime='" + publishtime + '\'' +
+                    ", albumNo='" + albumNo + '\'' +
+                    ", versions='" + versions + '\'' +
+                    ", picBig='" + picBig + '\'' +
+                    ", picSmall='" + picSmall + '\'' +
+                    ", country='" + country + '\'' +
+                    ", area='" + area + '\'' +
+                    ", lrclink='" + lrclink + '\'' +
+                    ", hot='" + hot + '\'' +
+                    ", fileDuration='" + fileDuration + '\'' +
+                    ", hasMvMobile=" + hasMvMobile +
+                    ", toneid='" + toneid + '\'' +
+                    ", info='" + info + '\'' +
+                    ", hasFilmtv='" + hasFilmtv + '\'' +
+                    ", songId='" + songId + '\'' +
+                    ", title='" + title + '\'' +
+                    ", tingUid='" + tingUid + '\'' +
+                    ", author='" + author + '\'' +
+                    ", albumId='" + albumId + '\'' +
+                    ", albumTitle='" + albumTitle + '\'' +
+                    ", havehigh=" + havehigh +
+                    ", charge=" + charge +
+                    ", hasMv=" + hasMv +
+                    ", listenTotal='" + listenTotal + '\'' +
+                    ", picRadio='" + picRadio + '\'' +
+                    ", picS500='" + picS500 + '\'' +
+                    ", picPremium='" + picPremium + '\'' +
+                    ", picHuge='" + picHuge + '\'' +
+                    '}';
+        }
     }
 
 }

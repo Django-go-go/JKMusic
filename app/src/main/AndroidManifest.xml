@@ -45,7 +45,8 @@
             android:exported="true"
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
-        <activity android:name=".ui.activity.ArtistListActivity"></activity>
+        <activity android:name=".ui.activity.ArtistListActivity" />
+        <activity android:name=".ui.activity.AlbumAndArtistActivity"/>
     </application>
 
 </manifest>

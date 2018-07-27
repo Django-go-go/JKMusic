@@ -7,24 +7,33 @@ import java.util.List;
 public class Album {
 
     private AlbumInfo albumInfo;
-    private List<Songlist> songlist;
 
+    private List<Song> songlist;
 
     public void setAlbumInfo(AlbumInfo albumInfo) {
         this.albumInfo = albumInfo;
     }
+
     public AlbumInfo getAlbumInfo() {
         return albumInfo;
     }
 
 
-    public void setSonglist(List<Songlist> songlist) {
-        this.songlist = songlist;
+    public void setSong(List<Song> songList) {
+        this.songlist = songList;
     }
-    public List<Songlist> getSonglist() {
+
+    public List<Song> getSongList() {
         return songlist;
     }
 
+    @Override
+    public String toString() {
+        return "Album{" +
+                "albumInfo=" + albumInfo +
+                ", mSongList=" + songlist +
+                '}';
+    }
 
     public class AlbumInfo {
 
@@ -67,6 +76,7 @@ public class Album {
         public void setAlbumId(String albumId) {
             this.albumId = albumId;
         }
+
         public String getAlbumId() {
             return albumId;
         }
@@ -75,6 +85,7 @@ public class Album {
         public void setAuthor(String author) {
             this.author = author;
         }
+
         public String getAuthor() {
             return author;
         }
@@ -83,6 +94,7 @@ public class Album {
         public void setTitle(String title) {
             this.title = title;
         }
+
         public String getTitle() {
             return title;
         }
@@ -91,6 +103,7 @@ public class Album {
         public void setPublishcompany(String publishcompany) {
             this.publishcompany = publishcompany;
         }
+
         public String getPublishcompany() {
             return publishcompany;
         }
@@ -99,6 +112,7 @@ public class Album {
         public void setProdcompany(String prodcompany) {
             this.prodcompany = prodcompany;
         }
+
         public String getProdcompany() {
             return prodcompany;
         }
@@ -107,6 +121,7 @@ public class Album {
         public void setCountry(String country) {
             this.country = country;
         }
+
         public String getCountry() {
             return country;
         }
@@ -115,6 +130,7 @@ public class Album {
         public void setLanguage(String language) {
             this.language = language;
         }
+
         public String getLanguage() {
             return language;
         }
@@ -123,6 +139,7 @@ public class Album {
         public void setSongsTotal(String songsTotal) {
             this.songsTotal = songsTotal;
         }
+
         public String getSongsTotal() {
             return songsTotal;
         }
@@ -131,6 +148,7 @@ public class Album {
         public void setInfo(String info) {
             this.info = info;
         }
+
         public String getInfo() {
             return info;
         }
@@ -139,6 +157,7 @@ public class Album {
         public void setPublishtime(String publishtime) {
             this.publishtime = publishtime;
         }
+
         public String getPublishtime() {
             return publishtime;
         }
@@ -146,6 +165,7 @@ public class Album {
         public void setPicSmall(String picSmall) {
             this.picSmall = picSmall;
         }
+
         public String getPicSmall() {
             return picSmall;
         }
@@ -154,6 +174,7 @@ public class Album {
         public void setPicBig(String picBig) {
             this.picBig = picBig;
         }
+
         public String getPicBig() {
             return picBig;
         }
@@ -161,6 +182,7 @@ public class Album {
         public void setFavoritesNum(int favoritesNum) {
             this.favoritesNum = favoritesNum;
         }
+
         public int getFavoritesNum() {
             return favoritesNum;
         }
@@ -169,6 +191,7 @@ public class Album {
         public void setRecommendNum(int recommendNum) {
             this.recommendNum = recommendNum;
         }
+
         public int getRecommendNum() {
             return recommendNum;
         }
@@ -177,6 +200,7 @@ public class Album {
         public void setCollectNum(int collectNum) {
             this.collectNum = collectNum;
         }
+
         public int getCollectNum() {
             return collectNum;
         }
@@ -185,6 +209,7 @@ public class Album {
         public void setShareNum(int shareNum) {
             this.shareNum = shareNum;
         }
+
         public int getShareNum() {
             return shareNum;
         }
@@ -193,6 +218,7 @@ public class Album {
         public void setCommentNum(int commentNum) {
             this.commentNum = commentNum;
         }
+
         public int getCommentNum() {
             return commentNum;
         }
@@ -201,6 +227,7 @@ public class Album {
         public void setArtistId(String artistId) {
             this.artistId = artistId;
         }
+
         public String getArtistId() {
             return artistId;
         }
@@ -208,6 +235,7 @@ public class Album {
         public void setPicS500(String picS500) {
             this.picS500 = picS500;
         }
+
         public String getPicS500() {
             return picS500;
         }
@@ -216,6 +244,7 @@ public class Album {
         public void setPicS1000(String picS1000) {
             this.picS1000 = picS1000;
         }
+
         public String getPicS1000() {
             return picS1000;
         }
@@ -223,14 +252,41 @@ public class Album {
         public void setListenNum(String listenNum) {
             this.listenNum = listenNum;
         }
+
         public String getListenNum() {
             return listenNum;
         }
 
+        @Override
+        public String toString() {
+            return "AlbumInfo{" +
+                    "albumId='" + albumId + '\'' +
+                    ", author='" + author + '\'' +
+                    ", title='" + title + '\'' +
+                    ", publishcompany='" + publishcompany + '\'' +
+                    ", prodcompany='" + prodcompany + '\'' +
+                    ", country='" + country + '\'' +
+                    ", language='" + language + '\'' +
+                    ", songsTotal='" + songsTotal + '\'' +
+                    ", info='" + info + '\'' +
+                    ", publishtime='" + publishtime + '\'' +
+                    ", picSmall='" + picSmall + '\'' +
+                    ", picBig='" + picBig + '\'' +
+                    ", favoritesNum=" + favoritesNum +
+                    ", recommendNum=" + recommendNum +
+                    ", collectNum=" + collectNum +
+                    ", shareNum=" + shareNum +
+                    ", commentNum=" + commentNum +
+                    ", artistId='" + artistId + '\'' +
+                    ", picS500='" + picS500 + '\'' +
+                    ", picS1000='" + picS1000 + '\'' +
+                    ", listenNum='" + listenNum + '\'' +
+                    '}';
+        }
     }
 
 
-    public class Songlist {
+    public class Song {
 
         @SerializedName("artist_id")
         private String artistId;
@@ -258,6 +314,7 @@ public class Album {
         public void setArtistId(String artistId) {
             this.artistId = artistId;
         }
+
         public String getArtistId() {
             return artistId;
         }
@@ -265,6 +322,7 @@ public class Album {
         public void setLanguage(String language) {
             this.language = language;
         }
+
         public String getLanguage() {
             return language;
         }
@@ -273,6 +331,7 @@ public class Album {
         public void setPublishtime(String publishtime) {
             this.publishtime = publishtime;
         }
+
         public String getPublishtime() {
             return publishtime;
         }
@@ -280,6 +339,7 @@ public class Album {
         public void setPicBig(String picBig) {
             this.picBig = picBig;
         }
+
         public String getPicBig() {
             return picBig;
         }
@@ -288,6 +348,7 @@ public class Album {
         public void setPicSmall(String picSmall) {
             this.picSmall = picSmall;
         }
+
         public String getPicSmall() {
             return picSmall;
         }
@@ -295,6 +356,7 @@ public class Album {
         public void setCountry(String country) {
             this.country = country;
         }
+
         public String getCountry() {
             return country;
         }
@@ -302,6 +364,7 @@ public class Album {
         public void setLrclink(String lrclink) {
             this.lrclink = lrclink;
         }
+
         public String getLrclink() {
             return lrclink;
         }
@@ -309,6 +372,7 @@ public class Album {
         public void setInfo(String info) {
             this.info = info;
         }
+
         public String getInfo() {
             return info;
         }
@@ -316,6 +380,7 @@ public class Album {
         public void setSongId(String songId) {
             this.songId = songId;
         }
+
         public String getSongId() {
             return songId;
         }
@@ -324,6 +389,7 @@ public class Album {
         public void setTitle(String title) {
             this.title = title;
         }
+
         public String getTitle() {
             return title;
         }
@@ -331,6 +397,7 @@ public class Album {
         public void setAuthor(String author) {
             this.author = author;
         }
+
         public String getAuthor() {
             return author;
         }
@@ -338,6 +405,7 @@ public class Album {
         public void setPicS500(String picS500) {
             this.picS500 = picS500;
         }
+
         public String getPicS500() {
             return picS500;
         }
@@ -346,6 +414,7 @@ public class Album {
         public void setPicPremium(String picPremium) {
             this.picPremium = picPremium;
         }
+
         public String getPicPremium() {
             return picPremium;
         }
@@ -354,9 +423,29 @@ public class Album {
         public void setPicHuge(String picHuge) {
             this.picHuge = picHuge;
         }
+
         public String getPicHuge() {
             return picHuge;
         }
 
+        @Override
+        public String toString() {
+            return "Song{" +
+                    "artistId='" + artistId + '\'' +
+                    ", language='" + language + '\'' +
+                    ", publishtime='" + publishtime + '\'' +
+                    ", picBig='" + picBig + '\'' +
+                    ", picSmall='" + picSmall + '\'' +
+                    ", country='" + country + '\'' +
+                    ", lrclink='" + lrclink + '\'' +
+                    ", info='" + info + '\'' +
+                    ", songId='" + songId + '\'' +
+                    ", title='" + title + '\'' +
+                    ", author='" + author + '\'' +
+                    ", picS500='" + picS500 + '\'' +
+                    ", picPremium='" + picPremium + '\'' +
+                    ", picHuge='" + picHuge + '\'' +
+                    '}';
+        }
     }
 }

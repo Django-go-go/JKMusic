@@ -17,16 +17,15 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.jkingone.common.Utils.DensityUtils;
+import com.jkingone.common.utils.DensityUtils;
 import com.jkingone.jkmusic.R;
-import com.jkingone.jkmusic.adapter.HeadAndFootRecycleAdapter;
 import com.jkingone.jkmusic.api.ArtistApi;
 import com.jkingone.jkmusic.entity.ArtistList;
 import com.jkingone.jkmusic.ui.activity.ArtistListActivity;
 import com.jkingone.jkmusic.ui.base.BaseFragment;
 import com.jkingone.jkmusic.ui.mvp.ArtistListPresenter;
 import com.jkingone.jkmusic.ui.mvp.contract.ArtistListContract;
-import com.jkingone.ui.customview.ContentLoadView;
+import com.jkingone.ui.widget.ContentLoadView;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -70,17 +69,15 @@ public class ArtistListFragment extends BaseFragment<ArtistListPresenter> implem
             ArtistApi.SEX_MALE, ArtistApi.SEX_FEMALE, ArtistApi.SEX_GROUP,
     };
 
-
-    private TextView mTextViewHot;
-    private RecyclerView mRecyclerViewHot;
-    @BindView(R.id.recycle_universal)
+    @BindView(R.id.recycle_common)
     RecyclerView mRecyclerViewContent;
-    @BindView(R.id.content_universal)
+    @BindView(R.id.content_common)
     ContentLoadView mContentLoadView;
 
     private Unbinder mUnbinder;
 
     private ContentAdapter mContentAdapter;
+    private HotAdapter mHotAdapter;
 
     @Override
     public ArtistListPresenter createPresenter() {
@@ -96,7 +93,7 @@ public class ArtistListFragment extends BaseFragment<ArtistListPresenter> implem
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.layout_load_universal_notoolbar, container, false);
+        View view = inflater.inflate(R.layout.common_root_none, container, false);
         mUnbinder = ButterKnife.bind(this, view);
         mRecyclerViewContent.setBackgroundColor(Color.parseColor("#efe6e9"));
         mRecyclerViewContent.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -113,8 +110,6 @@ public class ArtistListFragment extends BaseFragment<ArtistListPresenter> implem
         mContentAdapter = new ContentAdapter(getContext());
         mRecyclerViewContent.setAdapter(mContentAdapter);
 
-        initHeaderView();
-
         mContentLoadView.postLoadComplete();
 
         return view;
@@ -129,58 +124,59 @@ public class ArtistListFragment extends BaseFragment<ArtistListPresenter> implem
     @Override
     public void showArtistList(List<ArtistList> artistLists) {
         if (artistLists != null) {
-            mRecyclerViewHot.setAdapter(new HotAdapter(getContext(), artistLists));
+            mContentAdapter.mRecyclerViewHot.setAdapter(new HotAdapter(getContext(), artistLists));
         }
     }
 
-    private void initHeaderView() {
-        View view = LayoutInflater.from(getContext()).inflate(R.layout.item_list_artist_head, mRecyclerViewContent, false);
-        mRecyclerViewHot = view.findViewById(R.id.recycle_hot);
-        mRecyclerViewHot.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        mTextViewHot = view.findViewById(R.id.tv_hot);
-        mTextViewHot.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(ArtistListFragment.this.getContext(), ArtistListActivity.class);
-                intent.putExtra(ARTIST_AREA, ArtistApi.AREA_ALL);
-                intent.putExtra(ARTIST_SEX, ArtistApi.SEX_NONE);
-                ArtistListFragment.this.startActivity(intent);
-            }
-        });
-        mContentAdapter.addHeaderView(view);
-    }
+    class ContentAdapter extends RecyclerView.Adapter {
 
-    class ContentAdapter extends HeadAndFootRecycleAdapter {
-
+        private static final int TYPE_HEAD = 1;
         private static final int TYPE_CONTENT = 2;
 
         private Context mContext;
+
+        private TextView mTextViewHot;
+        private RecyclerView mRecyclerViewHot;
 
         ContentAdapter(Context context) {
             mContext = context;
         }
 
         @Override
-        public RecyclerView.ViewHolder onCreateContentViewHolder(ViewGroup parent, int viewType) {
-            switch (viewType){
+        public int getItemViewType(int position) {
+            if (position == 0) {
+                return TYPE_HEAD;
+            }
+            return TYPE_CONTENT;
+        }
+
+        @NonNull
+        @Override
+        public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            switch (viewType) {
+                case TYPE_HEAD: {
+                    View view = LayoutInflater.from(mContext).inflate(R.layout.item_list_artist_head, parent, false);
+                    mTextViewHot = view.findViewById(R.id.tv_hot);
+                    mRecyclerViewHot = view.findViewById(R.id.recycle_hot);
+                    mRecyclerViewHot.setLayoutManager(new LinearLayoutManager(mContext, LinearLayoutManager.HORIZONTAL, false));
+                    mTextViewHot.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Intent intent = new Intent(ArtistListFragment.this.getContext(), ArtistListActivity.class);
+                            intent.putExtra(ARTIST_AREA, ArtistApi.AREA_ALL);
+                            intent.putExtra(ARTIST_SEX, ArtistApi.SEX_NONE);
+                            ArtistListFragment.this.startActivity(intent);
+                        }
+                    });
+                    return new HeadViewHolder(view);
+                }
 
                 case TYPE_CONTENT:
-                    View convertView = LayoutInflater.from(mContext).inflate(R.layout.item_list_artist, parent, false);
-                    return new ContentViewHolder(convertView);
+                    return new ContentViewHolder(LayoutInflater.from(mContext).inflate(R.layout.item_list_artist, parent, false));
 
                 default:
                     throw new IllegalArgumentException("no Type");
             }
-        }
-
-        @Override
-        public int getItemContentCount() {
-            return sTitles.length;
-        }
-
-        @Override
-        public int getItemContentViewType(int position) {
-            return TYPE_CONTENT;
         }
 
         @Override
@@ -200,6 +196,11 @@ public class ArtistListFragment extends BaseFragment<ArtistListPresenter> implem
             }
         }
 
+        @Override
+        public int getItemCount() {
+            return sTitles.length + 1;
+        }
+
         class ContentViewHolder extends RecyclerView.ViewHolder {
 
             @BindView(R.id.tv_item)
@@ -210,9 +211,15 @@ public class ArtistListFragment extends BaseFragment<ArtistListPresenter> implem
                 ButterKnife.bind(this, itemView);
             }
         }
+
+        class HeadViewHolder extends RecyclerView.ViewHolder {
+            HeadViewHolder(View itemView) {
+                super(itemView);
+            }
+        }
     }
 
-    static class HotAdapter extends RecyclerView.Adapter<HotAdapter.HotViewHolder> {
+    class HotAdapter extends RecyclerView.Adapter<HotAdapter.HotViewHolder> {
 
         private int h;
         private int w;

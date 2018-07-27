@@ -2,26 +2,35 @@ package com.jkingone.jkmusic.ui.fragment;
 
 
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.graphics.Palette;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.jkingone.common.Utils.DensityUtils;
+import com.jkingone.common.utils.ScreenUtils;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.Utils;
 import com.jkingone.jkmusic.entity.AlbumList;
+import com.jkingone.jkmusic.ui.activity.AlbumAndArtistActivity;
 import com.jkingone.jkmusic.ui.base.BaseFragment;
 import com.jkingone.jkmusic.ui.mvp.AlbumListPresenter;
 import com.jkingone.jkmusic.ui.mvp.contract.AlbumListContract;
-import com.jkingone.ui.customview.ContentLoadView;
+import com.jkingone.ui.widget.ContentLoadView;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,9 +46,9 @@ public class AlbumListFragment extends BaseFragment<AlbumListPresenter> implemen
         return fragment;
     }
 
-    @BindView(R.id.recycle_universal)
+    @BindView(R.id.recycle_common)
     RecyclerView mRecyclerView;
-    @BindView(R.id.content_universal)
+    @BindView(R.id.content_common)
     ContentLoadView mContentLoadView;
 
     private List<AlbumList> mAlbumLists = new ArrayList<>();
@@ -57,11 +66,10 @@ public class AlbumListFragment extends BaseFragment<AlbumListPresenter> implemen
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.layout_load_universal_notoolbar, container, false);
+        View view = inflater.inflate(R.layout.common_root_none, container, false);
         ButterKnife.bind(this, view);
         StaggeredGridLayoutManager manager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(manager);
-        manager.setGapStrategy(StaggeredGridLayoutManager.GAP_HANDLING_NONE);
         mRecyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
             @Override
             public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
@@ -99,7 +107,6 @@ public class AlbumListFragment extends BaseFragment<AlbumListPresenter> implemen
         mContentLoadView.setLoadRetryListener(new ContentLoadView.LoadRetryListener() {
             @Override
             public void onRetry() {
-                mContentLoadView.postLoading();
                 mPresenter.getAlbumList(offset, LIMIT);
             }
         });
@@ -129,43 +136,65 @@ public class AlbumListFragment extends BaseFragment<AlbumListPresenter> implemen
         }
     }
 
-    class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.VH> {
+    class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumViewHolder> {
 
         private Context mContext;
-        private RecyclerView.LayoutParams mLayoutParams;
+        private int mWidth;
 
         AlbumAdapter(Context context) {
             mContext = context;
+            mWidth = ScreenUtils.getScreenWidth(context) / 3;
         }
 
         @NonNull
         @Override
-        public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new VH(LayoutInflater.from(mContext).inflate(R.layout.item_list_albumlist, parent, false));
+        public AlbumViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            return new AlbumViewHolder(LayoutInflater.from(mContext).inflate(R.layout.item_list_albumlist, parent, false));
         }
 
         @Override
-        public void onBindViewHolder(@NonNull VH holder, int position) {
+        public void onBindViewHolder(@NonNull final AlbumViewHolder holder, final int position) {
             AlbumList albumList = mAlbumLists.get(position);
-            if (position == 0 || position == 2) {
-                mLayoutParams = new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, DensityUtils.dp2px(mContext, 140));
-            } else {
-                mLayoutParams = new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, DensityUtils.dp2px(mContext, 120));
-            }
-            holder.itemView.setLayoutParams(mLayoutParams);
-            if (Utils.checkStringNotNull(albumList.getPicBig())) {
+            if (Utils.checkStringNotNull(albumList.getPicRadio())) {
                 Picasso.get().
-                        load(albumList.getPicBig())
-                        .resize(DensityUtils.dp2px(mContext, 120), DensityUtils.dp2px(mContext, 120))
+                        load(albumList.getPicRadio())
+                        .resize(mWidth, mWidth)
                         .centerCrop()
                         .tag(TAG)
-                        .into(holder.mImageView);
+                        .into(new Target() {
+                            @Override
+                            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                                holder.mImageView.setImageBitmap(bitmap);
+                                Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
+                                    @Override
+                                    public void onGenerated(@NonNull Palette palette) {
+                                        int color = palette.getLightMutedColor(Color.LTGRAY);
+                                        ((CardView)holder.itemView).setCardBackgroundColor(color);
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+                                ((CardView)holder.itemView).setCardBackgroundColor(Color.LTGRAY);
+                                holder.mImageView.setImageResource(R.drawable.music_large);
+                            }
+
+                            @Override
+                            public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+                            }
+                        });
             }
-            holder.mTextView.setText(albumList.getPublishTime());
+            holder.mTextViewTitle.setText(albumList.getTitle());
+            holder.mTextViewAuthor.setText(albumList.getAuthor());
+            holder.mTextViewPublish.setText(albumList.getPublishTime());
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
+                    Intent intent = new Intent(AlbumListFragment.this.getContext(), AlbumAndArtistActivity.class);
+                    intent.putExtra(AlbumAndArtistActivity.TYPE_ALBUM, mAlbumLists.get(position));
+                    startActivity(intent);
                 }
             });
         }
@@ -175,16 +204,24 @@ public class AlbumListFragment extends BaseFragment<AlbumListPresenter> implemen
             return mAlbumLists.size();
         }
 
-        class VH extends RecyclerView.ViewHolder {
+        class AlbumViewHolder extends RecyclerView.ViewHolder {
 
             @BindView(R.id.iv_album)
             ImageView mImageView;
             @BindView(R.id.tv_publish)
-            TextView mTextView;
+            TextView mTextViewPublish;
+            @BindView(R.id.tv_title)
+            TextView mTextViewTitle;
+            @BindView(R.id.tv_author)
+            TextView mTextViewAuthor;
+            @BindView(R.id.frame_item)
+            View mView;
 
-            VH(View itemView) {
+            AlbumViewHolder(View itemView) {
                 super(itemView);
                 ButterKnife.bind(this, itemView);
+                mView.setLayoutParams(new LinearLayout.LayoutParams(mWidth, mWidth));
+                itemView.setLayoutParams(new RecyclerView.LayoutParams(mWidth, RecyclerView.LayoutParams.WRAP_CONTENT));
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.jkingone.jkmusic.ui.fragment;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -10,16 +11,22 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
+import com.jkingone.common.utils.DensityUtils;
+import com.jkingone.common.utils.ScreenUtils;
 import com.jkingone.jkmusic.R;
-import com.jkingone.jkmusic.adapter.SongListAdapter;
+import com.jkingone.jkmusic.Utils;
+import com.jkingone.jkmusic.adapter.LoadMoreRecycleAdapter;
 import com.jkingone.jkmusic.entity.SongList;
 import com.jkingone.jkmusic.ui.activity.ClassifySongListActivity;
 import com.jkingone.jkmusic.ui.activity.SongAndTopListActivity;
 import com.jkingone.jkmusic.ui.base.BaseFragment;
 import com.jkingone.jkmusic.ui.mvp.contract.SongListFragContract;
 import com.jkingone.jkmusic.ui.mvp.SongListFragPresenter;
-import com.jkingone.ui.customview.ContentLoadView;
+import com.jkingone.ui.widget.ContentLoadView;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -35,18 +42,19 @@ import butterknife.Unbinder;
 
 public class SongListFragment extends BaseFragment<SongListFragPresenter> implements SongListFragContract.ViewCallback {
 
-    public static final String TAG = "SongListFragment";
+    private static final String TAG = "SongListFragment";
 
-    @BindView(R.id.recycle_universal)
+    @BindView(R.id.recycle_common)
     RecyclerView mRecyclerView;
-    @BindView(R.id.content_universal)
+    @BindView(R.id.content_common)
     ContentLoadView mContentLoadView;
 
     private SongListAdapter mRecycleAdapter;
 
-    private List<SongList> mLists = new ArrayList<>();
+    private List<SongList> mSongLists = new ArrayList<>();
 
     private int offset = 1;
+    public static final int SIZE = 20;
 
     private Unbinder mUnbinder;
 
@@ -58,16 +66,13 @@ public class SongListFragment extends BaseFragment<SongListFragPresenter> implem
 
     @Override
     protected void onLazyLoadOnce() {
-        super.onLazyLoadOnce();
-        if (mLists.size() == 0) {
-            mPresenter.getSongList(10, offset);
-        }
+        mPresenter.getSongList(SIZE, offset);
     }
 
     @Override
     public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.layout_load_universal_notoolbar, container, false);
+        View view = inflater.inflate(R.layout.common_root_none, container, false);
         view.setBackgroundColor(Color.WHITE);
 
         mUnbinder = ButterKnife.bind(this, view);
@@ -76,20 +81,26 @@ public class SongListFragment extends BaseFragment<SongListFragPresenter> implem
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
                 GridLayoutManager manager = (GridLayoutManager) recyclerView.getLayoutManager();
                 if (newState == RecyclerView.SCROLL_STATE_IDLE && manager.getChildCount() > 0) {
                     int y = manager.findLastCompletelyVisibleItemPosition();
-                    if (y == mLists.size() + 1) {
-                        mRecycleAdapter.getFootLoadView().postLoading();
-                        mPresenter.getSongList(20, offset);
+                    if (y == mSongLists.size() + 1) {
+                        mRecycleAdapter.mFootLoadView.postLoading();
+                        mPresenter.getSongList(SIZE, offset);
                     }
                 }
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    Picasso.get().resumeTag(SongListAdapter.TAG);
+                    Picasso.get().resumeTag(TAG);
                 } else {
-                    Picasso.get().pauseTag(SongListAdapter.TAG);
+                    Picasso.get().pauseTag(TAG);
                 }
+            }
+        });
+
+        mContentLoadView.setLoadRetryListener(new ContentLoadView.LoadRetryListener() {
+            @Override
+            public void onRetry() {
+                mPresenter.getSongList(SIZE, offset);
             }
         });
 
@@ -104,7 +115,8 @@ public class SongListFragment extends BaseFragment<SongListFragPresenter> implem
 
     @Override
     public void showView(List<SongList> songLists) {
-        if (mLists.size() == 0) {
+
+        if (mSongLists.size() == 0) {
             if (songLists == null) {
                 mContentLoadView.postLoadFail();
                 return;
@@ -116,48 +128,162 @@ public class SongListFragment extends BaseFragment<SongListFragPresenter> implem
             mContentLoadView.postLoadComplete();
         } else {
             if (songLists == null) {
-                mRecycleAdapter.getFootLoadView().postLoadFail();
+                mRecycleAdapter.mFootLoadView.postLoadFail();
                 return;
             }
             if (songLists.size() == 0) {
-                mRecycleAdapter.getFootLoadView().postLoadNoData();
+                mRecycleAdapter.mFootLoadView.postLoadNoData();
                 return;
             }
         }
 
-        mLists.addAll(songLists);
+        mSongLists.addAll(songLists);
 
         if (offset == 1) {
-            mRecycleAdapter = new SongListAdapter(getContext(), mLists);
+            mRecycleAdapter = new SongListAdapter(getContext());
             mRecyclerView.setAdapter(mRecycleAdapter);
         } else {
             mRecycleAdapter.notifyDataSetChanged();
         }
 
-        mRecycleAdapter.getFootLoadView().postLoadComplete();
+        mRecycleAdapter.mFootLoadView.postLoadComplete();
 
         offset++;
-
-        mRecycleAdapter.setContentOnClickListener(new SongListAdapter.ContentOnClickListener() {
-            @Override
-            public void contentOnClick(int pos) {
-                if (mLists.get(pos) != null) {
-                    Intent intent = new Intent(getContext(), SongAndTopListActivity.class);
-                    intent.putExtra(SongAndTopListActivity.TYPE_SONG_LIST, mLists.get(pos));
-                    startActivity(intent);
-                }
-            }
-        });
-        mRecycleAdapter.setHeadOnClickListener(new SongListAdapter.HeadOnClickListener() {
-            @Override
-            public void headOnClick(View view) {
-                startActivity(new Intent(getContext(), ClassifySongListActivity.class));
-            }
-        });
     }
 
     @Override
     public SongListFragPresenter createPresenter() {
         return new SongListFragPresenter(this);
+    }
+
+    class SongListAdapter extends LoadMoreRecycleAdapter {
+
+        private static final int TYPE_CONTENT = 2;
+        private static final int TYPE_HEAD = 1;
+
+        private int col = 2;
+        private int w;
+        private int h;
+
+        SongListAdapter(Context context) {
+            super(context);
+            w = ScreenUtils.getScreenWidth(mContext);
+            h = DensityUtils.dp2px(mContext, 8) + DensityUtils.sp2px(mContext, 42);
+        }
+
+        @Override
+        public RecyclerView.ViewHolder onCreateContentViewHolder(ViewGroup parent, int viewType) {
+
+            switch (viewType) {
+                case TYPE_HEAD: {
+                    View view = LayoutInflater.from(mContext).inflate(R.layout.item_grid_songlist_head, parent, false);
+                    view.setLayoutParams(
+                            new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, DensityUtils.dp2px(mContext, 150)));
+                    view.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            startActivity(new Intent(getContext(), ClassifySongListActivity.class));
+                        }
+                    });
+                    return new HeadViewHolder(view);
+                }
+
+                case TYPE_CONTENT: {
+                    View convertView = LayoutInflater.from(mContext).inflate(R.layout.item_universal, parent, false);
+                    return new ContentViewHolder(convertView);
+                }
+
+                default:
+                    throw new IllegalArgumentException("no Type");
+            }
+        }
+
+        @Override
+        public int getItemContentCount() {
+            return mSongLists.size() + 1;
+        }
+
+        @Override
+        public int getItemContentViewType(int position) {
+            if (position == 0) {
+                return TYPE_HEAD;
+            }
+            return TYPE_CONTENT;
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position) {
+
+            if (holder instanceof ContentViewHolder) {
+
+                ContentViewHolder contentViewHolder = (ContentViewHolder) holder;
+                final SongList songList = mSongLists.get(position - 1);
+
+                contentViewHolder.mTextView.setText(songList.getTitle());
+
+                if (Utils.checkStringNotNull(songList.getPic300())) {
+                    Picasso.get().load(songList.getPic300())
+                            .resize(w / col, w / col)
+                            .centerCrop()
+                            .tag(TAG)
+                            .into(contentViewHolder.mImageView);
+
+                } else if (Utils.checkStringNotNull(songList.getPic())) {
+                    Picasso.get().load(songList.getPic())
+                            .resize(w / col, w / col)
+                            .centerCrop()
+                            .tag(TAG)
+                            .into(contentViewHolder.mImageView);
+                }
+
+                contentViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(getContext(), SongAndTopListActivity.class);
+                        intent.putExtra(SongAndTopListActivity.TYPE_SONG_LIST, songList);
+                        startActivity(intent);
+                    }
+                });
+
+            }
+        }
+
+        @Override
+        public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+            RecyclerView.LayoutManager manager = recyclerView.getLayoutManager();
+            if (manager instanceof GridLayoutManager) {
+                GridLayoutManager gridLayoutManager = (GridLayoutManager) manager;
+                gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+                    @Override
+                    public int getSpanSize(int position) {
+                        if (getItemViewType(position) != TYPE_CONTENT) {
+                            return 2;
+                        }
+                        return 1;
+                    }
+                });
+            }
+        }
+
+        class HeadViewHolder extends RecyclerView.ViewHolder {
+
+            HeadViewHolder(View itemView) {
+                super(itemView);
+            }
+        }
+
+        class ContentViewHolder extends RecyclerView.ViewHolder {
+            @BindView(R.id.iv_item)
+            ImageView mImageView;
+            @BindView(R.id.tv_item)
+            TextView mTextView;
+
+            ContentViewHolder(View itemView) {
+                super(itemView);
+                ButterKnife.bind(this, itemView);
+                mTextView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, h));
+                itemView.setLayoutParams(new RecyclerView.LayoutParams(w / 2, w / 2 + h));
+            }
+        }
     }
 }

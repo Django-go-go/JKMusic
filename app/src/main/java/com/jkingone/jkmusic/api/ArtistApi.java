@@ -7,8 +7,6 @@ import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
-import retrofit2.http.HEAD;
-import retrofit2.http.Header;
 import retrofit2.http.Headers;
 import retrofit2.http.Query;
 
@@ -86,8 +84,8 @@ public interface ArtistApi {
      */
     @GET("ting?method=baidu.ting.artist.getSongList")
     @Headers("User-Agent:Mozilla")
-    Call<List<Artist.Songlist>> getArtistSongList(@Query("tinguid")String tingUid, @Query("artistid")String artistId,
-                                                  @Query("offset")int offset, @Query("limits")int limit);
+    Call<List<Artist.Song>> getArtistSongList(@Query("tinguid")String tingUid, @Query("artistid")String artistId,
+                                              @Query("offset")int offset, @Query("limits")int limit);
 
 
     /**

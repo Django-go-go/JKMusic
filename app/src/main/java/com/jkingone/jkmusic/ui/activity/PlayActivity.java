@@ -28,9 +28,9 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.google.android.exoplayer2.C;
-import com.jkingone.common.Utils.ImageUtils;
-import com.jkingone.common.Utils.ScreenUtils;
-import com.jkingone.common.Utils.TimeUtils;
+import com.jkingone.common.utils.ImageUtils;
+import com.jkingone.common.utils.ScreenUtils;
+import com.jkingone.common.utils.TimeUtils;
 import com.jkingone.jkmusic.ui.base.BaseActivity;
 import com.jkingone.jkmusic.Constant;
 import com.jkingone.jkmusic.MusicBroadcastReceiver;

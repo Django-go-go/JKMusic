@@ -8,18 +8,14 @@ import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.jkingone.common.Utils.DensityUtils;
-import com.jkingone.common.Utils.ScreenUtils;
-import com.jkingone.jkmusic.Constant;
+import com.jkingone.common.utils.DensityUtils;
+import com.jkingone.common.utils.ScreenUtils;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.Utils;
 import com.jkingone.jkmusic.api.ArtistApi;
@@ -28,7 +24,7 @@ import com.jkingone.jkmusic.ui.base.BaseActivity;
 import com.jkingone.jkmusic.ui.fragment.ArtistListFragment;
 import com.jkingone.jkmusic.ui.mvp.ArtistListPresenter;
 import com.jkingone.jkmusic.ui.mvp.contract.ArtistListContract;
-import com.jkingone.ui.customview.ContentLoadView;
+import com.jkingone.ui.widget.ContentLoadView;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -41,11 +37,11 @@ public class ArtistListActivity extends BaseActivity<ArtistListPresenter> implem
 
     private static final String TAG = "ArtistListActivity";
 
-    @BindView(R.id.content_universal)
+    @BindView(R.id.content_common)
     ContentLoadView mContentLoadView;
-    @BindView(R.id.recycle_universal)
+    @BindView(R.id.recycle_common)
     RecyclerView mRecyclerView;
-    @BindView(R.id.toolbar_universal)
+    @BindView(R.id.toolbar_common)
     Toolbar mToolbar;
 
     private int mArea;
@@ -60,7 +56,7 @@ public class ArtistListActivity extends BaseActivity<ArtistListPresenter> implem
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.layout_load_universal);
+        setContentView(R.layout.common_root_normal);
         ScreenUtils.setTranslucent(this);
         ButterKnife.bind(this);
 
