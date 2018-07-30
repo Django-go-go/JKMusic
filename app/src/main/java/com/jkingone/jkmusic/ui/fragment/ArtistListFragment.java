@@ -24,7 +24,7 @@ import com.jkingone.jkmusic.api.ArtistApi;
 import com.jkingone.jkmusic.entity.ArtistList;
 import com.jkingone.jkmusic.ui.activity.ArtistListActivity;
 import com.jkingone.jkmusic.ui.base.BaseFragment;
-import com.jkingone.jkmusic.ui.mvp.ArtistListPresenter;
+import com.jkingone.jkmusic.ui.mvp.presenter.ArtistListPresenter;
 import com.jkingone.jkmusic.ui.mvp.contract.ArtistListContract;
 import com.jkingone.ui.widget.ContentLoadView;
 

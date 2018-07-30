@@ -30,7 +30,7 @@ import com.jkingone.ui.widget.ContentLoadView;
 import com.jkingone.ui.widget.WaveView;
 import com.jkingone.jkmusic.entity.SongList;
 import com.jkingone.jkmusic.ui.mvp.contract.ClassifySongListContract;
-import com.jkingone.jkmusic.ui.mvp.ClassifySongListPresenter;
+import com.jkingone.jkmusic.ui.mvp.presenter.ClassifySongListPresenter;
 
 import java.util.ArrayList;
 import java.util.List;

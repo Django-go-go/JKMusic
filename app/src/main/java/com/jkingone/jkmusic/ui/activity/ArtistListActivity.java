@@ -18,12 +18,11 @@ import com.jkingone.common.utils.DensityUtils;
 import com.jkingone.common.utils.ScreenUtils;
 import com.jkingone.jkmusic.GlideApp;
 import com.jkingone.jkmusic.R;
-import com.jkingone.jkmusic.Utils;
 import com.jkingone.jkmusic.api.ArtistApi;
 import com.jkingone.jkmusic.entity.ArtistList;
 import com.jkingone.jkmusic.ui.base.BaseActivity;
 import com.jkingone.jkmusic.ui.fragment.ArtistListFragment;
-import com.jkingone.jkmusic.ui.mvp.ArtistListPresenter;
+import com.jkingone.jkmusic.ui.mvp.presenter.ArtistListPresenter;
 import com.jkingone.jkmusic.ui.mvp.contract.ArtistListContract;
 import com.jkingone.ui.widget.ContentLoadView;
 

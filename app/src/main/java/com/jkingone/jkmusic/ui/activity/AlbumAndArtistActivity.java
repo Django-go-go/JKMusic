@@ -1,12 +1,8 @@
 package com.jkingone.jkmusic.ui.activity;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.AppBarLayout;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
@@ -18,7 +14,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.jkingone.common.utils.DensityUtils;
 import com.jkingone.common.utils.LogUtils;
 import com.jkingone.common.utils.ScreenUtils;
 import com.jkingone.jkmusic.R;
@@ -30,7 +25,7 @@ import com.jkingone.jkmusic.entity.Artist;
 import com.jkingone.jkmusic.entity.ArtistList;
 import com.jkingone.jkmusic.entity.SongInfo;
 import com.jkingone.jkmusic.ui.base.BaseActivity;
-import com.jkingone.jkmusic.ui.mvp.AlbumAndArtistPresenter;
+import com.jkingone.jkmusic.ui.mvp.presenter.AlbumAndArtistPresenter;
 import com.jkingone.jkmusic.ui.mvp.contract.AlbumAndArtistContract;
 import com.jkingone.ui.widget.ContentLoadView;
 import com.jkingone.ui.widget.PagerSlidingTabStrip;

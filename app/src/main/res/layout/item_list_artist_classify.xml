@@ -6,8 +6,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <com.jkingone.ui.widget.RoundedImageView
-        app:type="round"
-        app:radius="6dp"
         android:scaleType="centerCrop"
         android:id="@+id/iv_item"
         android:layout_width="64dp"

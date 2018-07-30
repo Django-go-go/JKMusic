@@ -29,7 +29,7 @@ import com.jkingone.jkmusic.entity.SongList;
 import com.jkingone.jkmusic.entity.TopList;
 import com.jkingone.jkmusic.ui.base.BaseActivity;
 import com.jkingone.jkmusic.ui.mvp.contract.SongAndTopListContract;
-import com.jkingone.jkmusic.ui.mvp.SongAndTopListPresenter;
+import com.jkingone.jkmusic.ui.mvp.presenter.SongAndTopListPresenter;
 import com.jkingone.ui.widget.ContentLoadView;
 
 import java.util.ArrayList;

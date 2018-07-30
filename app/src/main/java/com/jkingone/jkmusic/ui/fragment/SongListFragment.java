@@ -26,7 +26,7 @@ import com.jkingone.jkmusic.ui.activity.ClassifySongListActivity;
 import com.jkingone.jkmusic.ui.activity.SongAndTopListActivity;
 import com.jkingone.jkmusic.ui.base.BaseFragment;
 import com.jkingone.jkmusic.ui.mvp.contract.SongListFragContract;
-import com.jkingone.jkmusic.ui.mvp.SongListFragPresenter;
+import com.jkingone.jkmusic.ui.mvp.presenter.SongListFragPresenter;
 import com.jkingone.ui.widget.ContentLoadView;
 
 import java.util.ArrayList;

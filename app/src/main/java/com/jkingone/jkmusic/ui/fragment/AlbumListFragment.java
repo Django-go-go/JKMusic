@@ -20,19 +20,14 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.jkingone.common.utils.ScreenUtils;
 import com.jkingone.jkmusic.GlideApp;
-import com.jkingone.jkmusic.JkGlideApp;
 import com.jkingone.jkmusic.R;
-import com.jkingone.jkmusic.Utils;
 import com.jkingone.jkmusic.entity.AlbumList;
 import com.jkingone.jkmusic.ui.base.BaseFragment;
-import com.jkingone.jkmusic.ui.mvp.AlbumListPresenter;
+import com.jkingone.jkmusic.ui.mvp.presenter.AlbumListPresenter;
 import com.jkingone.jkmusic.ui.mvp.contract.AlbumListContract;
 import com.jkingone.ui.widget.ContentLoadView;
 

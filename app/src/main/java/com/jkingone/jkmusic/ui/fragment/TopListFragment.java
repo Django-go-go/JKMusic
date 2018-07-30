@@ -16,12 +16,11 @@ import android.widget.TextView;
 import com.jkingone.common.utils.DensityUtils;
 import com.jkingone.jkmusic.GlideApp;
 import com.jkingone.jkmusic.R;
-import com.jkingone.jkmusic.Utils;
 import com.jkingone.jkmusic.entity.TopList;
 import com.jkingone.jkmusic.ui.activity.SongAndTopListActivity;
 import com.jkingone.jkmusic.ui.base.BaseFragment;
 import com.jkingone.jkmusic.ui.mvp.contract.TopListFragContract;
-import com.jkingone.jkmusic.ui.mvp.TopListFragPresenter;
+import com.jkingone.jkmusic.ui.mvp.presenter.TopListFragPresenter;
 import com.jkingone.ui.widget.ContentLoadView;
 
 import java.util.ArrayList;
@@ -65,6 +64,14 @@ public class TopListFragment extends BaseFragment<TopListFragPresenter> implemen
         mUnbinder = ButterKnife.bind(this, view);
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+//        LinearSnapHelper linearSnapHelper = new LinearSnapHelper();
+//        linearSnapHelper.attachToRecyclerView(mRecyclerView);
+
+//        PagerSnapHelper pagerSnapHelper = new PagerSnapHelper();
+//        pagerSnapHelper.attachToRecyclerView(mRecyclerView);
+
+
 
         mContentLoadView.setLoadRetryListener(new ContentLoadView.LoadRetryListener() {
             @Override
@@ -153,7 +160,7 @@ public class TopListFragment extends BaseFragment<TopListFragPresenter> implemen
             GlideApp.with(TopListFragment.this)
                     .asBitmap()
                     .load(topList.getPicS260())
-                    .override(DensityUtils.dp2px(mContext, 128))
+                    .override(DensityUtils.dp2px(mContext, 124))
                     .into(vh.imageView);
         }
 
