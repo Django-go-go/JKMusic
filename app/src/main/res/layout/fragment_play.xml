@@ -8,12 +8,18 @@
     android:background="@drawable/selector_line_frag"
     tools:context="com.jkingone.jkmusic.ui.fragment.PlayFragment">
 
-    <com.jkingone.ui.widget.TouchViewPager
-        android:id="@+id/pager"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycle_pager"
         android:layout_weight="1"
         android:layout_width="0dp"
-        android:background="@null"
         android:layout_height="match_parent"/>
+
+    <!--<com.jkingone.ui.widget.TouchViewPager-->
+        <!--android:id="@+id/pager"-->
+        <!--android:layout_weight="1"-->
+        <!--android:layout_width="0dp"-->
+        <!--android:background="@null"-->
+        <!--android:layout_height="match_parent"/>-->
 
     <ImageView
         android:padding="8dp"

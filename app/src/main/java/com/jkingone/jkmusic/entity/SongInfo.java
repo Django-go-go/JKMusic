@@ -19,6 +19,7 @@ public class SongInfo implements Parcelable {
     private String url; // 歌曲路径 5
     private String picUrl;
     private int type;
+    private boolean isPlaying = false;
 
     public SongInfo() {
         super();
@@ -48,6 +49,14 @@ public class SongInfo implements Parcelable {
             return new SongInfo[size];
         }
     };
+
+    public boolean isPlaying() {
+        return isPlaying;
+    }
+
+    public void setPlaying(boolean playing) {
+        isPlaying = playing;
+    }
 
     public int getType() {
         return type;

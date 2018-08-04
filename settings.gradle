@@ -1,1 +1,1 @@
-include ':app', ':lib-common', ':lib-ui', ':imagelib'
+include ':app', ':lib-common', ':lib-ui'

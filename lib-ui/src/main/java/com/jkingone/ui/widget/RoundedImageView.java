@@ -17,24 +17,20 @@ import com.jkingone.common.utils.DensityUtils;
 import com.jkingone.ui.R;
 
 public class RoundedImageView extends android.support.v7.widget.AppCompatImageView {
-    /**
-     * 圆形模式
-     */
+
     private static final int MODE_CIRCLE = 1;
-    /**
-     * 普通模式
-     */
     private static final int MODE_NONE = 0;
-    /**
-     * 圆角模式
-     */
     private static final int MODE_ROUND = 2;
+
     private Paint mPaint;
-    private int currMode = 0;
-    /**
-     * 圆角半径
-     */
-    private int currRound;
+
+    private int mMode;
+    private int mRadius;
+    private int mRound;
+
+    private RectF mRoundRectF;
+
+    private BitmapShader mBitmapShader;
 
     public RoundedImageView(Context context) {
         this(context, null, 0);
@@ -48,25 +44,24 @@ public class RoundedImageView extends android.support.v7.widget.AppCompatImageVi
         super(context, attrs, defStyleAttr);
 
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG);
-        currRound = DensityUtils.dp2px(getContext(), 6);
+        mRound = DensityUtils.dp2px(getContext(), 6);
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.RoundedImageView, defStyleAttr, 0);
-        currMode = a.hasValue(R.styleable.RoundedImageView_type) ? a.getInt(R.styleable.RoundedImageView_type, MODE_NONE) : MODE_ROUND;
-        currRound = a.hasValue(R.styleable.RoundedImageView_radius) ? a.getDimensionPixelSize(R.styleable.RoundedImageView_radius, currRound) : currRound;
+        mMode = a.getInt(R.styleable.RoundedImageView_type, MODE_ROUND);
+        mRound = a.getDimensionPixelSize(R.styleable.RoundedImageView_radius, mRound);
         a.recycle();
+
+        mRoundRectF = new RectF();
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        /**
-         * 当模式为圆形模式的时候，我们强制让宽高一致
-         */
-        if (currMode == MODE_CIRCLE) {
-            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        if (mMode == MODE_CIRCLE) {
             int result = Math.min(getMeasuredHeight(), getMeasuredWidth());
+            mRadius = result / 2;
             setMeasuredDimension(result, result);
-        } else {
-            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         }
     }
 
@@ -74,12 +69,13 @@ public class RoundedImageView extends android.support.v7.widget.AppCompatImageVi
     protected void onDraw(Canvas canvas) {
         Drawable mDrawable = getDrawable();
         Matrix mDrawMatrix = getImageMatrix();
+
         if (mDrawable == null) {
-            return; // couldn't resolve the URI
+            return;
         }
 
         if (mDrawable.getIntrinsicWidth() == 0 || mDrawable.getIntrinsicHeight() == 0) {
-            return;     // nothing to draw (empty bounds)
+            return;
         }
 
         if (mDrawMatrix == null && getPaddingTop() == 0 && getPaddingLeft() == 0) {
@@ -97,40 +93,36 @@ public class RoundedImageView extends android.support.v7.widget.AppCompatImageVi
                             scrollY + getBottom() - getTop() - getPaddingBottom());
                 }
             }
+
             canvas.translate(getPaddingLeft(), getPaddingTop());
-            if (currMode == MODE_CIRCLE) {//当为圆形模式的时候
+
+            if (mDrawMatrix != null) {
+                canvas.concat(mDrawMatrix);
+            }
+
+            if (mBitmapShader == null) {
                 Bitmap bitmap = drawableToBitmap(mDrawable);
-                mPaint.setShader(new BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP));
-                canvas.drawCircle(getMeasuredWidth() / 2, getMeasuredHeight() / 2, getMeasuredHeight() / 2, mPaint);
-            } else if (currMode == MODE_ROUND) {//当为圆角模式的时候
-                Bitmap bitmap = drawableToBitmap(mDrawable);
-                mPaint.setShader(new BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP));
-                canvas.drawRoundRect(new RectF(getPaddingLeft(), getPaddingTop(), getMeasuredWidth() - getPaddingRight(), getMeasuredHeight() - getPaddingBottom()),
-                        currRound, currRound, mPaint);
+                mBitmapShader = new BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+            }
+
+            mPaint.setShader(mBitmapShader);
+
+            if (mMode == MODE_CIRCLE) {
+                canvas.drawCircle(getMeasuredWidth() / 2, getMeasuredHeight() / 2, mRadius, mPaint);
+            } else if (mMode == MODE_ROUND) {
+                mRoundRectF.set(getPaddingLeft(), getPaddingTop(), getMeasuredWidth() - getPaddingRight(),
+                        getMeasuredHeight() - getPaddingBottom());
+                canvas.drawRoundRect(mRoundRectF, mRound, mRound, mPaint);
             } else {
-                if (mDrawMatrix != null) {
-                    canvas.concat(mDrawMatrix);
-                }
                 mDrawable.draw(canvas);
             }
             canvas.restoreToCount(saveCount);
         }
     }
 
-    /**
-     * drawable转换成bitmap
-     */
     private Bitmap drawableToBitmap(Drawable drawable) {
-        if (drawable == null) {
-            return null;
-        }
         Bitmap bitmap = Bitmap.createBitmap(getMeasuredWidth(), getMeasuredHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
-        //根据传递的scaletype获取matrix对象，设置给bitmap
-        Matrix matrix = getImageMatrix();
-        if (matrix != null) {
-            canvas.concat(matrix);
-        }
         drawable.draw(canvas);
         return bitmap;
     }

@@ -105,7 +105,7 @@ public class ContentLoadView extends FrameLayout {
                 }
 
                 mTextView.setVisibility(INVISIBLE);
-                mProgressBar.setVisibility(VISIBLE);
+                mProgressBar.setVisibility(GONE);
             }
         });
     }
@@ -120,7 +120,7 @@ public class ContentLoadView extends FrameLayout {
 
                 mTextView.setVisibility(VISIBLE);
                 mTextView.setText("加载失败！");
-                mProgressBar.setVisibility(INVISIBLE);
+                mProgressBar.setVisibility(GONE);
             }
         });
     }
@@ -135,7 +135,7 @@ public class ContentLoadView extends FrameLayout {
 
                 mTextView.setVisibility(VISIBLE);
                 mTextView.setText("抱歉，没有数据！");
-                mProgressBar.setVisibility(INVISIBLE);
+                mProgressBar.setVisibility(GONE);
             }
         });
     }
@@ -149,7 +149,7 @@ public class ContentLoadView extends FrameLayout {
                 }
 
                 mTextView.setVisibility(INVISIBLE);
-                mProgressBar.setVisibility(INVISIBLE);
+                mProgressBar.setVisibility(GONE);
             }
         });
     }

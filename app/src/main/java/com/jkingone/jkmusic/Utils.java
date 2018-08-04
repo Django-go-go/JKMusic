@@ -15,6 +15,7 @@ import android.widget.LinearLayout;
 import com.jkingone.jkmusic.entity.Album;
 import com.jkingone.jkmusic.entity.Song;
 import com.jkingone.jkmusic.entity.SongInfo;
+import com.jkingone.jkmusic.service.MusicManagerService;
 import com.jkingone.jkmusic.service.MusicService;
 
 import java.lang.reflect.Field;
@@ -32,16 +33,16 @@ public class Utils {
     }
 
     public static int getNextRepeatMode(int mode) {
-        if (mode == MusicService.PLAY_MODE_ALL) {
-            return MusicService.PLAY_MODE_ONE;
+        if (mode == MusicManagerService.PLAY_MODE_ALL) {
+            return MusicManagerService.PLAY_MODE_ONE;
         }
-        if (mode == MusicService.PLAY_MODE_ONE) {
-            return MusicService.PLAY_MODE_SHUFFLE;
+        if (mode == MusicManagerService.PLAY_MODE_ONE) {
+            return MusicManagerService.PLAY_MODE_SHUFFLE;
         }
-        if (mode == MusicService.PLAY_MODE_SHUFFLE) {
-            return MusicService.PLAY_MODE_ALL;
+        if (mode == MusicManagerService.PLAY_MODE_SHUFFLE) {
+            return MusicManagerService.PLAY_MODE_ALL;
         }
-        return MusicService.PLAY_MODE_ALL;
+        return MusicManagerService.PLAY_MODE_ALL;
     }
 
     public static void setIndicator(TabLayout tabs, int leftDip, int rightDip) {

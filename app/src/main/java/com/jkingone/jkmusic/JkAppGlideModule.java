@@ -13,7 +13,7 @@ import com.bumptech.glide.request.RequestOptions;
  * Created by Jkingone at 2018/7/27
  */
 @GlideModule
-public class JkGlideApp extends AppGlideModule {
+public class JkAppGlideModule extends AppGlideModule {
     @Override
     public void applyOptions(Context context, GlideBuilder builder) {
         builder.setDefaultRequestOptions(new RequestOptions().centerCrop());

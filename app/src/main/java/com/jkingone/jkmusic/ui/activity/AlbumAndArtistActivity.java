@@ -306,7 +306,7 @@ public class AlbumAndArtistActivity extends BaseActivity<AlbumAndArtistPresenter
 
         class SongViewHolder extends RecyclerView.ViewHolder {
 
-            @BindView(R.id.tv_songName)
+            @BindView(R.id.tv_song_name)
             TextView tv_songName;
             @BindView(R.id.tv_singer)
             TextView tv_singer;

@@ -4,31 +4,25 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.PagerSnapHelper;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.jkingone.common.utils.DensityUtils;
-import com.jkingone.jkmusic.GlideApp;
+import com.jkingone.common.utils.LogUtils;
+import com.jkingone.jkmusic.ContentHelper;
+import com.jkingone.jkmusic.service.MusicManager;
+import com.jkingone.jkmusic.service.MusicManagerService;
 import com.jkingone.jkmusic.ui.base.LazyFragment;
 import com.jkingone.ui.widget.JDialog;
-import com.jkingone.jkmusic.Constant;
 import com.jkingone.jkmusic.MusicBroadcastReceiver;
-import com.jkingone.jkmusic.MusicManagerService;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.Utils;
 import com.jkingone.jkmusic.entity.SongInfo;
-import com.jkingone.jkmusic.service.MusicService;
 import com.jkingone.jkmusic.ui.base.BaseActivity;
 import com.jkingone.jkmusic.ui.activity.PlayActivity;
 
@@ -40,15 +34,13 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
 
-public class PlayFragment extends LazyFragment {
-
-    private static final String TAG = "PlayFragment";
+public class PlayFragment extends LazyFragment implements MusicManager.ServiceConnectionListener {
 
     public static final String CUR_SONG = "cur_song";
     public static final String CUR_INDEX = "cur_index";
 
-    @BindView(R.id.pager)
-    ViewPager mViewPager;
+    @BindView(R.id.recycle_pager)
+    RecyclerView mRecyclerViewPager;
     @BindView(R.id.iv_play)
     ImageView mImageViewPlay;
     @BindView(R.id.iv_menu)
@@ -56,23 +48,46 @@ public class PlayFragment extends LazyFragment {
 
     private JDialog mJDialog;
 
-    private List<View> mRootViews = new ArrayList<>(6);
-    private ImageView mImageViewCover;
-    private TextView mTextViewSinger;
-    private TextView mTextViewSongName;
-    private List<SongInfo> mSongInfos = new ArrayList<>();
-
     private Unbinder mUnbinder;
 
     private SongInfo mCurSongInfo;
     private int mCurIndex = Integer.MIN_VALUE;
 
-    private boolean isComplete;
     private boolean isNext;
 
     private BaseActivity mBaseActivity;
+    private MusicManager mMusicManager;
+
+    private List<SongInfo> mMediaSources = new ArrayList<>();
 
     private MusicAdapter mMusicAdapter;
+
+    private PagerSnapHelper mPagerSnapHelper;
+
+    private MusicBroadcastReceiver.MediaPlayerCallback
+            mMediaPlayerCallback = new MusicBroadcastReceiver.SimpleMediaPlayerCallback() {
+
+        @Override
+        public void onCompletion() {
+            isNext = true;
+            mRecyclerViewPager.smoothScrollToPosition(mMusicManager.getNextIndex() + 1);
+        }
+
+        @Override
+        public void onError(int what) {
+            isNext = true;
+            mRecyclerViewPager.smoothScrollToPosition(mMusicManager.getNextIndex() + 1);
+        }
+
+        @Override
+        public void onPrepared(boolean isPlaying) {
+            if (isPlaying) {
+                mImageViewPlay.setImageResource(R.drawable.music_xxh_yellow);
+            } else {
+                mImageViewPlay.setImageResource(R.drawable.music);
+            }
+        }
+    };
 
     public static PlayFragment newInstance(String... params) {
         PlayFragment fragment = new PlayFragment();
@@ -89,13 +104,25 @@ public class PlayFragment extends LazyFragment {
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_play, container, false);
         mUnbinder = ButterKnife.bind(this, view);
 
-        initViewPager();
+        mMusicManager = MusicManager.getInstance();
 
-        initCallback();
+        mRecyclerViewPager.setLayoutManager(new LinearLayoutManager(getContext(),
+                LinearLayoutManager.HORIZONTAL, false));
+        mPagerSnapHelper = new PagerSnapHelper();
+        mPagerSnapHelper.attachToRecyclerView(mRecyclerViewPager);
+        mRecyclerViewPager.addOnScrollListener(new MusicScrollListener());
+        if (mMusicAdapter == null) {
+            mMusicAdapter = new MusicAdapter();
+        }
+        mRecyclerViewPager.setAdapter(mMusicAdapter);
+
+
+        mMusicManager.setServiceConnectionListener(this);
+        mMusicManager.addMediaPlayerCallback(mMediaPlayerCallback);
 
         return view;
     }
@@ -104,134 +131,43 @@ public class PlayFragment extends LazyFragment {
     public void onDestroyView() {
         super.onDestroyView();
         mUnbinder.unbind();
-    }
-
-    private void initCallback() {
-        mBaseActivity.getMusicManagerService().setBindServiceCallback(new MusicManagerService.BindServiceCallback() {
-            @Override
-            public void updateFirst() {
-                mSongInfos.clear();
-                mSongInfos.addAll(mBaseActivity.getMusicManagerService().getMediaSources());
-            }
-        });
-        mBaseActivity.getMusicManagerService().setPlayCallback(new MusicBroadcastReceiver.PlayCallback() {
-            @Override
-            public void playStateChange(boolean isPlaying) {
-                if (isPlaying) {
-                    mImageViewPlay.setImageResource(R.drawable.music_xxh_yellow);
-                } else {
-                    mImageViewPlay.setImageResource(R.drawable.music);
-                }
-            }
-
-            @Override
-            public void mediaSourceChange(boolean indexChanged, int index, List<SongInfo> songInfos) {
-                if (songInfos.size() == 0) {
-                    Toast.makeText(mBaseActivity, "clear", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(mBaseActivity, "" + indexChanged + " " + index, Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void indexChanged(int index, boolean isComplete) {
-                updateIndex(index);
-                PlayFragment.this.isComplete = isComplete;
-                if (isComplete) {
-                    mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1, true);
-                } else {
-                    updateViewPager(mViewPager.getCurrentItem());
-                }
-            }
-        });
-    }
-
-    private void initViewPager() {
-        if (mMusicAdapter == null) {
-            mMusicAdapter = new MusicAdapter();
-        }
-        mViewPager.setAdapter(mMusicAdapter);
-        mViewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-
-            int lastPos = mViewPager.getCurrentItem();
-
-            @Override
-            public void onPageSelected(int position) {
-
-                isNext = (lastPos == Constant.PAGER_SIZE - 1 && position == 1) || (position > lastPos);
-                if (lastPos == 0 && position == Constant.PAGER_SIZE - 2) {
-                    isNext = false;
-                }
-                Log.i(TAG, "onPageSelected: " + position + " " + isComplete + " " + isNext);
-                lastPos = position;
-
-                if (position == 0) {
-                    mViewPager.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            isComplete = false;
-                            isNext = false;
-                            mViewPager.setCurrentItem(Constant.PAGER_SIZE - 2, false);
-                        }
-                    }, 200);
-                } else if (position == Constant.PAGER_SIZE - 1) {
-                    mViewPager.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            isComplete = false;
-                            isNext = true;
-                            mViewPager.setCurrentItem(1, false);
-                        }
-                    }, 200);
-                } else {
-                    if (!isComplete) {
-                        if (isNext) {
-                            mBaseActivity.getMusicManagerService().next();
-                        } else {
-                            mBaseActivity.getMusicManagerService().previous();
-                        }
-                    } else {
-                        updateViewPager(position);
-                    }
-                    isComplete = false;
-                }
-            }
-        });
+        mMusicManager.removeMediaPlayerCallback(mMediaPlayerCallback);
     }
 
     private View dialogView;
     private RecyclerView mRecyclerView;
     private PlayListAdapter mPlayListAdapter;
+
     @OnClick(R.id.iv_menu)
     public void onMenuClick() {
         if (mJDialog == null) {
-            mJDialog = new JDialog(mBaseActivity);
+            mJDialog = new JDialog(getContext());
 
-            List<String> strings = new ArrayList<>();
-            for (int i = 0; i < 10; i++) {
-                strings.add("index : " + i);
-            }
-            final ListView listView = new ListView(mBaseActivity);
-            listView.setAdapter(new ArrayAdapter<>(mBaseActivity, android.R.layout.simple_list_item_1, strings));
-            mJDialog.setContentView(listView);
-            mJDialog.setCheckScroll(new JDialog.CheckScroll() {
-                @Override
-                public boolean canScrollVertically() {
-                    return listView.canScrollVertically(-1);
-                }
-            });
-
-//            createDialogView();
-//            mJDialog.setContentView(dialogView);
+//            List<String> strings = new ArrayList<>();
+//            for (int i = 0; i < 10; i++) {
+//                strings.add("index : " + i);
+//            }
+//            final ListView listView = new ListView(mBaseActivity);
+//            listView.setAdapter(new ArrayAdapter<>(mBaseActivity, android.R.layout.simple_list_item_1, strings));
+//            mJDialog.setContentView(listView);
 //            mJDialog.setCheckScroll(new JDialog.CheckScroll() {
 //                @Override
 //                public boolean canScrollVertically() {
-//                    return mRecyclerView.canScrollVertically(-1);
+//                    return listView.canScrollVertically(-1);
 //                }
 //            });
+
+            createDialogView();
+            mJDialog.setContentView(dialogView);
+            mJDialog.setCheckScroll(new JDialog.CheckScroll() {
+                @Override
+                public boolean canScrollVertically() {
+                    return mRecyclerView.canScrollVertically(-1);
+                }
+            });
         }
-//        mPlayListAdapter.setPlayPosition(mBaseActivity.getMusicManagerService().getCurrentWindowIndex());
-//        mRecyclerView.scrollToPosition(mBaseActivity.getMusicManagerService().getCurrentWindowIndex());
+        mPlayListAdapter.setPlayPosition(mMusicManager.getCurrentIndex());
+        mRecyclerView.scrollToPosition(mMusicManager.getCurrentIndex());
         mJDialog.show();
     }
 
@@ -240,29 +176,28 @@ public class PlayFragment extends LazyFragment {
 
         mRecyclerView = dialogView.findViewById(R.id.recycle_dialog);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mBaseActivity));
-        mPlayListAdapter = new PlayListAdapter(mBaseActivity, mSongInfos, mBaseActivity.getMusicManagerService());
+        mPlayListAdapter = new PlayListAdapter();
         mRecyclerView.setAdapter(mPlayListAdapter);
 
         dialogView.findViewById(R.id.tv_repeat).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 TextView textView = (TextView) v;
-                int mode = Utils.getNextRepeatMode(mBaseActivity.getMusicManagerService().getPlayMode());
-                if (mode == MusicService.PLAY_MODE_ALL) {
+                int mode = Utils.getNextRepeatMode(mMusicManager.getPlayMode());
+                if (mode == MusicManagerService.PLAY_MODE_ALL) {
                     textView.setText("全部循环");
-                } else if (mode == MusicService.PLAY_MODE_SHUFFLE) {
+                } else if (mode == MusicManagerService.PLAY_MODE_SHUFFLE) {
                     textView.setText("随机播放");
                 } else {
                     textView.setText("单曲循环");
                 }
-                mBaseActivity.getMusicManagerService().setPlayMode(mode);
+                mMusicManager.setPlayMode(mode);
             }
         });
         dialogView.findViewById(R.id.tv_clear).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mBaseActivity.getMusicManagerService().clearMediaSources();
-                mPlayListAdapter.clearData();
+                mMusicManager.clearMediaSources();
                 mPlayListAdapter.notifyDataSetChanged();
             }
         });
@@ -270,124 +205,153 @@ public class PlayFragment extends LazyFragment {
 
     @OnClick(R.id.iv_play)
     public void onPlayClick() {
-        if (mBaseActivity.getMusicManagerService() != null) {
-            if (mBaseActivity.getMusicManagerService().isPlaying()) {
-                mBaseActivity.getMusicManagerService().pause();
+        if (mMusicManager != null) {
+            if (mMusicManager.isPlaying()) {
+                mMusicManager.pause();
             } else {
-                mBaseActivity.getMusicManagerService().play();
+                mMusicManager.start();
             }
         }
     }
 
-    @OnClick(R.id.pager)
-    public void onPagerClick() {
-        Intent intent = new Intent(mBaseActivity, PlayActivity.class);
-        intent.putExtra(CUR_SONG, mCurSongInfo);
-        intent.putExtra(CUR_INDEX, mCurIndex);
-        startActivity(intent);
+//    public void onPagerClick() {
+//        Intent intent = new Intent(mBaseActivity, PlayActivity.class);
+//        intent.putExtra(CUR_SONG, mCurSongInfo);
+//        intent.putExtra(CUR_INDEX, mCurIndex);
+//        startActivity(intent);
+//    }
+
+    @Override
+    public void onConnected() {
+        mMusicManager.prepareMediaSources(new ContentHelper(getContext()).getMusic());
+        mMusicManager.setPlayMode(MusicManagerService.PLAY_MODE_ONE);
+
+        mMediaSources.clear();
+        mMediaSources.addAll(mMusicManager.getMediaSourcesForPlayMode());
+
+        LogUtils.i("playFragment : " + mMediaSources);
+
+        if (mMusicAdapter != null) {
+            mMusicAdapter.notifyDataSetChanged();
+        }
+
+        mCurIndex = mMusicManager.getCurrentIndex();
+
+        LogUtils.i("curIndex " + mCurIndex);
+        mRecyclerViewPager.scrollToPosition(mCurIndex + 1);
     }
 
-    private class MusicAdapter extends PagerAdapter {
-
-        @Override
-        public int getCount() {
-            return Constant.PAGER_SIZE;
-        }
-
-        @Override
-        public boolean isViewFromObject(@NonNull View view, @NonNull Object object) {
-            return object == view;
-        }
-
+    class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewHolder> {
         @NonNull
         @Override
-        public Object instantiateItem(@NonNull ViewGroup container, int position) {
-            View view = instantiateView(container, position);
-            container.addView(view);
-            return view;
+        public MusicViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            return new MusicViewHolder(LayoutInflater.from(getContext()).inflate(R.layout.pager_bottom_music, parent, false));
         }
 
         @Override
-        public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
-            if (position < mRootViews.size()) {
-                container.removeView(mRootViews.get(position));
-                clearViewPager(mRootViews.get(position));
+        public void onBindViewHolder(@NonNull MusicViewHolder holder, int position) {
+
+            if (position == 0) {
+                position = mMediaSources.size() - 1;
+            } else if (position == getItemCount() - 1) {
+                position = 0;
+            } else {
+                position -= 1;
+            }
+
+            SongInfo songInfo = mMediaSources.get(position);
+            holder.mTextViewSinger.setText(songInfo.getArtist());
+            holder.mTextViewSongName.setText(songInfo.getTitle());
+        }
+
+        @Override
+        public int getItemCount() {
+            if (mMediaSources.size() == 0) {
+                return 0;
+            }
+            return mMediaSources.size() + 2;
+        }
+
+        class MusicViewHolder extends RecyclerView.ViewHolder {
+            @BindView(R.id.iv_cover)
+            ImageView mImageViewCover;
+            @BindView(R.id.tv_singer)
+            TextView mTextViewSinger;
+            @BindView(R.id.tv_song_name)
+            TextView mTextViewSongName;
+
+            MusicViewHolder(View itemView) {
+                super(itemView);
+                ButterKnife.bind(this, itemView);
             }
         }
     }
 
-    private synchronized View instantiateView(ViewGroup container, int position) {
-        int size = mRootViews.size();
-        if (position >= size) {
-            for (int i = size; i <= position; i++) {
-                mRootViews.add(null);
+    class MusicScrollListener extends RecyclerView.OnScrollListener {
+        @Override
+        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            LinearLayoutManager manager = (LinearLayoutManager) recyclerView.getLayoutManager();
+            if (recyclerView.getAdapter() != null
+                    && newState == RecyclerView.SCROLL_STATE_IDLE
+                    && recyclerView.getChildCount() > 0) {
+                View view = mPagerSnapHelper.findSnapView(manager);
+                int pos = recyclerView.getChildAdapterPosition(view);
+                onScrollSelected(recyclerView, pos);
             }
         }
-        if (mRootViews.get(position) == null) {
-            View view = LayoutInflater.from(getContext()).inflate(R.layout.pager_bottom_music, container, false);
-            mRootViews.set(position, view);
+
+        private void onScrollSelected(RecyclerView recyclerView, int position) {
+            int itemCount = recyclerView.getAdapter().getItemCount();
+            if (position == 0) {
+                recyclerView.scrollToPosition(itemCount - 2);
+            } else if (position == itemCount - 1) {
+                recyclerView.scrollToPosition(1);
+            } else {
+                if (isNext) {
+                    mMusicManager.next();
+                } else {
+                    mMusicManager.previous();
+                }
+            }
         }
-        return mRootViews.get(position);
+
+        @Override
+        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            if (dx > 0) {
+                isNext = true;
+            }
+            if (dx < 0) {
+                isNext = false;
+            }
+        }
     }
 
-    private void updateIndex(int index) {
-        mCurIndex = index;
-        mCurSongInfo = mSongInfos.get(mCurIndex);
-    }
+    class PlayListAdapter extends RecyclerView.Adapter<PlayListAdapter.PlayListViewHolder> {
 
-    private void updateViewPager(int pos) {
-        View view = instantiateView(mViewPager, pos);
-        mImageViewCover = view.findViewById(R.id.iv_cover);
-        mTextViewSinger = view.findViewById(R.id.tv_singer);
-        mTextViewSongName = view.findViewById(R.id.tv_songName);
-        GlideApp.with(this)
-                .asBitmap()
-                .load(mCurSongInfo.getPicUrl())
-                .override(DensityUtils.dp2px(mBaseActivity, 48))
-                .into(mImageViewCover);
-        mTextViewSinger.setText(mCurSongInfo.getArtist());
-        mTextViewSongName.setText(mCurSongInfo.getTitle());
-    }
-
-    private void clearViewPager(View view) {
-        ImageView imageViewCover = view.findViewById(R.id.iv_cover);
-        TextView textViewSinger = view.findViewById(R.id.tv_singer);
-        TextView textViewSongName = view.findViewById(R.id.tv_songName);
-        textViewSinger.setText("");
-        textViewSongName.setText("");
-        imageViewCover.setImageDrawable(null);
-    }
-
-    static class PlayListAdapter extends RecyclerView.Adapter<PlayListAdapter.PlayListViewHolder> {
-
-        private Context mContext;
-        private List<PlayList> mPlayLists = new ArrayList<>();
-        private LayoutInflater mLayoutInflater;
         private int mPlayPosition = -1;
-
-        private MusicManagerService mMusicManagerService;
 
         @NonNull
         @Override
         public PlayListViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new PlayListViewHolder(mLayoutInflater.inflate(R.layout.item_list_playlist, parent, false));
+            return new PlayListViewHolder(LayoutInflater.from(getContext())
+                    .inflate(R.layout.item_list_playlist, parent, false));
         }
 
         @Override
         public void onBindViewHolder(@NonNull PlayListViewHolder holder, final int position) {
 
-            final PlayList playList = mPlayLists.get(position);
+            SongInfo songInfo = mMediaSources.get(position);
 
-            if (playList.isPlaying) {
+            if (songInfo.isPlaying()) {
                 mPlayPosition = position;
                 holder.mImageViewPic.setVisibility(View.VISIBLE);
-                holder.mTextView.setTextColor(mContext.getResources().getColor(R.color.colorPrimary));
+                holder.mTextView.setTextColor(getContext().getResources().getColor(R.color.colorPrimary));
             } else {
                 holder.mImageViewPic.setVisibility(View.GONE);
-                holder.mTextView.setTextColor(mContext.getResources().getColor(R.color.black));
+                holder.mTextView.setTextColor(getContext().getResources().getColor(R.color.black));
             }
 
-            holder.mTextView.setText(playList.mSongInfo.getTitle() + " - " + playList.mSongInfo.getArtist());
+            holder.mTextView.setText(songInfo.getTitle() + " - " + songInfo.getArtist());
 
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -396,15 +360,14 @@ public class PlayFragment extends LazyFragment {
                     if (mPlayPosition != position) {
                         setPlayPosition(position);
 
-                        mMusicManagerService.seekToIndex(position, 0);
+                        mMusicManager.seekToIndex(position, 0);
                     }
                 }
             });
             holder.mImageViewDelete.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mMusicManagerService.removeMediaSource(position);
-                    mPlayLists.remove(playList);
+                    mMusicManager.removeMediaSource(position);
                     notifyDataSetChanged();
                 }
             });
@@ -412,44 +375,22 @@ public class PlayFragment extends LazyFragment {
 
         @Override
         public int getItemCount() {
-            return mPlayLists.size();
-        }
-
-        public void clearData() {
-            mPlayLists.clear();
-        }
-
-        PlayListAdapter(Context context, List<SongInfo> songInfos, MusicManagerService musicManagerService) {
-            mContext = context;
-            mLayoutInflater = LayoutInflater.from(context);
-            for (int i = 0; i < songInfos.size(); i++) {
-                PlayList playList = new PlayList();
-                playList.mSongInfo = songInfos.get(i);
-                playList.isPlaying = false;
-                mPlayLists.add(playList);
-            }
-            mMusicManagerService = musicManagerService;
+            return mMediaSources.size();
         }
 
         void setPlayPosition(int playPosition) {
-            if (playPosition >= 0) {
-                if (playPosition != mPlayPosition) {
-                    if (mPlayPosition >= 0) {
-                        mPlayLists.get(mPlayPosition).isPlaying = false;
-                    }
-                    PlayList playList = new PlayList();
-                    playList.isPlaying = true;
-                    playList.mSongInfo = mPlayLists.get(playPosition).mSongInfo;
-                    mPlayLists.set(playPosition, playList);
-                    mPlayPosition = playPosition;
-                    notifyDataSetChanged();
-                }
-            }
-        }
+            if (playPosition >= 0 && playPosition != mPlayPosition) {
+//                if (mPlayPosition >= 0) {
+//                    mPlayLists.get(mPlayPosition).isPlaying = false;
+//                }
+//                PlayList playList = new PlayList();
+//                playList.isPlaying = true;
+//                playList.mSongInfo = mPlayLists.get(playPosition).mSongInfo;
+//                mPlayLists.set(playPosition, playList);
 
-        class PlayList {
-            SongInfo mSongInfo;
-            boolean isPlaying;
+                mPlayPosition = playPosition;
+                notifyDataSetChanged();
+            }
         }
 
         class PlayListViewHolder extends RecyclerView.ViewHolder {

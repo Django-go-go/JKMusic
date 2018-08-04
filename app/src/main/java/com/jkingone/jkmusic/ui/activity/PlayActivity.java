@@ -27,21 +27,18 @@ import android.widget.Scroller;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.bumptech.glide.load.Transformation;
-import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
-import com.google.android.exoplayer2.C;
 import com.jkingone.common.utils.ImageUtils;
 import com.jkingone.common.utils.ScreenUtils;
 import com.jkingone.common.utils.TimeUtils;
 import com.jkingone.jkmusic.GlideApp;
+import com.jkingone.jkmusic.service.MusicManager;
 import com.jkingone.jkmusic.ui.base.BaseActivity;
 import com.jkingone.jkmusic.Constant;
 import com.jkingone.jkmusic.MusicBroadcastReceiver;
-import com.jkingone.jkmusic.MusicManagerService;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.entity.SongInfo;
 import com.jkingone.jkmusic.ui.fragment.PlayFragment;
@@ -99,12 +96,16 @@ public class PlayActivity extends BaseActivity {
     private boolean isComplete;
     private boolean isNext;
 
+    private MusicManager mMusicManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play);
         ScreenUtils.setTranslucent(this);
         ButterKnife.bind(this);
+
+        mMusicManager = MusicManager.getInstance();
 
         Intent intent = getIntent();
         mCurSongInfo = intent.getParcelableExtra(PlayFragment.CUR_SONG);
@@ -118,10 +119,10 @@ public class PlayActivity extends BaseActivity {
     }
 
     private void initCallback() {
-        mMusicManagerService.setBindServiceCallback(new MusicManagerService.BindServiceCallback() {
+        mMusicManager.setServiceConnectionListener(new MusicManager.ServiceConnectionListener() {
             @Override
-            public void updateFirst() {
-                if (mMusicManagerService.isPlaying()) {
+            public void onConnected() {
+                if (mMusicManager.isPlaying()) {
                     scheduleSeekBarUpdate();
                     mImageViewPlay.setImageResource(R.drawable.music_large_blue);
                 } else {
@@ -132,8 +133,37 @@ public class PlayActivity extends BaseActivity {
             }
         });
 
-        mMusicManagerService.setPlayCallback(new MusicBroadcastReceiver.PlayCallback() {
+        mMusicManager.addMediaPlayerCallback(new MusicBroadcastReceiver.MediaPlayerCallback() {
             @Override
+            public void onCompletion() {
+
+            }
+
+            @Override
+            public void onBufferingUpdate(int percent) {
+
+            }
+
+            @Override
+            public void onPrepared(boolean isPlaying) {
+
+            }
+
+            @Override
+            public void onError(int what) {
+
+            }
+
+            @Override
+            public void onInfo(int what) {
+
+            }
+
+            @Override
+            public void onSeekComplete() {
+
+            }
+
             public void playStateChange(boolean isPlaying) {
                 if (isPlaying) {
                     mImageViewPlay.setImageResource(R.drawable.music_large_blue);
@@ -143,12 +173,10 @@ public class PlayActivity extends BaseActivity {
                 postViewPagerAnimator(isPlaying);
             }
 
-            @Override
             public void mediaSourceChange(boolean indexChanged, int index, List<SongInfo> songInfos) {
 
             }
 
-            @Override
             public void indexChanged(int index, boolean isComplete) {
                 updateIndex(index);
                 PlayActivity.this.isComplete = isComplete;
@@ -202,9 +230,9 @@ public class PlayActivity extends BaseActivity {
                 } else {
                     if (!isComplete) {
                         if (isNext) {
-                            mMusicManagerService.next();
+                            mMusicManager.next();
                         } else {
-                            mMusicManagerService.previous();
+                            mMusicManager.previous();
                         }
                     } else {
                         updateViewPager(position);
@@ -230,14 +258,12 @@ public class PlayActivity extends BaseActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        exeBindService();
         getScheduledService();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        exeUnbindService();
         releaseScheduledService();
     }
 
@@ -253,27 +279,21 @@ public class PlayActivity extends BaseActivity {
                 break;
             }
             case R.id.iv_last: {
-                if (getMusicManagerService() != null) {
-                    isComplete = false;
-                    mViewPager.setCurrentItem(mViewPager.getCurrentItem() - 1, true);
-                }
+                isComplete = false;
+                mViewPager.setCurrentItem(mViewPager.getCurrentItem() - 1, true);
                 break;
             }
             case R.id.iv_play: {
-                if (getMusicManagerService() != null) {
-                    if (mMusicManagerService.isPlaying()) {
-                        mMusicManagerService.pause();
-                    } else {
-                        mMusicManagerService.play();
-                    }
+                if (mMusicManager.isPlaying()) {
+                    mMusicManager.pause();
+                } else {
+                    mMusicManager.start();
                 }
                 break;
             }
             case R.id.iv_next: {
-                if (getMusicManagerService() != null) {
-                    isComplete = false;
-                    mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1, true);
-                }
+                isComplete = false;
+                mViewPager.setCurrentItem(mViewPager.getCurrentItem() + 1, true);
                 break;
             }
             case R.id.iv_menu: {
@@ -283,28 +303,26 @@ public class PlayActivity extends BaseActivity {
     }
 
     private void updateSeekBar() {
-        if (getMusicManagerService() != null) {
-            long progress = mMusicManagerService.getCurrentPosition();
-            long total = mMusicManagerService.getDuration();
-            long buf = mMusicManagerService.getBufferedPosition();
+//        long progress = mMusicManager.getCurrentIndex();
+//        long total = mMusicManager.getDuration();
+//        long buf = mMusicManager.getBufferedPosition();
 
-            if (progress == C.TIME_UNSET) {
-                progress = 0;
-            }
-            if (total == C.TIME_UNSET) {
-                total = 0;
-            }
-            if (buf == C.TIME_UNSET) {
-                buf = 0;
-            }
+//            if (progress == C.TIME_UNSET) {
+//                progress = 0;
+//            }
+//            if (total == C.TIME_UNSET) {
+//                total = 0;
+//            }
+//            if (buf == C.TIME_UNSET) {
+//                buf = 0;
+//            }
 
-            mTextViewStart.setText(TimeUtils.formatTime(progress));
-            mTextViewTotal.setText(TimeUtils.formatTime(total));
-
-            mSeekBar.setMax((int) total);
-            mSeekBar.setProgress((int) progress);
-            mSeekBar.setSecondaryProgress((int) buf);
-        }
+//        mTextViewStart.setText(TimeUtils.formatTime(progress));
+//        mTextViewTotal.setText(TimeUtils.formatTime(total));
+//
+//        mSeekBar.setMax((int) total);
+//        mSeekBar.setProgress((int) progress);
+//        mSeekBar.setSecondaryProgress((int) buf);
     }
 
     private void updateViewPager(int pos) {
@@ -339,7 +357,7 @@ public class PlayActivity extends BaseActivity {
                 .into(new SimpleTarget<Bitmap>() {
 
                     private Handler mHandler = new Handler();
-                    private Runnable mLastCallback =null;
+                    private Runnable mLastCallback = null;
 
                     @Override
                     public void onResourceReady(final Bitmap resource, Transition<? super Bitmap> transition) {
@@ -360,13 +378,13 @@ public class PlayActivity extends BaseActivity {
         mToolbar.setTitle(mCurSongInfo.getTitle());
         mToolbar.setSubtitle(mCurSongInfo.getArtist());
 
-        postViewPagerAnimator(mMusicManagerService.isPlaying());
+        postViewPagerAnimator(mMusicManager.isPlaying());
     }
 
     private void updateIndex(int index) {
         mCurIndex = index;
         if (mSongInfos == null) {
-            mSongInfos = mMusicManagerService.getMediaSources();
+//            mSongInfos = mMusicManager.getMediaSources();
         }
         mCurSongInfo = mSongInfos.get(mCurIndex);
     }
