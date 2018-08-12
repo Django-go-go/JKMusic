@@ -2,7 +2,7 @@ package com.jkingone.jkmusic;
 
 import android.app.Application;
 
-import com.jkingone.jkmusic.service.MusicManager;
+import com.jkingone.jkmusic.music.MusicManager;
 
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 

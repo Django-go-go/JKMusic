@@ -15,8 +15,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.jkingone.common.utils.DensityUtils;
-import com.jkingone.common.utils.ScreenUtils;
+import com.jkingone.utils.DensityUtils;
+import com.jkingone.utils.ScreenUtils;
 import com.jkingone.jkmusic.GlideApp;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.Utils;

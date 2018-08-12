@@ -20,8 +20,8 @@ import android.widget.TextView;
 
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
-import com.jkingone.common.utils.DensityUtils;
-import com.jkingone.common.utils.ScreenUtils;
+import com.jkingone.utils.DensityUtils;
+import com.jkingone.utils.ScreenUtils;
 import com.jkingone.jkmusic.GlideApp;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.entity.SongInfo;

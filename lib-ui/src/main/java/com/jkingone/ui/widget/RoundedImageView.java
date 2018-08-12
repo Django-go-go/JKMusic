@@ -13,8 +13,8 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.AttributeSet;
 
-import com.jkingone.common.utils.DensityUtils;
 import com.jkingone.ui.R;
+import com.jkingone.ui.utils.DensityUtils;
 
 public class RoundedImageView extends android.support.v7.widget.AppCompatImageView {
 

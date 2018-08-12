@@ -1,7 +1,6 @@
 package com.jkingone.jkmusic.ui.fragment;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
@@ -13,10 +12,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.jkingone.common.utils.LogUtils;
+import com.jkingone.utils.LogUtils;
 import com.jkingone.jkmusic.ContentHelper;
-import com.jkingone.jkmusic.service.MusicManager;
-import com.jkingone.jkmusic.service.MusicManagerService;
+import com.jkingone.jkmusic.music.MusicManager;
 import com.jkingone.jkmusic.ui.base.LazyFragment;
 import com.jkingone.ui.widget.JDialog;
 import com.jkingone.jkmusic.MusicBroadcastReceiver;
@@ -24,9 +22,7 @@ import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.Utils;
 import com.jkingone.jkmusic.entity.SongInfo;
 import com.jkingone.jkmusic.ui.base.BaseActivity;
-import com.jkingone.jkmusic.ui.activity.PlayActivity;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -39,6 +35,9 @@ public class PlayFragment extends LazyFragment implements MusicManager.ServiceCo
     public static final String CUR_SONG = "cur_song";
     public static final String CUR_INDEX = "cur_index";
 
+    public static final int NEXT = 1;
+    public static final int PREV = 2;
+
     @BindView(R.id.recycle_pager)
     RecyclerView mRecyclerViewPager;
     @BindView(R.id.iv_play)
@@ -50,15 +49,10 @@ public class PlayFragment extends LazyFragment implements MusicManager.ServiceCo
 
     private Unbinder mUnbinder;
 
-    private SongInfo mCurSongInfo;
-    private int mCurIndex = Integer.MIN_VALUE;
-
-    private boolean isNext;
+    private int mScrollDirection;
 
     private BaseActivity mBaseActivity;
     private MusicManager mMusicManager;
-
-    private List<SongInfo> mMediaSources = new ArrayList<>();
 
     private MusicAdapter mMusicAdapter;
 
@@ -69,13 +63,13 @@ public class PlayFragment extends LazyFragment implements MusicManager.ServiceCo
 
         @Override
         public void onCompletion() {
-            isNext = true;
+            mScrollDirection = NEXT;
             mRecyclerViewPager.smoothScrollToPosition(mMusicManager.getNextIndex() + 1);
         }
 
         @Override
         public void onError(int what) {
-            isNext = true;
+            mScrollDirection = NEXT;
             mRecyclerViewPager.smoothScrollToPosition(mMusicManager.getNextIndex() + 1);
         }
 
@@ -184,9 +178,9 @@ public class PlayFragment extends LazyFragment implements MusicManager.ServiceCo
             public void onClick(View v) {
                 TextView textView = (TextView) v;
                 int mode = Utils.getNextRepeatMode(mMusicManager.getPlayMode());
-                if (mode == MusicManagerService.PLAY_MODE_ALL) {
+                if (mode == MusicManager.PLAY_MODE_ALL) {
                     textView.setText("全部循环");
-                } else if (mode == MusicManagerService.PLAY_MODE_SHUFFLE) {
+                } else if (mode == MusicManager.PLAY_MODE_SHUFFLE) {
                     textView.setText("随机播放");
                 } else {
                     textView.setText("单曲循环");
@@ -224,24 +218,27 @@ public class PlayFragment extends LazyFragment implements MusicManager.ServiceCo
     @Override
     public void onConnected() {
         mMusicManager.prepareMediaSources(new ContentHelper(getContext()).getMusic());
-        mMusicManager.setPlayMode(MusicManagerService.PLAY_MODE_ONE);
-
-        mMediaSources.clear();
-        mMediaSources.addAll(mMusicManager.getMediaSourcesForPlayMode());
-
-        LogUtils.i("playFragment : " + mMediaSources);
+        mMusicManager.setPlayMode(MusicManager.PLAY_MODE_SHUFFLE);
 
         if (mMusicAdapter != null) {
             mMusicAdapter.notifyDataSetChanged();
         }
 
-        mCurIndex = mMusicManager.getCurrentIndex();
+        int curIndex = mMusicManager.getCurrentIndex();
 
-        LogUtils.i("curIndex " + mCurIndex);
-        mRecyclerViewPager.scrollToPosition(mCurIndex + 1);
+        mMusicManager.prepare();
+
+        LogUtils.i("curIndex " + curIndex);
+        mRecyclerViewPager.scrollToPosition(curIndex + 1);
     }
 
     class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewHolder> {
+        private List<SongInfo> mMediaSources;
+
+        MusicAdapter() {
+            mMediaSources = mMusicManager.getMediaSourcesForPlayMode();
+        }
+
         @NonNull
         @Override
         public MusicViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -262,6 +259,7 @@ public class PlayFragment extends LazyFragment implements MusicManager.ServiceCo
             SongInfo songInfo = mMediaSources.get(position);
             holder.mTextViewSinger.setText(songInfo.getArtist());
             holder.mTextViewSongName.setText(songInfo.getTitle());
+            holder.mImageViewCover.setImageResource(R.mipmap.ic_launcher_round);
         }
 
         @Override
@@ -307,9 +305,10 @@ public class PlayFragment extends LazyFragment implements MusicManager.ServiceCo
             } else if (position == itemCount - 1) {
                 recyclerView.scrollToPosition(1);
             } else {
-                if (isNext) {
+                if (mScrollDirection == NEXT) {
                     mMusicManager.next();
-                } else {
+                }
+                if (mScrollDirection == PREV) {
                     mMusicManager.previous();
                 }
             }
@@ -318,17 +317,23 @@ public class PlayFragment extends LazyFragment implements MusicManager.ServiceCo
         @Override
         public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
             if (dx > 0) {
-                isNext = true;
+                mScrollDirection = NEXT;
             }
             if (dx < 0) {
-                isNext = false;
+                mScrollDirection = PREV;
             }
         }
     }
 
     class PlayListAdapter extends RecyclerView.Adapter<PlayListAdapter.PlayListViewHolder> {
 
+        private List<SongInfo> mPlayLists;
+
         private int mPlayPosition = -1;
+
+        PlayListAdapter() {
+            mPlayLists = mMusicManager.getMediaSources();
+        }
 
         @NonNull
         @Override
@@ -338,9 +343,9 @@ public class PlayFragment extends LazyFragment implements MusicManager.ServiceCo
         }
 
         @Override
-        public void onBindViewHolder(@NonNull PlayListViewHolder holder, final int position) {
+        public void onBindViewHolder(@NonNull final PlayListViewHolder holder, final int position) {
 
-            SongInfo songInfo = mMediaSources.get(position);
+            final SongInfo songInfo = mPlayLists.get(position);
 
             if (songInfo.isPlaying()) {
                 mPlayPosition = position;
@@ -359,37 +364,39 @@ public class PlayFragment extends LazyFragment implements MusicManager.ServiceCo
 
                     if (mPlayPosition != position) {
                         setPlayPosition(position);
-
-                        mMusicManager.seekToIndex(position, 0);
+                        mRecyclerViewPager.scrollToPosition(mMusicManager.indexForPlayMode(songInfo) + 1);
+                        mMusicManager.seekToIndex(mMusicManager.indexForPlayMode(songInfo), 0);
                     }
                 }
             });
             holder.mImageViewDelete.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mMusicManager.removeMediaSource(position);
-                    notifyDataSetChanged();
+//                    mMusicManager.removeMediaSource(mMediaSources.indexOf(songInfo));
+//                    notifyDataSetChanged();
                 }
             });
         }
 
         @Override
         public int getItemCount() {
-            return mMediaSources.size();
+            return mPlayLists.size();
         }
 
         void setPlayPosition(int playPosition) {
             if (playPosition >= 0 && playPosition != mPlayPosition) {
-//                if (mPlayPosition >= 0) {
-//                    mPlayLists.get(mPlayPosition).isPlaying = false;
-//                }
-//                PlayList playList = new PlayList();
-//                playList.isPlaying = true;
-//                playList.mSongInfo = mPlayLists.get(playPosition).mSongInfo;
-//                mPlayLists.set(playPosition, playList);
+                if (mPlayPosition >= 0) {
+                    SongInfo songInfo = SongInfo.cloneSongInfo(mPlayLists.get(mPlayPosition));
+                    songInfo.setPlaying(false);
+                    mMusicManager.updateMediaSource(mPlayPosition, songInfo, true);
+                    notifyItemChanged(mPlayPosition);
+                }
 
+                SongInfo cur = SongInfo.cloneSongInfo(mPlayLists.get(playPosition));
+                cur.setPlaying(true);
+                mMusicManager.updateMediaSource(playPosition, cur, true);
+                notifyItemChanged(playPosition);
                 mPlayPosition = playPosition;
-                notifyDataSetChanged();
             }
         }
 

@@ -18,7 +18,6 @@ public class SongInfo implements Parcelable {
     private long size; // 歌曲大小 8
     private String url; // 歌曲路径 5
     private String picUrl;
-    private int type;
     private boolean isPlaying = false;
 
     public SongInfo() {
@@ -35,7 +34,6 @@ public class SongInfo implements Parcelable {
         size = in.readLong();
         url = in.readString();
         picUrl = in.readString();
-        type = in.readInt();
     }
 
     public static final Creator<SongInfo> CREATOR = new Creator<SongInfo>() {
@@ -58,20 +56,12 @@ public class SongInfo implements Parcelable {
         isPlaying = playing;
     }
 
-    public int getType() {
-        return type;
-    }
-
     public String getId() {
         return id;
     }
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public void setType(int type) {
-        this.type = type;
     }
 
     public String getPicUrl() {
@@ -150,7 +140,6 @@ public class SongInfo implements Parcelable {
                 ", size=" + size +
                 ", url='" + url + '\'' +
                 ", picUrl='" + picUrl + '\'' +
-                ", type=" + type +
                 '}';
     }
 
@@ -170,6 +159,20 @@ public class SongInfo implements Parcelable {
         dest.writeLong(size);
         dest.writeString(url);
         dest.writeString(picUrl);
-        dest.writeInt(type);
+    }
+
+    public static SongInfo cloneSongInfo(SongInfo songInfo) {
+        SongInfo copy = new SongInfo();
+        copy.setPlaying(songInfo.isPlaying());
+        copy.setUrl(songInfo.getUrl());
+        copy.setTitle(songInfo.getTitle());
+        copy.setId(songInfo.getId());
+        copy.setPicUrl(songInfo.getPicUrl());
+        copy.setDuration(songInfo.getDuration());
+        copy.setArtist(songInfo.getArtist());
+        copy.setAlbum(songInfo.getAlbum());
+        copy.setAlbumId(songInfo.getAlbumId());
+        copy.setSize(songInfo.getSize());
+        return copy;
     }
 }

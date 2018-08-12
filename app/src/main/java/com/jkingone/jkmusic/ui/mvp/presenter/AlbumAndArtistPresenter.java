@@ -2,19 +2,17 @@ package com.jkingone.jkmusic.ui.mvp.presenter;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.jkingone.common.utils.LogUtils;
+import com.jkingone.utils.LogUtils;
 import com.jkingone.jkmusic.Constant;
 import com.jkingone.jkmusic.api.AlbumApi;
 import com.jkingone.jkmusic.api.ArtistApi;
 import com.jkingone.jkmusic.entity.Album;
-import com.jkingone.jkmusic.entity.AlbumList;
 import com.jkingone.jkmusic.entity.Artist;
 import com.jkingone.jkmusic.ui.mvp.base.BasePresenter;
 import com.jkingone.jkmusic.ui.mvp.contract.AlbumAndArtistContract;

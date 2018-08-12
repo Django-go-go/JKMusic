@@ -13,7 +13,7 @@ import android.util.AttributeSet;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.LinearLayout;
 
-import com.jkingone.common.utils.ScreenUtils;
+import com.jkingone.ui.utils.ScreenUtils;
 
 /**
  * Created by Administrator on 2018/6/24.

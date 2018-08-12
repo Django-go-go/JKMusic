@@ -3,7 +3,6 @@ package com.jkingone.jkmusic.ui.base;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 ;
-import com.jkingone.jkmusic.service.MusicManager;
 import com.jkingone.jkmusic.ui.mvp.base.BasePresenter;
 import com.jkingone.jkmusic.ui.fragment.PlayFragment;
 

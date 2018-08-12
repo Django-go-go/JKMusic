@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.jkingone.jkmusic.service.MusicManagerService;
+import com.jkingone.jkmusic.music.MusicManagerService;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -14,8 +14,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.jkingone.common.utils.PermissionUtils;
-import com.jkingone.common.utils.ScreenUtils;
+import com.jkingone.utils.PermissionUtils;
+import com.jkingone.utils.ScreenUtils;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.ui.base.BaseActivity;
 import com.jkingone.jkmusic.ui.mvp.base.BasePresenter;
@@ -62,8 +62,6 @@ public class MainActivity extends BaseActivity {
 
 		PermissionUtils.hasPermission(this);
 
-		exeBindService();
-
 		mDrawerLayout.setStatusBarBackgroundColor(getResources().getColor(R.color.colorPrimary));
 
 	}
@@ -71,7 +69,6 @@ public class MainActivity extends BaseActivity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		exeUnbindService();
 	}
 
 	@Override

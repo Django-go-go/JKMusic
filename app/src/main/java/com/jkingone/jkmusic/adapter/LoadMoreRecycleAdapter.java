@@ -6,7 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.jkingone.common.utils.DensityUtils;
+import com.jkingone.utils.DensityUtils;
 import com.jkingone.ui.widget.FootLoadView;
 
 /**

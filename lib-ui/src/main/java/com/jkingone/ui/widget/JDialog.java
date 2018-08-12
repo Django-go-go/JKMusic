@@ -19,8 +19,8 @@ import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 
-import com.jkingone.common.utils.ScreenUtils;
 import com.jkingone.ui.R;
+import com.jkingone.ui.utils.ScreenUtils;
 
 
 public class JDialog extends FrameLayout {
@@ -129,15 +129,15 @@ public class JDialog extends FrameLayout {
         if (Gravity.BOTTOM == gravity) {
             mContainerHeight = ScreenUtils.getScreenHeight(mActivity) / 3 * 2;
             mContainerLayoutParams = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, mContainerHeight, gravity);
-            mContainerView.setBackgroundResource(R.drawable.shape_rect_top_white);
+            mContainerView.setBackgroundResource(R.drawable.jdialog_shape_top);
         } else if (Gravity.TOP == gravity) {
             mContainerHeight = ScreenUtils.getScreenHeight(mActivity) / 3 * 2;
             mContainerLayoutParams = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, mContainerHeight, gravity);
-            mContainerView.setBackgroundResource(R.drawable.shape_rect_bottom_white);
+            mContainerView.setBackgroundResource(R.drawable.jdialog_shape_bottom);
         } else {
             mContainerHeight = ScreenUtils.getScreenHeight(mActivity) / 3;
             mContainerLayoutParams = new FrameLayout.LayoutParams(mContainerWidth, mContainerHeight, gravity);
-            mContainerView.setBackgroundResource(R.drawable.shape_rect_white);
+            mContainerView.setBackgroundResource(R.drawable.jdialog_shape);
         }
 
         mLocation = gravity;
