@@ -1,6 +1,8 @@
 package com.jkingone.jkmusic.ui.activity;
 
 import android.animation.Animator;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -21,6 +23,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.jkingone.jkmusic.viewmodels.SongListViewModel;
 import com.jkingone.utils.DensityUtils;
 import com.jkingone.utils.ScreenUtils;
 import com.jkingone.jkmusic.GlideApp;
@@ -29,8 +32,6 @@ import com.jkingone.jkmusic.ui.base.BaseActivity;
 import com.jkingone.ui.widget.ContentLoadView;
 import com.jkingone.ui.widget.WaveView;
 import com.jkingone.jkmusic.entity.SongList;
-import com.jkingone.jkmusic.ui.mvp.contract.ClassifySongListContract;
-import com.jkingone.jkmusic.ui.mvp.presenter.ClassifySongListPresenter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,8 +39,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class ClassifySongListActivity extends BaseActivity<ClassifySongListPresenter>
-        implements ClassifySongListContract.ViewCallBack {
+public class ClassifySongListActivity extends BaseActivity {
 
     @BindView(R.id.recycle_common)
     RecyclerView mRecyclerView;
@@ -57,12 +57,19 @@ public class ClassifySongListActivity extends BaseActivity<ClassifySongListPrese
 
     private String tag = "华语";
 
-    private List<SongList> mLists = new ArrayList<>();
-
-    @Override
-    public ClassifySongListPresenter createPresenter() {
-        return new ClassifySongListPresenter(this);
-    }
+    private SongListViewModel mSongListViewModel;
+    private Observer<List<SongList>> mSongListObserver = new Observer<List<SongList>>() {
+        @Override
+        public void onChanged(@Nullable List<SongList> songLists) {
+            if (songLists == null) {
+                mContentLoadView.postLoadFail();
+                return;
+            } else {
+                mContentLoadView.postLoadComplete();
+            }
+            mRecyclerView.setAdapter(new ClassifySongListAdapter(ClassifySongListActivity.this, songLists));
+        }
+    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -72,7 +79,15 @@ public class ClassifySongListActivity extends BaseActivity<ClassifySongListPrese
         ButterKnife.bind(this);
         initView();
         mContentLoadView.postLoading();
-        mPresenter.loadData(tag);
+        mSongListViewModel = ViewModelProviders.of(this).get(SongListViewModel.class);
+        mSongListViewModel.getTagSongListLiveData().observe(this, mSongListObserver);
+        mSongListViewModel.getTagSongList(tag);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mSongListViewModel.getTagSongListLiveData().removeObserver(mSongListObserver);
     }
 
     private void initView(){
@@ -140,7 +155,7 @@ public class ClassifySongListActivity extends BaseActivity<ClassifySongListPrese
             @Override
             public void onRetry() {
                 mContentLoadView.postLoading();
-                mPresenter.loadData(tag);
+                mSongListViewModel.getTagSongList(tag);
             }
         });
 
@@ -150,17 +165,6 @@ public class ClassifySongListActivity extends BaseActivity<ClassifySongListPrese
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_ac_classify, menu);
         return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public void showView(List<SongList> classifySongLists) {
-        if (classifySongLists == null) {
-            mContentLoadView.postLoadFail();
-            return;
-        } else {
-            mContentLoadView.postLoadComplete();
-        }
-        mRecyclerView.setAdapter(new ClassifySongListAdapter(this, classifySongLists));
     }
 
     class ClassifySongListAdapter extends RecyclerView.Adapter<ClassifySongListAdapter.VH> {
@@ -189,8 +193,8 @@ public class ClassifySongListActivity extends BaseActivity<ClassifySongListPrese
                 holder.itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                            Intent intent = new Intent(mContext, SongAndTopListActivity.class);
-                            intent.putExtra(SongAndTopListActivity.TYPE_SONG_LIST, mList.get(position));
+                            Intent intent = new Intent(mContext, DetailActivity.class);
+                            intent.putExtra(DetailActivity.TYPE_SONG_LIST, mList.get(position));
                             startActivity(intent);
                     }
                 });
@@ -258,7 +262,7 @@ public class ClassifySongListActivity extends BaseActivity<ClassifySongListPrese
                 @Override
                 public void onClick(View v) {
                     tag = mAllList.get(position);
-                    mPresenter.loadData(tag);
+                    mSongListViewModel.getTagSongList(tag);
                     mToolbar.setTitle("分类歌单•" + tag);
                     mClassifyView.startReverse();
                     mContentLoadView.postLoading();

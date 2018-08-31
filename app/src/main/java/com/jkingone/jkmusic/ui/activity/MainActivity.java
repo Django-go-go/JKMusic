@@ -18,7 +18,6 @@ import com.jkingone.utils.PermissionUtils;
 import com.jkingone.utils.ScreenUtils;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.ui.base.BaseActivity;
-import com.jkingone.jkmusic.ui.mvp.base.BasePresenter;
 import com.jkingone.jkmusic.ui.fragment.NetWorkFragment;
 import com.jkingone.jkmusic.ui.fragment.PlaceholderFragment;
 
@@ -69,11 +68,6 @@ public class MainActivity extends BaseActivity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-	}
-
-	@Override
-	public BasePresenter createPresenter() {
-		return null;
 	}
 
 	private void initDrawerLayout(){

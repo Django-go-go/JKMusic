@@ -1,10 +1,13 @@
 package com.jkingone.jkmusic.ui.activity;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,21 +17,18 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.jkingone.utils.LogUtils;
-import com.jkingone.utils.ScreenUtils;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.Utils;
 import com.jkingone.jkmusic.adapter.LoadMoreRecycleAdapter;
 import com.jkingone.jkmusic.entity.Album;
 import com.jkingone.jkmusic.entity.AlbumList;
-import com.jkingone.jkmusic.entity.Artist;
 import com.jkingone.jkmusic.entity.ArtistList;
 import com.jkingone.jkmusic.entity.SongInfo;
 import com.jkingone.jkmusic.ui.base.BaseActivity;
-import com.jkingone.jkmusic.ui.mvp.presenter.AlbumAndArtistPresenter;
-import com.jkingone.jkmusic.ui.mvp.contract.AlbumAndArtistContract;
+import com.jkingone.jkmusic.viewmodels.AlbumViewModel;
 import com.jkingone.ui.widget.ContentLoadView;
 import com.jkingone.ui.widget.PagerSlidingTabStrip;
+import com.jkingone.utils.ScreenUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,22 +36,14 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class AlbumAndArtistActivity extends BaseActivity<AlbumAndArtistPresenter> implements AlbumAndArtistContract.ViewCallback {
-
-
-    public static final String TYPE_ALBUM = "album";
-    public static final String TYPE_ARTIST = "artist";
+public class AlbumDetailActivity extends BaseActivity {
     public static final String ALBUM_INFO = "专辑信息";
     public static final String ALBUM_SONG = "专辑歌曲";
-    public static final String ARTIST_INFO = "详细信息";
-    public static final String ARTIST_SONG = "歌曲";
     public static final int LIMIT = 30;
 
     private AlbumList mAlbumList;
-    private ArtistList mArtistList;
 
     private int mOffset = 0;
-    private String mType;
 
     private List<SongInfo> mSongs = new ArrayList<>();
 
@@ -59,8 +51,6 @@ public class AlbumAndArtistActivity extends BaseActivity<AlbumAndArtistPresenter
     private RecyclerView mRecyclerView;
     private View mViewInfo;
 
-//    @BindView(R.id.app_bar)
-//    AppBarLayout mAppBarLayout;
     @BindView(R.id.pager_strip)
     PagerSlidingTabStrip mPagerSlidingTabStrip;
     @BindView(R.id.viewpager)
@@ -68,48 +58,16 @@ public class AlbumAndArtistActivity extends BaseActivity<AlbumAndArtistPresenter
     @BindView(R.id.iv_cover)
     ImageView mImageViewCover;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_album_and_artist);
-
-        ScreenUtils.setTranslucent(this);
-
-        ButterKnife.bind(this);
-
-        if (getIntent() != null) {
-            if ((mAlbumList = getIntent().getParcelableExtra(TYPE_ALBUM)) != null) {
-                mType = TYPE_ALBUM;
-                mPresenter.loadAlbum(mAlbumList.getAlbumId());
-                mViewPager.setAdapter(new ViewPagerAdapter());
-                mPagerSlidingTabStrip.setViewPager(mViewPager);
+    private AlbumViewModel mAlbumViewModel;
+    private Observer<Album> mAlbumObserver = new Observer<Album>() {
+        @Override
+        public void onChanged(@Nullable Album album) {
+            if (album == null) {
+                mContentLoadView.postLoadFail();
                 return;
             }
-
-            if ((mArtistList = getIntent().getParcelableExtra(TYPE_ARTIST)) != null) {
-                mType = TYPE_ARTIST;
-                mPresenter.loadArtistSong(mArtistList.getTingUid(), mArtistList.getArtistId(), mOffset, LIMIT);
-                mPresenter.loadArtistInfo(mArtistList.getTingUid(), mArtistList.getArtistId());
-                mViewPager.setAdapter(new ViewPagerAdapter());
-                mPagerSlidingTabStrip.setViewPager(mViewPager);
-            }
-        }
-
-    }
-
-    @Override
-    public AlbumAndArtistPresenter createPresenter() {
-        return new AlbumAndArtistPresenter(this);
-    }
-
-    @Override
-    public void showAlbum(Album album) {
-        if (album == null) {
-            mContentLoadView.postLoadFail();
-            return;
-        }
-        Album.AlbumInfo albumInfo = album.getAlbumInfo();
-        if (Utils.checkStringNotNull(albumInfo.getPicS1000())) {
+            Album.AlbumInfo albumInfo = album.getAlbumInfo();
+            if (Utils.checkStringNotNull(albumInfo.getPicS1000())) {
 //            Picasso.get()
 //                    .load(album.getAlbumInfo().getPicS1000())
 //                    .resize(ScreenUtils.getScreenWidth(this), DensityUtils.dp2px(this, 400))
@@ -131,37 +89,43 @@ public class AlbumAndArtistActivity extends BaseActivity<AlbumAndArtistPresenter
 //
 //                        }
 //                    });
+            }
+
+            List<SongInfo> songs = Utils.AlbumSongToSongInfo(album.getSongList());
+
+            if (songs == null || songs.size() == 0) {
+                mContentLoadView.postLoadNoData();
+                return;
+            }
+
+            mSongs.clear();
+            mSongs.addAll(songs);
+
+            mRecyclerView.setAdapter(new SongAdapter(AlbumDetailActivity.this));
+            mContentLoadView.postLoadComplete();
         }
+    };
 
-        List<SongInfo> songs = Utils.AlbumSongToSongInfo(album.getSongList());
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_album_and_artist);
 
-        if (songs == null || songs.size() == 0) {
-            mContentLoadView.postLoadNoData();
-            return;
-        }
+        ScreenUtils.setTranslucent(this);
 
-        mSongs.clear();
-        mSongs.addAll(songs);
+        ButterKnife.bind(this);
 
-        mRecyclerView.setAdapter(new SongAdapter(this));
-        mContentLoadView.postLoadComplete();
+        mAlbumViewModel = ViewModelProviders.of(this).get(AlbumViewModel.class);
+        mAlbumViewModel.getAlbumLiveData().observe(this, mAlbumObserver);
+        mAlbumViewModel.getAlbum(mAlbumList.getAlbumId());
+        mViewPager.setAdapter(new ViewPagerAdapter());
+        mPagerSlidingTabStrip.setViewPager(mViewPager);
     }
 
     @Override
-    public void showArtistInfo(Artist.ArtistInfo artistInfo) {
-        LogUtils.i("showArtist" + artistInfo);
-
-        if (Utils.checkStringNotNull(artistInfo.getAvatarS1000())) {
-//            Picasso.get().load(artistInfo.getAvatarS1000())
-//                    .resize(ScreenUtils.getScreenWidth(this), DensityUtils.dp2px(this, 400))
-//                    .centerCrop()
-//                    .into(mImageViewCover);
-        }
-    }
-
-    @Override
-    public void showArtistSong(List<Artist.Song> songlist) {
-        LogUtils.i("showArtistSong" + songlist);
+    protected void onDestroy() {
+        super.onDestroy();
+        mAlbumViewModel.getAlbumLiveData().removeObserver(mAlbumObserver);
     }
 
     class ViewPagerAdapter extends PagerAdapter {
@@ -179,22 +143,13 @@ public class AlbumAndArtistActivity extends BaseActivity<AlbumAndArtistPresenter
         @Nullable
         @Override
         public CharSequence getPageTitle(int position) {
-            if (TYPE_ALBUM.equals(mType)) {
+
                 if (position == 0) {
                     return ALBUM_SONG;
                 }
                 if (position == 1) {
                     return ALBUM_INFO;
                 }
-            }
-            if (TYPE_ARTIST.equals(mType)) {
-                if (position == 0) {
-                    return ARTIST_SONG;
-                }
-                if (position == 1) {
-                    return ALBUM_INFO;
-                }
-            }
 
             return super.getPageTitle(position);
         }
@@ -203,14 +158,16 @@ public class AlbumAndArtistActivity extends BaseActivity<AlbumAndArtistPresenter
         @Override
         public Object instantiateItem(@NonNull ViewGroup container, int position) {
             if (position == 0) {
-                mContentLoadView = (ContentLoadView) LayoutInflater.from(AlbumAndArtistActivity.this).inflate(R.layout.common_root_none, container, false);
+                mContentLoadView = (ContentLoadView) LayoutInflater.from(AlbumDetailActivity.this)
+                        .inflate(R.layout.common_root_none, container, false);
                 mRecyclerView = mContentLoadView.findViewById(R.id.recycle_common);
-                mRecyclerView.setLayoutManager(new LinearLayoutManager(AlbumAndArtistActivity.this));
+                mRecyclerView.setLayoutManager(new LinearLayoutManager(AlbumDetailActivity.this));
                 container.addView(mContentLoadView);
                 return mContentLoadView;
             }
             if (position == 1) {
-                mViewInfo = LayoutInflater.from(AlbumAndArtistActivity.this).inflate(R.layout.activity_album_and_artist_info, container, false);
+                mViewInfo = LayoutInflater.from(AlbumDetailActivity.this)
+                        .inflate(R.layout.activity_album_and_artist_info, container, false);
                 container.addView(mViewInfo);
                 return mViewInfo;
             }
@@ -325,5 +282,4 @@ public class AlbumAndArtistActivity extends BaseActivity<AlbumAndArtistPresenter
             }
         }
     }
-
 }

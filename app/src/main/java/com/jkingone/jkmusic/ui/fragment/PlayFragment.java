@@ -217,19 +217,19 @@ public class PlayFragment extends LazyFragment implements MusicManager.ServiceCo
 
     @Override
     public void onConnected() {
-        mMusicManager.prepareMediaSources(new ContentHelper(getContext()).getMusic());
-        mMusicManager.setPlayMode(MusicManager.PLAY_MODE_SHUFFLE);
-
-        if (mMusicAdapter != null) {
-            mMusicAdapter.notifyDataSetChanged();
-        }
-
-        int curIndex = mMusicManager.getCurrentIndex();
-
-        mMusicManager.prepare();
-
-        LogUtils.i("curIndex " + curIndex);
-        mRecyclerViewPager.scrollToPosition(curIndex + 1);
+//        mMusicManager.prepareMediaSources(new ContentHelper(getContext()).getMusic());
+//        mMusicManager.setPlayMode(MusicManager.PLAY_MODE_SHUFFLE);
+//
+//        if (mMusicAdapter != null) {
+//            mMusicAdapter.notifyDataSetChanged();
+//        }
+//
+//        int curIndex = mMusicManager.getCurrentIndex();
+//
+//        mMusicManager.prepare();
+//
+//        LogUtils.i("curIndex " + curIndex);
+//        mRecyclerViewPager.scrollToPosition(curIndex + 1);
     }
 
     class MusicAdapter extends RecyclerView.Adapter<MusicAdapter.MusicViewHolder> {

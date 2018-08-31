@@ -1,5 +1,7 @@
 package com.jkingone.jkmusic.ui.fragment;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -17,15 +19,14 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.jkingone.jkmusic.ui.base.LazyFragment;
+import com.jkingone.jkmusic.viewmodels.ArtistListViewModel;
 import com.jkingone.utils.DensityUtils;
 import com.jkingone.jkmusic.GlideApp;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.api.ArtistApi;
 import com.jkingone.jkmusic.entity.ArtistList;
 import com.jkingone.jkmusic.ui.activity.ArtistListActivity;
-import com.jkingone.jkmusic.ui.base.BaseFragment;
-import com.jkingone.jkmusic.ui.mvp.presenter.ArtistListPresenter;
-import com.jkingone.jkmusic.ui.mvp.contract.ArtistListContract;
 import com.jkingone.ui.widget.ContentLoadView;
 
 import java.util.List;
@@ -34,7 +35,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
-public class ArtistListFragment extends BaseFragment<ArtistListPresenter> implements ArtistListContract.ViewCallback {
+public class ArtistListFragment extends LazyFragment {
 
     public static ArtistListFragment newInstance(String... params) {
         ArtistListFragment fragment = new ArtistListFragment();
@@ -79,14 +80,24 @@ public class ArtistListFragment extends BaseFragment<ArtistListPresenter> implem
     private ContentAdapter mContentAdapter;
     private HotAdapter mHotAdapter;
 
+    private ArtistListViewModel mArtistListViewModel;
+    private Observer<List<ArtistList>> mArtistListObserver = new Observer<List<ArtistList>>() {
+        @Override
+        public void onChanged(@Nullable List<ArtistList> artistLists) {
+            mContentAdapter.mRecyclerViewHot.setAdapter(new HotAdapter(getContext(), artistLists));
+        }
+    };
+
     @Override
-    public ArtistListPresenter createPresenter() {
-        return new ArtistListPresenter(this);
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mArtistListViewModel = ViewModelProviders.of(this).get(ArtistListViewModel.class);
+        mArtistListViewModel.getArtistListLiveData().observe(this, mArtistListObserver);
     }
 
     @Override
     protected void onLazyLoadOnce() {
-        mPresenter.getArtistList(0, 20, ArtistApi.AREA_ALL, ArtistApi.SEX_NONE, ArtistApi.ORDER_HOT);
+        mArtistListViewModel.getArtistList(0, 20, ArtistApi.AREA_ALL, ArtistApi.SEX_NONE, ArtistApi.ORDER_HOT);
     }
 
     @Nullable
@@ -102,7 +113,7 @@ public class ArtistListFragment extends BaseFragment<ArtistListPresenter> implem
             public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
                 int pos = parent.getChildAdapterPosition(view);
                 if (pos % 3 == 0) {
-                    outRect.bottom = DensityUtils.dp2px(ArtistListFragment.this.getContext(), 8);
+                    outRect.bottom = DensityUtils.dp2px(parent.getContext(), 8);
                 }
             }
         });
@@ -122,10 +133,9 @@ public class ArtistListFragment extends BaseFragment<ArtistListPresenter> implem
     }
 
     @Override
-    public void showArtistList(List<ArtistList> artistLists) {
-        if (artistLists != null) {
-            mContentAdapter.mRecyclerViewHot.setAdapter(new HotAdapter(getContext(), artistLists));
-        }
+    public void onDestroy() {
+        super.onDestroy();
+        mArtistListViewModel.getArtistListLiveData().removeObserver(mArtistListObserver);
     }
 
     class ContentAdapter extends RecyclerView.Adapter {

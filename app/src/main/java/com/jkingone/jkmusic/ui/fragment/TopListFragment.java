@@ -1,5 +1,7 @@
 package com.jkingone.jkmusic.ui.fragment;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,14 +15,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.jkingone.jkmusic.ui.base.LazyFragment;
+import com.jkingone.jkmusic.viewmodels.TopListViewModel;
 import com.jkingone.utils.DensityUtils;
 import com.jkingone.jkmusic.GlideApp;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.entity.TopList;
-import com.jkingone.jkmusic.ui.activity.SongAndTopListActivity;
-import com.jkingone.jkmusic.ui.base.BaseFragment;
-import com.jkingone.jkmusic.ui.mvp.contract.TopListFragContract;
-import com.jkingone.jkmusic.ui.mvp.presenter.TopListFragPresenter;
+import com.jkingone.jkmusic.ui.activity.DetailActivity;
 import com.jkingone.ui.widget.ContentLoadView;
 
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ import butterknife.Unbinder;
  * Created by Administrator on 2017/8/3.
  */
 
-public class TopListFragment extends BaseFragment<TopListFragPresenter> implements TopListFragContract.ViewCallback {
+public class TopListFragment extends LazyFragment {
 
     private Unbinder mUnbinder;
 
@@ -49,9 +50,40 @@ public class TopListFragment extends BaseFragment<TopListFragPresenter> implemen
         return fragment;
     }
 
+    private TopListViewModel mTopListViewModel;
+    private Observer<List<TopList>> mTopListObserver = new Observer<List<TopList>>() {
+        @Override
+        public void onChanged(@Nullable List<TopList> topLists) {
+            if (topLists == null) {
+                mContentLoadView.postLoadFail();
+                return;
+            }
+            if (topLists.size() == 0) {
+                mContentLoadView.postLoadNoData();
+                return;
+            }
+            mContentLoadView.postLoadComplete();
+            List<TopList> mList = new ArrayList<>();
+            for (TopList topList : topLists) {
+                if (!topList.getType().equals("105")) {
+                    mList.add(topList);
+                }
+            }
+            TopListAdapter listAdapter = new TopListAdapter(getContext(), mList);
+            mRecyclerView.setAdapter(listAdapter);
+        }
+    };
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mTopListViewModel = ViewModelProviders.of(this).get(TopListViewModel.class);
+        mTopListViewModel.getTopListLiveData().observe(this, mTopListObserver);
+    }
+
     @Override
     protected void onLazyLoadOnce() {
-        mPresenter.loadData();
+        mTopListViewModel.getTopList();
     }
 
 
@@ -65,20 +97,7 @@ public class TopListFragment extends BaseFragment<TopListFragPresenter> implemen
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-//        LinearSnapHelper linearSnapHelper = new LinearSnapHelper();
-//        linearSnapHelper.attachToRecyclerView(mRecyclerView);
-
-//        PagerSnapHelper pagerSnapHelper = new PagerSnapHelper();
-//        pagerSnapHelper.attachToRecyclerView(mRecyclerView);
-
-
-
-        mContentLoadView.setLoadRetryListener(new ContentLoadView.LoadRetryListener() {
-            @Override
-            public void onRetry() {
-                mPresenter.loadData();
-            }
-        });
+        mContentLoadView.setLoadRetryListener(() -> mTopListViewModel.getTopList());
 
         return view;
     }
@@ -87,32 +106,6 @@ public class TopListFragment extends BaseFragment<TopListFragPresenter> implemen
     public void onDestroyView() {
         super.onDestroyView();
         mUnbinder.unbind();
-    }
-
-    @Override
-    public void showView(List<TopList> topLists) {
-        if (topLists == null) {
-            mContentLoadView.postLoadFail();
-            return;
-        }
-        if (topLists.size() == 0) {
-            mContentLoadView.postLoadNoData();
-            return;
-        }
-        mContentLoadView.postLoadComplete();
-        List<TopList> mList = new ArrayList<>();
-        for (TopList topList : topLists) {
-            if (!topList.getType().equals("105")) {
-                mList.add(topList);
-            }
-        }
-        TopListAdapter listAdapter = new TopListAdapter(getContext(), mList);
-        mRecyclerView.setAdapter(listAdapter);
-    }
-
-    @Override
-    public TopListFragPresenter createPresenter() {
-        return new TopListFragPresenter(this);
     }
 
     class TopListAdapter extends RecyclerView.Adapter<TopListAdapter.VH> {
@@ -146,14 +139,11 @@ public class TopListFragment extends BaseFragment<TopListFragPresenter> implemen
             vh.textView2.setText(strings.get(1));
             vh.textView3.setText(strings.get(2));
             vh.textView4.setText(strings.get(3));
-            vh.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (mList.get(position) != null){
-                        Intent intent = new Intent(mContext, SongAndTopListActivity.class);
-                        intent.putExtra(SongAndTopListActivity.TYPE_TOP_LIST, mList.get(position));
-                        startActivity(intent);
-                    }
+            vh.itemView.setOnClickListener(v -> {
+                if (mList.get(position) != null){
+                    Intent intent = new Intent(mContext, DetailActivity.class);
+                    intent.putExtra(DetailActivity.TYPE_TOP_LIST, mList.get(position));
+                    startActivity(intent);
                 }
             });
 

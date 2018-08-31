@@ -1,6 +1,8 @@
 package com.jkingone.jkmusic.ui.fragment;
 
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -23,12 +25,11 @@ import android.widget.TextView;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.jkingone.jkmusic.GlideApp;
+import com.jkingone.jkmusic.ui.base.LazyFragment;
+import com.jkingone.jkmusic.viewmodels.AlbumListViewModel;
 import com.jkingone.utils.ScreenUtils;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.entity.AlbumList;
-import com.jkingone.jkmusic.ui.base.BaseFragment;
-import com.jkingone.jkmusic.ui.mvp.presenter.AlbumListPresenter;
-import com.jkingone.jkmusic.ui.mvp.contract.AlbumListContract;
 import com.jkingone.ui.widget.ContentLoadView;
 
 import java.util.ArrayList;
@@ -37,7 +38,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class AlbumListFragment extends BaseFragment<AlbumListPresenter> implements AlbumListContract.ViewCallback {
+public class AlbumListFragment extends LazyFragment {
 
     public static AlbumListFragment newInstance(String... params) {
         AlbumListFragment fragment = new AlbumListFragment();
@@ -56,9 +57,37 @@ public class AlbumListFragment extends BaseFragment<AlbumListPresenter> implemen
     private int offset = 0;
     private static final int LIMIT = 30;
 
+    private AlbumListViewModel mAlbumListViewModel;
+    private Observer<List<AlbumList>> mAlbumListObserver = new Observer<List<AlbumList>>() {
+        @Override
+        public void onChanged(List<AlbumList> albumLists) {
+            if (albumLists == null) {
+                mContentLoadView.postLoadFail();
+                return;
+            }
+
+            mContentLoadView.postLoadComplete();
+
+            mAlbumLists.addAll(albumLists);
+            if (mAlbumAdapter == null) {
+                mAlbumAdapter = new AlbumAdapter(getContext());
+                mRecyclerView.setAdapter(mAlbumAdapter);
+            } else {
+                mAlbumAdapter.notifyDataSetChanged();
+            }
+        }
+    };
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mAlbumListViewModel = ViewModelProviders.of(this).get(AlbumListViewModel.class);
+        mAlbumListViewModel.getAlbumListLiveData().observe(this, mAlbumListObserver);
+    }
+
     @Override
     protected void onLazyLoadOnce() {
-        mPresenter.getAlbumList(offset, LIMIT);
+        mAlbumListViewModel.getAlbumList(offset, LIMIT);
     }
 
     @Override
@@ -91,41 +120,19 @@ public class AlbumListFragment extends BaseFragment<AlbumListPresenter> implemen
                     }
                     if (max == manager.getItemCount() - 1 && manager.getChildCount() > 0) {
                         offset += LIMIT;
-                        mPresenter.getAlbumList(offset, LIMIT);
+                        mAlbumListViewModel.getAlbumList(offset, LIMIT);
                     }
                 }
             }
         });
-        mContentLoadView.setLoadRetryListener(new ContentLoadView.LoadRetryListener() {
-            @Override
-            public void onRetry() {
-                mPresenter.getAlbumList(offset, LIMIT);
-            }
-        });
+        mContentLoadView.setLoadRetryListener(() -> mAlbumListViewModel.getAlbumList(offset, LIMIT));
         return view;
     }
 
     @Override
-    public AlbumListPresenter createPresenter() {
-        return new AlbumListPresenter(this);
-    }
-
-    @Override
-    public void showAlbumList(List<AlbumList> albumLists) {
-        if (albumLists == null) {
-            mContentLoadView.postLoadFail();
-            return;
-        }
-
-        mContentLoadView.postLoadComplete();
-
-        mAlbumLists.addAll(albumLists);
-        if (mAlbumAdapter == null) {
-            mAlbumAdapter = new AlbumAdapter(getContext());
-            mRecyclerView.setAdapter(mAlbumAdapter);
-        } else {
-            mAlbumAdapter.notifyDataSetChanged();
-        }
+    public void onDestroy() {
+        super.onDestroy();
+        mAlbumListViewModel.getAlbumListLiveData().removeObserver(mAlbumListObserver);
     }
 
     class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumViewHolder> {

@@ -1,5 +1,7 @@
 package com.jkingone.jkmusic.ui.fragment;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -15,6 +17,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.jkingone.jkmusic.ui.activity.DetailActivity;
+import com.jkingone.jkmusic.ui.base.LazyFragment;
+import com.jkingone.jkmusic.viewmodels.SongListViewModel;
 import com.jkingone.utils.DensityUtils;
 import com.jkingone.utils.ScreenUtils;
 import com.jkingone.jkmusic.GlideApp;
@@ -23,10 +28,6 @@ import com.jkingone.jkmusic.Utils;
 import com.jkingone.jkmusic.adapter.LoadMoreRecycleAdapter;
 import com.jkingone.jkmusic.entity.SongList;
 import com.jkingone.jkmusic.ui.activity.ClassifySongListActivity;
-import com.jkingone.jkmusic.ui.activity.SongAndTopListActivity;
-import com.jkingone.jkmusic.ui.base.BaseFragment;
-import com.jkingone.jkmusic.ui.mvp.contract.SongListFragContract;
-import com.jkingone.jkmusic.ui.mvp.presenter.SongListFragPresenter;
 import com.jkingone.ui.widget.ContentLoadView;
 
 import java.util.ArrayList;
@@ -40,7 +41,7 @@ import butterknife.Unbinder;
  * Created by Administrator on 2017/8/6.
  */
 
-public class SongListFragment extends BaseFragment<SongListFragPresenter> implements SongListFragContract.ViewCallback {
+public class SongListFragment extends LazyFragment implements Observer<List<SongList>> {
 
     @BindView(R.id.recycle_common)
     RecyclerView mRecyclerView;
@@ -62,9 +63,17 @@ public class SongListFragment extends BaseFragment<SongListFragPresenter> implem
         return fragment;
     }
 
+    private SongListViewModel mSongListViewModel;
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mSongListViewModel = ViewModelProviders.of(this).get(SongListViewModel.class);
+        mSongListViewModel.getSongListLiveData().observe(this, this);
+    }
+
     @Override
     protected void onLazyLoadOnce() {
-        mPresenter.getSongList(SIZE, offset);
+        mSongListViewModel.getSongList(SIZE, offset);
     }
 
     @Override
@@ -78,24 +87,19 @@ public class SongListFragment extends BaseFragment<SongListFragPresenter> implem
         mRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2, GridLayoutManager.VERTICAL, false));
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 GridLayoutManager manager = (GridLayoutManager) recyclerView.getLayoutManager();
                 if (newState == RecyclerView.SCROLL_STATE_IDLE && manager.getChildCount() > 0) {
                     int y = manager.findLastCompletelyVisibleItemPosition();
                     if (y == mSongLists.size() + 1) {
                         mRecycleAdapter.mFootLoadView.postLoading();
-                        mPresenter.getSongList(SIZE, offset);
+                        mSongListViewModel.getSongList(SIZE, offset);
                     }
                 }
             }
         });
 
-        mContentLoadView.setLoadRetryListener(new ContentLoadView.LoadRetryListener() {
-            @Override
-            public void onRetry() {
-                mPresenter.getSongList(SIZE, offset);
-            }
-        });
+        mContentLoadView.setLoadRetryListener(() -> mSongListViewModel.getSongList(SIZE, offset));
 
         return view;
     }
@@ -107,8 +111,13 @@ public class SongListFragment extends BaseFragment<SongListFragPresenter> implem
     }
 
     @Override
-    public void showView(List<SongList> songLists) {
+    public void onDestroy() {
+        super.onDestroy();
+        mSongListViewModel.getSongListLiveData().removeObserver(this);
+    }
 
+    @Override
+    public void onChanged(List<SongList> songLists) {
         if (mSongLists.size() == 0) {
             if (songLists == null) {
                 mContentLoadView.postLoadFail();
@@ -142,11 +151,6 @@ public class SongListFragment extends BaseFragment<SongListFragPresenter> implem
         mRecycleAdapter.mFootLoadView.postLoadComplete();
 
         offset++;
-    }
-
-    @Override
-    public SongListFragPresenter createPresenter() {
-        return new SongListFragPresenter(this);
     }
 
     class SongListAdapter extends LoadMoreRecycleAdapter {
@@ -233,8 +237,8 @@ public class SongListFragment extends BaseFragment<SongListFragPresenter> implem
                 contentViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Intent intent = new Intent(getContext(), SongAndTopListActivity.class);
-                        intent.putExtra(SongAndTopListActivity.TYPE_SONG_LIST, songList);
+                        Intent intent = new Intent(getContext(), DetailActivity.class);
+                        intent.putExtra(DetailActivity.TYPE_SONG_LIST, songList);
                         startActivity(intent);
                     }
                 });

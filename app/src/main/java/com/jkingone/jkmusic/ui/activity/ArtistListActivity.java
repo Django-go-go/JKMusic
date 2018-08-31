@@ -1,10 +1,13 @@
 package com.jkingone.jkmusic.ui.activity;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -14,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.jkingone.jkmusic.viewmodels.ArtistListViewModel;
 import com.jkingone.utils.DensityUtils;
 import com.jkingone.utils.ScreenUtils;
 import com.jkingone.jkmusic.GlideApp;
@@ -22,8 +26,6 @@ import com.jkingone.jkmusic.api.ArtistApi;
 import com.jkingone.jkmusic.entity.ArtistList;
 import com.jkingone.jkmusic.ui.base.BaseActivity;
 import com.jkingone.jkmusic.ui.fragment.ArtistListFragment;
-import com.jkingone.jkmusic.ui.mvp.presenter.ArtistListPresenter;
-import com.jkingone.jkmusic.ui.mvp.contract.ArtistListContract;
 import com.jkingone.ui.widget.ContentLoadView;
 
 import java.util.ArrayList;
@@ -32,7 +34,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class ArtistListActivity extends BaseActivity<ArtistListPresenter> implements ArtistListContract.ViewCallback {
+public class ArtistListActivity extends BaseActivity {
 
     private static final String TAG = "ArtistListActivity";
 
@@ -51,6 +53,39 @@ public class ArtistListActivity extends BaseActivity<ArtistListPresenter> implem
 
     private ArtistAdapter mArtistAdapter;
     private List<ArtistList> mArtistLists = new ArrayList<>();
+
+    private ArtistListViewModel mArtistListViewModel;
+    private Observer<List<ArtistList>> mArtistListObserver = new Observer<List<ArtistList>>() {
+        @Override
+        public void onChanged(@Nullable List<ArtistList> artistLists) {
+            if (mArtistLists.size() == 0) {
+                if (artistLists == null) {
+                    mContentLoadView.postLoadFail();
+                    return;
+                }
+                if (artistLists.size() == 0) {
+                    mContentLoadView.postLoadNoData();
+                    return;
+                }
+            } else {
+                if (artistLists == null || artistLists.size() == 0) {
+                    return;
+                }
+            }
+
+            mContentLoadView.postLoadComplete();
+
+            mOffset += LIMIT;
+
+            mArtistLists.addAll(artistLists);
+            if (mArtistAdapter == null) {
+                mArtistAdapter = new ArtistAdapter(mArtistLists, ArtistListActivity.this);
+                mRecyclerView.setAdapter(mArtistAdapter);
+            } else {
+                mArtistAdapter.notifyDataSetChanged();
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,48 +120,20 @@ public class ArtistListActivity extends BaseActivity<ArtistListPresenter> implem
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 if (newState == RecyclerView.SCROLL_STATE_IDLE && recyclerView.getLayoutManager().getChildCount() > 0) {
                     mContentLoadView.postLoading();
-                    mPresenter.getArtistList(mOffset, LIMIT, mArea, mSex, ArtistApi.ORDER_HOT);
+                    mArtistListViewModel.getArtistList(mOffset, LIMIT, mArea, mSex, ArtistApi.ORDER_HOT);
                 }
             }
         });
 
-        mPresenter.getArtistList(mOffset, LIMIT, mArea, mSex, ArtistApi.ORDER_HOT);
+        mArtistListViewModel = ViewModelProviders.of(this).get(ArtistListViewModel.class);
+        mArtistListViewModel.getArtistListLiveData().observe(this, mArtistListObserver);
+        mArtistListViewModel.getArtistList(mOffset, LIMIT, mArea, mSex, ArtistApi.ORDER_HOT);
     }
 
     @Override
-    public ArtistListPresenter createPresenter() {
-        return new ArtistListPresenter(this);
-    }
-
-    @Override
-    public void showArtistList(List<ArtistList> artistLists) {
-
-        if (mArtistLists.size() == 0) {
-            if (artistLists == null) {
-                mContentLoadView.postLoadFail();
-                return;
-            }
-            if (artistLists.size() == 0) {
-                mContentLoadView.postLoadNoData();
-                return;
-            }
-        } else {
-            if (artistLists == null || artistLists.size() == 0) {
-                return;
-            }
-        }
-
-        mContentLoadView.postLoadComplete();
-
-        mOffset += LIMIT;
-
-        mArtistLists.addAll(artistLists);
-        if (mArtistAdapter == null) {
-            mArtistAdapter = new ArtistAdapter(mArtistLists, this);
-            mRecyclerView.setAdapter(mArtistAdapter);
-        } else {
-            mArtistAdapter.notifyDataSetChanged();
-        }
+    protected void onDestroy() {
+        super.onDestroy();
+        mArtistListViewModel.getArtistListLiveData().removeObserver(mArtistListObserver);
     }
 
     class ArtistAdapter extends RecyclerView.Adapter<ArtistAdapter.ArtistViewHolder> {

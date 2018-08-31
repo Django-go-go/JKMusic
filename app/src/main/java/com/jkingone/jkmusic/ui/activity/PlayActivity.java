@@ -41,7 +41,6 @@ import com.jkingone.jkmusic.MusicBroadcastReceiver;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.entity.SongInfo;
 import com.jkingone.jkmusic.ui.fragment.PlayFragment;
-import com.jkingone.jkmusic.ui.mvp.base.BasePresenter;
 
 import java.lang.reflect.Field;
 import java.security.MessageDigest;
@@ -264,11 +263,6 @@ public class PlayActivity extends BaseActivity {
     protected void onStop() {
         super.onStop();
         releaseScheduledService();
-    }
-
-    @Override
-    public BasePresenter createPresenter() {
-        return null;
     }
 
     @OnClick({R.id.iv_mode, R.id.iv_last, R.id.iv_next, R.id.iv_play, R.id.iv_menu})

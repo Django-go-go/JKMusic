@@ -24,29 +24,17 @@
         </activity>
         <activity android:name=".ui.activity.PlayActivity" />
         <activity android:name=".ui.activity.ClassifySongListActivity" />
-        <activity android:name=".ui.activity.SongAndTopListActivity" />
+        <activity android:name=".ui.activity.DetailActivity" />
 
         <service
             android:name=".music.MusicService"
             android:enabled="true"
             android:exported="true"
             android:process=":remote" />
-        <service
-            android:name=".media.MusicDownloadService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.android.exoplayer.downloadService.action.INIT" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </service>
-        <service
-            android:name="com.google.android.exoplayer2.scheduler.PlatformScheduler$PlatformSchedulerService"
-            android:exported="true"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
 
         <activity android:name=".ui.activity.ArtistListActivity" />
-        <activity android:name=".ui.activity.AlbumAndArtistActivity"/>
+        <activity android:name=".ui.activity.AlbumDetailActivity" />
+        <activity android:name=".ui.activity.ArtistDetailActivity"/>
     </application>
 
 </manifest>
