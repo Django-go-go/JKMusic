@@ -40,7 +40,7 @@
 
         </android.support.design.widget.CollapsingToolbarLayout>
 
-        <com.jkingone.ui.widget.PagerSlidingTabStrip
+        <com.jkingone.ui.PagerSlidingTabStrip
             android:id="@+id/pager_strip"
             android:background="@drawable/shape_rect_top_white"
             app:tabPadding="3dp"

@@ -29,8 +29,8 @@ import com.jkingone.utils.ScreenUtils;
 import com.jkingone.jkmusic.GlideApp;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.ui.base.BaseActivity;
-import com.jkingone.ui.widget.ContentLoadView;
-import com.jkingone.ui.widget.WaveView;
+import com.jkingone.ui.ContentLoadView;
+import com.jkingone.ui.WaveView;
 import com.jkingone.jkmusic.entity.SongList;
 
 import java.util.ArrayList;

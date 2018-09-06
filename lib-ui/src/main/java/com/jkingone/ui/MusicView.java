@@ -1,4 +1,4 @@
-package com.jkingone.ui.widget;
+package com.jkingone.ui;
 
 import android.content.Context;
 import android.graphics.Canvas;

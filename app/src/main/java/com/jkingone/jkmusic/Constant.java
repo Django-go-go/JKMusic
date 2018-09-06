@@ -9,6 +9,8 @@ import java.util.List;
 
 public class Constant {
 
+    public static final String TAG = "JKTemplate : ";
+
     public static final String BASE_URL = "http://tingapi.ting.baidu.com/v1/restserver/";
 
     public static final int PAGER_SIZE = 6;

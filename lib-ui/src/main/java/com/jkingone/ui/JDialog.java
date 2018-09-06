@@ -1,4 +1,4 @@
-package com.jkingone.ui.widget;
+package com.jkingone.ui;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -19,7 +19,6 @@ import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.FrameLayout;
 
-import com.jkingone.ui.R;
 import com.jkingone.ui.utils.ScreenUtils;
 
 

@@ -31,7 +31,7 @@ import com.jkingone.jkmusic.entity.SongInfo;
 import com.jkingone.jkmusic.entity.SongList;
 import com.jkingone.jkmusic.entity.TopList;
 import com.jkingone.jkmusic.ui.base.BaseActivity;
-import com.jkingone.ui.widget.ContentLoadView;
+import com.jkingone.ui.ContentLoadView;
 
 import java.util.ArrayList;
 import java.util.List;

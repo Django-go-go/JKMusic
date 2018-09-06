@@ -2,13 +2,15 @@ package com.jkingone.jkmusic.ui.fragment;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.arch.paging.PagedList;
+import android.arch.paging.PagedListAdapter;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Gravity;
@@ -27,9 +29,7 @@ import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.api.ArtistApi;
 import com.jkingone.jkmusic.entity.ArtistList;
 import com.jkingone.jkmusic.ui.activity.ArtistListActivity;
-import com.jkingone.ui.widget.ContentLoadView;
-
-import java.util.List;
+import com.jkingone.ui.ContentLoadView;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -77,36 +77,32 @@ public class ArtistListFragment extends LazyFragment {
 
     private Unbinder mUnbinder;
 
-    private ContentAdapter mContentAdapter;
     private HotAdapter mHotAdapter;
 
     private ArtistListViewModel mArtistListViewModel;
-    private Observer<List<ArtistList>> mArtistListObserver = new Observer<List<ArtistList>>() {
-        @Override
-        public void onChanged(@Nullable List<ArtistList> artistLists) {
-            mContentAdapter.mRecyclerViewHot.setAdapter(new HotAdapter(getContext(), artistLists));
-        }
+    private Observer<PagedList<ArtistList>> mArtistListObserver = artistLists -> {
+        mHotAdapter.submitList(artistLists);
     };
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mArtistListViewModel = ViewModelProviders.of(this).get(ArtistListViewModel.class);
-        mArtistListViewModel.getArtistListLiveData().observe(this, mArtistListObserver);
+        mArtistListViewModel.setParams(ArtistApi.AREA_ALL, ArtistApi.SEX_NONE, ArtistApi.ORDER_HOT, null);
     }
 
     @Override
     protected void onLazyLoadOnce() {
-        mArtistListViewModel.getArtistList(0, 20, ArtistApi.AREA_ALL, ArtistApi.SEX_NONE, ArtistApi.ORDER_HOT);
+        mArtistListViewModel.getArtistListLiveData().observe(this, mArtistListObserver);
     }
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.common_root_none, container, false);
         mUnbinder = ButterKnife.bind(this, view);
-        mRecyclerViewContent.setBackgroundColor(Color.parseColor("#efe6e9"));
+        mRecyclerViewContent.setBackgroundColor(getResources().getColor(R.color.gray_trans));
         mRecyclerViewContent.setLayoutManager(new LinearLayoutManager(getContext()));
         mRecyclerViewContent.addItemDecoration(new RecyclerView.ItemDecoration() {
             @Override
@@ -118,9 +114,7 @@ public class ArtistListFragment extends LazyFragment {
             }
         });
 
-        mContentAdapter = new ContentAdapter(getContext());
-        mRecyclerViewContent.setAdapter(mContentAdapter);
-
+        mRecyclerViewContent.setAdapter(new ContentAdapter(getContext()));
         mContentLoadView.postLoadComplete();
 
         return view;
@@ -145,9 +139,6 @@ public class ArtistListFragment extends LazyFragment {
 
         private Context mContext;
 
-        private TextView mTextViewHot;
-        private RecyclerView mRecyclerViewHot;
-
         ContentAdapter(Context context) {
             mContext = context;
         }
@@ -164,28 +155,16 @@ public class ArtistListFragment extends LazyFragment {
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             switch (viewType) {
-                case TYPE_HEAD: {
-                    View view = LayoutInflater.from(mContext).inflate(R.layout.item_list_artist_head, parent, false);
-                    mTextViewHot = view.findViewById(R.id.tv_hot);
-                    mRecyclerViewHot = view.findViewById(R.id.recycle_hot);
-                    mRecyclerViewHot.setLayoutManager(new LinearLayoutManager(mContext, LinearLayoutManager.HORIZONTAL, false));
-                    mTextViewHot.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Intent intent = new Intent(ArtistListFragment.this.getContext(), ArtistListActivity.class);
-                            intent.putExtra(ARTIST_AREA, ArtistApi.AREA_ALL);
-                            intent.putExtra(ARTIST_SEX, ArtistApi.SEX_NONE);
-                            ArtistListFragment.this.startActivity(intent);
-                        }
-                    });
-                    return new HeadViewHolder(view);
-                }
+                case TYPE_HEAD:
+                    return new HeadViewHolder(LayoutInflater.from(mContext)
+                            .inflate(R.layout.item_list_artist_head, parent, false));
 
                 case TYPE_CONTENT:
-                    return new ContentViewHolder(LayoutInflater.from(mContext).inflate(R.layout.item_list_artist, parent, false));
+                    return new ContentViewHolder(LayoutInflater.from(mContext)
+                            .inflate(R.layout.item_list_artist, parent, false));
 
                 default:
-                    throw new IllegalArgumentException("no Type");
+                    throw new IllegalArgumentException("no type");
             }
         }
 
@@ -203,6 +182,21 @@ public class ArtistListFragment extends LazyFragment {
                         ArtistListFragment.this.startActivity(intent);
                     }
                 });
+            } else if (holder instanceof HeadViewHolder) {
+                HeadViewHolder headViewHolder = (HeadViewHolder) holder;
+
+                if (mHotAdapter == null) {
+                    mHotAdapter = new HotAdapter(getContext());
+                }
+                headViewHolder.mRecyclerView.setAdapter(mHotAdapter);
+
+                headViewHolder.mTextView.setOnClickListener(v -> {
+                    Intent intent = new Intent(mContext, ArtistListActivity.class);
+                    intent.putExtra(ARTIST_AREA, ArtistApi.AREA_ALL);
+                    intent.putExtra(ARTIST_SEX, ArtistApi.SEX_NONE);
+                    ArtistListFragment.this.startActivity(intent);
+                });
+
             }
         }
 
@@ -223,23 +217,40 @@ public class ArtistListFragment extends LazyFragment {
         }
 
         class HeadViewHolder extends RecyclerView.ViewHolder {
+            @BindView(R.id.tv_hot)
+            TextView mTextView;
+            @BindView(R.id.recycle_hot)
+            RecyclerView mRecyclerView;
+
             HeadViewHolder(View itemView) {
                 super(itemView);
+                ButterKnife.bind(this, itemView);
+                mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext,
+                        LinearLayoutManager.HORIZONTAL, false));
             }
         }
     }
 
-    class HotAdapter extends RecyclerView.Adapter<HotAdapter.HotViewHolder> {
+    class HotAdapter extends PagedListAdapter<ArtistList, HotAdapter.HotViewHolder> {
 
         private int h;
         private int w;
 
         private Context mContext;
-        private List<ArtistList> mData;
 
-        HotAdapter(Context context, List<ArtistList> data) {
+        HotAdapter(Context context) {
+            super(new DiffUtil.ItemCallback<ArtistList>() {
+                @Override
+                public boolean areItemsTheSame(@NonNull ArtistList artistList, @NonNull ArtistList newArtist) {
+                    return artistList.artistId.equals(newArtist.artistId);
+                }
+
+                @Override
+                public boolean areContentsTheSame(@NonNull ArtistList artistList, @NonNull ArtistList newArtist) {
+                    return artistList.equals(newArtist);
+                }
+            });
             mContext = context;
-            mData = data;
             w = DensityUtils.dp2px(context, 96 + 8);
             h = DensityUtils.dp2px(mContext, 8 + 8) + DensityUtils.sp2px(mContext, 14);
         }
@@ -247,24 +258,23 @@ public class ArtistListFragment extends LazyFragment {
         @NonNull
         @Override
         public HotViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new HotViewHolder(LayoutInflater.from(mContext).inflate(R.layout.item_universal, parent, false));
+            return new HotViewHolder(LayoutInflater.from(mContext)
+                    .inflate(R.layout.item_universal, parent, false));
         }
 
         @Override
         public void onBindViewHolder(@NonNull HotViewHolder holder, int position) {
-            ArtistList artistList = mData.get(position);
-            holder.mTextView.setText(artistList.getName());
+            ArtistList artistList = getItem(position);
+            if (artistList != null) {
+                holder.mTextView.setText(artistList.name);
 
-            GlideApp.with(ArtistListFragment.this)
-                    .asBitmap()
-                    .override(w)
-                    .load(artistList.getAvatarBig())
-                    .into(holder.mImageView);
-        }
+                GlideApp.with(ArtistListFragment.this)
+                        .asBitmap()
+                        .override(w)
+                        .load(artistList.avatarBig)
+                        .into(holder.mImageView);
+            }
 
-        @Override
-        public int getItemCount() {
-            return mData.size();
         }
 
         class HotViewHolder extends RecyclerView.ViewHolder {

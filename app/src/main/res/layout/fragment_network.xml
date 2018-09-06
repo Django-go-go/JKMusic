@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.jkingone.ui.widget.PagerSlidingTabStrip
+    <com.jkingone.ui.PagerSlidingTabStrip
         android:id="@+id/pagerStrip"
         android:background="@color/colorPrimary"
         app:containerPadding="1dp"

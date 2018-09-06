@@ -12,11 +12,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.jkingone.utils.LogUtils;
-import com.jkingone.jkmusic.ContentHelper;
 import com.jkingone.jkmusic.music.MusicManager;
 import com.jkingone.jkmusic.ui.base.LazyFragment;
-import com.jkingone.ui.widget.JDialog;
+import com.jkingone.ui.JDialog;
 import com.jkingone.jkmusic.MusicBroadcastReceiver;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.Utils;

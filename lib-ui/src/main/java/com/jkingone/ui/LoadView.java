@@ -1,4 +1,4 @@
-package com.jkingone.ui.widget;
+package com.jkingone.ui;
 
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;

@@ -22,7 +22,7 @@ import com.jkingone.jkmusic.GlideApp;
 import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.entity.TopList;
 import com.jkingone.jkmusic.ui.activity.DetailActivity;
-import com.jkingone.ui.widget.ContentLoadView;
+import com.jkingone.ui.ContentLoadView;
 
 import java.util.ArrayList;
 import java.util.List;

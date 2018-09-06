@@ -28,7 +28,7 @@ import com.jkingone.jkmusic.Utils;
 import com.jkingone.jkmusic.adapter.LoadMoreRecycleAdapter;
 import com.jkingone.jkmusic.entity.SongList;
 import com.jkingone.jkmusic.ui.activity.ClassifySongListActivity;
-import com.jkingone.ui.widget.ContentLoadView;
+import com.jkingone.ui.ContentLoadView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,14 +77,16 @@ public class SongListFragment extends LazyFragment implements Observer<List<Song
     }
 
     @Override
-    public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.common_root_none, container, false);
         view.setBackgroundColor(Color.WHITE);
 
         mUnbinder = ButterKnife.bind(this, view);
 
-        mRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 2, GridLayoutManager.VERTICAL, false));
+        mRecyclerView.setLayoutManager(new GridLayoutManager(getContext(),
+                2, GridLayoutManager.VERTICAL, false));
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
@@ -173,9 +175,10 @@ public class SongListFragment extends LazyFragment implements Observer<List<Song
 
             switch (viewType) {
                 case TYPE_HEAD: {
-                    View view = LayoutInflater.from(mContext).inflate(R.layout.item_grid_songlist_head, parent, false);
-                    view.setLayoutParams(
-                            new RecyclerView.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, DensityUtils.dp2px(mContext, 150)));
+                    View view = LayoutInflater.from(mContext)
+                            .inflate(R.layout.item_grid_songlist_head, parent, false);
+                    view.setLayoutParams(new RecyclerView.LayoutParams(
+                            RecyclerView.LayoutParams.MATCH_PARENT, DensityUtils.dp2px(mContext, 150)));
                     view.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -186,7 +189,8 @@ public class SongListFragment extends LazyFragment implements Observer<List<Song
                 }
 
                 case TYPE_CONTENT: {
-                    View convertView = LayoutInflater.from(mContext).inflate(R.layout.item_universal, parent, false);
+                    View convertView = LayoutInflater.from(mContext)
+                            .inflate(R.layout.item_universal, parent, false);
                     return new ContentViewHolder(convertView);
                 }
 

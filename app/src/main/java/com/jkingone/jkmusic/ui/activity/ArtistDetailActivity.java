@@ -2,12 +2,10 @@ package com.jkingone.jkmusic.ui.activity;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -15,21 +13,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.jkingone.jkmusic.R;
-import com.jkingone.jkmusic.adapter.LoadMoreRecycleAdapter;
-import com.jkingone.jkmusic.entity.AlbumList;
 import com.jkingone.jkmusic.entity.Artist;
 import com.jkingone.jkmusic.entity.ArtistList;
-import com.jkingone.jkmusic.entity.SongInfo;
 import com.jkingone.jkmusic.ui.base.BaseActivity;
 import com.jkingone.jkmusic.viewmodels.ArtistVieModel;
-import com.jkingone.ui.widget.ContentLoadView;
-import com.jkingone.ui.widget.PagerSlidingTabStrip;
+import com.jkingone.ui.ContentLoadView;
+import com.jkingone.ui.PagerSlidingTabStrip;
 import com.jkingone.utils.ScreenUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -83,8 +76,8 @@ public class ArtistDetailActivity extends BaseActivity {
         mArtistVieModel = ViewModelProviders.of(this).get(ArtistVieModel.class);
         mArtistVieModel.getArtistInfoLiveData().observe(this, mArtistInfoObserver);
         mArtistVieModel.getArtistSongsLiveData().observe(this, mArtistSongsObserver);
-        mArtistVieModel.getArtistSong(mArtistList.getTingUid(), mArtistList.getArtistId(), mOffset, LIMIT);
-        mArtistVieModel.getArtistInfo(mArtistList.getTingUid(), mArtistList.getArtistId());
+        mArtistVieModel.getArtistSong(mArtistList.tingUid, mArtistList.artistId, mOffset, LIMIT);
+        mArtistVieModel.getArtistInfo(mArtistList.tingUid, mArtistList.artistId);
         mViewPager.setAdapter(new ViewPagerAdapter());
         mPagerSlidingTabStrip.setViewPager(mViewPager);
     }

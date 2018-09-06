@@ -15,7 +15,7 @@
         app:contentInsetStartWithNavigation="0dp"
         app:navigationIcon="@drawable/music" />
 
-    <com.jkingone.ui.widget.ContentLoadView
+    <com.jkingone.ui.ContentLoadView
         android:id="@+id/content_common"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -26,6 +26,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-    </com.jkingone.ui.widget.ContentLoadView>
+    </com.jkingone.ui.ContentLoadView>
 
 </RelativeLayout>

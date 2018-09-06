@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.jkingone.ui.widget.WaveView
+<com.jkingone.ui.WaveView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:background="@color/white"
     android:orientation="vertical"
@@ -40,4 +40,4 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"/>
 
-</com.jkingone.ui.widget.WaveView>
+</com.jkingone.ui.WaveView>

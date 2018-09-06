@@ -7,7 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.jkingone.utils.DensityUtils;
-import com.jkingone.ui.widget.FootLoadView;
+import com.jkingone.ui.FootLoadView;
 
 /**
  * Created by Administrator on 2017/9/13.

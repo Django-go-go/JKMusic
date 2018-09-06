@@ -12,7 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.jkingone.jkmusic.ui.base.LazyFragment;
-import com.jkingone.ui.widget.PagerSlidingTabStrip;
+import com.jkingone.ui.PagerSlidingTabStrip;
 import com.jkingone.jkmusic.R;
 
 import butterknife.BindView;

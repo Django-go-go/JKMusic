@@ -14,11 +14,11 @@ public interface ArtistApi {
     /**
      * 全部地区
      */
-    int AREA_ALL = 1;
+    int AREA_ALL = 0;
     /**
      * 华语
      */
-    int AREA_CHINA = 2;
+    int AREA_CHINA = 6;
     /**
      * 欧美
      */
@@ -26,35 +26,36 @@ public interface ArtistApi {
     /**
      * 韩国
      */
-    int AREA_KOREA = 4;
+    int AREA_KOREA = 7;
     /**
      * 日本
      */
-    int AREA_JAPAN = 5;
+    int AREA_JAPAN = 60;
     /**
      * 其他
      */
-    int AREA_OTHER = 6;
+    int AREA_OTHER = 5;
 
     /**
      * 无选择
      */
-    int SEX_NONE = 10;
+    int SEX_NONE = 0;
     /**
      * 男性
-     */int SEX_MALE = 11;
+     */
+    int SEX_MALE = 1;
     /**
      * 女性
      */
-    int SEX_FEMALE = 12;
+    int SEX_FEMALE = 2;
     /**
      * 组合
      */
-    int SEX_GROUP = 13;
+    int SEX_GROUP = 3;
 
-    int ORDER_HOT = 14;
+    int ORDER_HOT = 1;
 
-    int ORDER_ID = 15;
+    int ORDER_ID = 2;
 
     /**
      * 获取艺术家列表

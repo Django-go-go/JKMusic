@@ -30,25 +30,25 @@ import com.google.gson.annotations.SerializedName;
 public class ArtistList implements Parcelable {
 
     @SerializedName("avatar_middle")
-    private String avatarMiddle;
+    public String avatarMiddle;
     @SerializedName("avatar_mini")
-    private String avatarMini;
+    public String avatarMini;
     @SerializedName("avatar_big")
-    private String avatarBig;
+    public String avatarBig;
     @SerializedName("avatar_small")
-    private String avatarSmall;
+    public String avatarSmall;
     @SerializedName("artist_id")
-    private String artistId;
-    private String name;
+    public String artistId;
+    public String name;
     @SerializedName("firstchar")
-    private String firstChar;
+    public String firstChar;
     @SerializedName("ting_uid")
-    private String tingUid;
-    private String country;
+    public String tingUid;
+    public String country;
     @SerializedName("albums_total")
-    private int albumsTotal;
+    public int albumsTotal;
     @SerializedName("songs_total")
-    private int songsTotal;
+    public int songsTotal;
 
     protected ArtistList(Parcel in) {
         avatarMiddle = in.readString();
@@ -75,94 +75,6 @@ public class ArtistList implements Parcelable {
             return new ArtistList[size];
         }
     };
-
-    public String getAvatarMiddle() {
-        return avatarMiddle;
-    }
-
-    public void setAvatarMiddle(String avatarMiddle) {
-        this.avatarMiddle = avatarMiddle;
-    }
-
-    public String getAvatarMini() {
-        return avatarMini;
-    }
-
-    public void setAvatarMini(String avatarMini) {
-        this.avatarMini = avatarMini;
-    }
-
-    public String getAvatarBig() {
-        return avatarBig;
-    }
-
-    public void setAvatarBig(String avatarBig) {
-        this.avatarBig = avatarBig;
-    }
-
-    public String getAvatarSmall() {
-        return avatarSmall;
-    }
-
-    public void setAvatarSmall(String avatarSmall) {
-        this.avatarSmall = avatarSmall;
-    }
-
-    public String getArtistId() {
-        return artistId;
-    }
-
-    public void setArtistId(String artistId) {
-        this.artistId = artistId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getFirstChar() {
-        return firstChar;
-    }
-
-    public void setFirstChar(String firstChar) {
-        this.firstChar = firstChar;
-    }
-
-    public String getTingUid() {
-        return tingUid;
-    }
-
-    public void setTingUid(String tingUid) {
-        this.tingUid = tingUid;
-    }
-
-    public String getCountry() {
-        return country;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
-    public int getAlbumsTotal() {
-        return albumsTotal;
-    }
-
-    public void setAlbumsTotal(int albumsTotal) {
-        this.albumsTotal = albumsTotal;
-    }
-
-    public int getSongsTotal() {
-        return songsTotal;
-    }
-
-    public void setSongsTotal(int songsTotal) {
-        this.songsTotal = songsTotal;
-    }
 
     @Override
     public String toString() {
