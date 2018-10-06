@@ -1,1 +1,1 @@
-include ':app', ':lib-ui', ':lib-utils'
+include ':app', ':lib-ui', ':lib-utils', ':lib-glide-transformation'

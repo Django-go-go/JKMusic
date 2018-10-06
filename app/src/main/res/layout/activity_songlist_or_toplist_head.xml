@@ -12,7 +12,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="96dp">
 
-        <com.jkingone.ui.RoundedImageView
+        <ImageView
             android:id="@+id/iv_coverimage"
             android:layout_width="120dp"
             android:layout_height="120dp"

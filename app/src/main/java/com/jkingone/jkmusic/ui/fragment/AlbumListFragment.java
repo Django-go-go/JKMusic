@@ -22,8 +22,13 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions;
+import com.bumptech.glide.request.target.BitmapImageViewTarget;
+import com.bumptech.glide.request.target.ImageViewTarget;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.jkingone.glide_transformation.BitmapTransformation;
+import com.jkingone.glide_transformation.RoundedCornersTransformation;
 import com.jkingone.jkmusic.GlideApp;
 import com.jkingone.jkmusic.ui.base.LazyFragment;
 import com.jkingone.jkmusic.viewmodels.AlbumListViewModel;
@@ -159,23 +164,25 @@ public class AlbumListFragment extends LazyFragment {
                     .asBitmap()
                     .load(albumList.getPicRadio())
                     .centerCrop()
-                    .override(mWidth, mWidth)
-                    .into(new SimpleTarget<Bitmap>() {
+                    .override(mWidth)
+                    .transition(BitmapTransitionOptions.withCrossFade())
+                    .transform(new RoundedCornersTransformation(8, 0))
+                    .into(new ImageViewTarget<Bitmap>(holder.mImageView) {
                         @Override
-                        public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
-                            holder.mImageView.setImageBitmap(resource);
-                            Palette.from(resource).generate(new Palette.PaletteAsyncListener() {
-                                @Override
-                                public void onGenerated(@NonNull Palette palette) {
-                                    int color = palette.getLightMutedColor(Color.LTGRAY);
-                                    ((CardView) holder.itemView).setCardBackgroundColor(color);
-                                }
-                            });
-                        }
+                        protected void setResource(@Nullable Bitmap resource) {
+                            getView().setImageBitmap(resource);
+                            if (resource != null) {
+                                Palette.from(resource).generate(new Palette.PaletteAsyncListener() {
+                                    @Override
+                                    public void onGenerated(@NonNull Palette palette) {
+                                        int color = palette.getLightMutedColor(Color.LTGRAY);
+                                        ((CardView) holder.itemView).setCardBackgroundColor(color);
+                                    }
+                                });
+                            } else {
+                                ((CardView) holder.itemView).setCardBackgroundColor(Color.LTGRAY);
+                            }
 
-                        @Override
-                        public void onLoadFailed(@Nullable Drawable errorDrawable) {
-                            ((CardView) holder.itemView).setCardBackgroundColor(Color.LTGRAY);
                         }
                     });
             holder.mTextViewTitle.setText(albumList.getTitle());

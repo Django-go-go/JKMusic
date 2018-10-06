@@ -17,6 +17,11 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.BitmapImageViewTarget;
+import com.jkingone.glide_transformation.RoundedCornersTransformation;
 import com.jkingone.jkmusic.ui.activity.DetailActivity;
 import com.jkingone.jkmusic.ui.base.LazyFragment;
 import com.jkingone.jkmusic.viewmodels.SongListViewModel;
@@ -179,12 +184,8 @@ public class SongListFragment extends LazyFragment implements Observer<List<Song
                             .inflate(R.layout.item_grid_songlist_head, parent, false);
                     view.setLayoutParams(new RecyclerView.LayoutParams(
                             RecyclerView.LayoutParams.MATCH_PARENT, DensityUtils.dp2px(mContext, 150)));
-                    view.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            startActivity(new Intent(getContext(), ClassifySongListActivity.class));
-                        }
-                    });
+                    view.setOnClickListener(v -> startActivity(
+                            new Intent(getContext(), ClassifySongListActivity.class)));
                     return new HeadViewHolder(view);
                 }
 
@@ -222,29 +223,28 @@ public class SongListFragment extends LazyFragment implements Observer<List<Song
 
                 contentViewHolder.mTextView.setText(songList.getTitle());
 
-
-
                 if (Utils.checkStringNotNull(songList.getPic300())) {
                     GlideApp.with(SongListFragment.this)
                             .asBitmap()
-                            .override(w / col, w / col)
+                            .override(w / col)
                             .load(songList.getPic300())
-                            .into(contentViewHolder.mImageView);
+                            .transition(BitmapTransitionOptions.withCrossFade())
+                            .transform(new RoundedCornersTransformation(8, 0))
+                            .into(new BitmapImageViewTarget(contentViewHolder.mImageView));
                 } else if (Utils.checkStringNotNull(songList.getPic())) {
                     GlideApp.with(SongListFragment.this)
                             .asBitmap()
-                            .override(w / col, w / col)
+                            .override(w / col)
                             .load(songList.getPic())
-                            .into(contentViewHolder.mImageView);
+                            .transition(BitmapTransitionOptions.withCrossFade())
+                            .transform(new RoundedCornersTransformation(8, 0))
+                            .into(new BitmapImageViewTarget(contentViewHolder.mImageView));
                 }
 
-                contentViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent = new Intent(getContext(), DetailActivity.class);
-                        intent.putExtra(DetailActivity.TYPE_SONG_LIST, songList);
-                        startActivity(intent);
-                    }
+                contentViewHolder.itemView.setOnClickListener(v -> {
+                    Intent intent = new Intent(getContext(), DetailActivity.class);
+                    intent.putExtra(DetailActivity.TYPE_SONG_LIST, songList);
+                    startActivity(intent);
                 });
 
             }

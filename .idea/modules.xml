@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/JKMusic.iml" filepath="$PROJECT_DIR$/JKMusic.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/lib-glide-transformation/lib-glide-transformation.iml" filepath="$PROJECT_DIR$/lib-glide-transformation/lib-glide-transformation.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-ui/lib-ui.iml" filepath="$PROJECT_DIR$/lib-ui/lib-ui.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib-utils/lib-utils.iml" filepath="$PROJECT_DIR$/lib-utils/lib-utils.iml" />
     </modules>

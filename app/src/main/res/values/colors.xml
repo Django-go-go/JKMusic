@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#ca27ba</color>
-    <color name="colorPrimaryDark">#e11eba</color>
+    <color name="colorPrimary">#ffffff</color>
+    <color name="colorPrimaryDark">#ffffff</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="common_text_normal">#212020</color>
+    <color name="common_text_press">#ff0008</color>
 
     <color name="pink">#FF4081</color>
     <color name="black">#000000</color>

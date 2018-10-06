@@ -21,6 +21,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions;
+import com.bumptech.glide.request.target.BitmapImageViewTarget;
+import com.bumptech.glide.request.transition.Transition;
+import com.bumptech.glide.request.transition.TransitionFactory;
+import com.jkingone.glide_transformation.RoundedCornersTransformation;
 import com.jkingone.jkmusic.ui.base.LazyFragment;
 import com.jkingone.jkmusic.viewmodels.ArtistListViewModel;
 import com.jkingone.utils.DensityUtils;
@@ -272,7 +278,9 @@ public class ArtistListFragment extends LazyFragment {
                         .asBitmap()
                         .override(w)
                         .load(artistList.avatarBig)
-                        .into(holder.mImageView);
+                        .transition(BitmapTransitionOptions.withCrossFade())
+                        .transform(new RoundedCornersTransformation(8, 0))
+                        .into(new BitmapImageViewTarget(holder.mImageView));
             }
 
         }

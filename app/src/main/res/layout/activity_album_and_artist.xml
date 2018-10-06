@@ -45,9 +45,9 @@
             android:background="@drawable/shape_rect_top_white"
             app:tabPadding="3dp"
             app:tabTextSize="16sp"
-            app:tabTextColor="@color/black"
+            app:tabTextColor="@color/common_text_normal"
             app:indicatorHeight="1dp"
-            app:indicatorColor="@color/black"
+            app:indicatorColor="@color/common_text_normal"
             app:shouldExpand="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
