@@ -41,10 +41,6 @@ public class MainActivity extends BaseActivity {
 
 	private MyPagerAdapter adapter;
 
-	private Fragment[] fragment = {
-			PlaceholderFragment.newInstance("~~~~~~~~~"),
-			NetWorkFragment.newInstance("-------")};
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -57,7 +53,7 @@ public class MainActivity extends BaseActivity {
 
 		initView();
 
-		setPlayFragment(R.id.fragment_container);
+//		setPlayFragment(R.id.fragment_container);
 
 		PermissionUtils.hasPermission(this);
 
@@ -166,6 +162,10 @@ public class MainActivity extends BaseActivity {
 
 	private class MyPagerAdapter extends FragmentPagerAdapter {
 
+		private Fragment[] fragment = {
+				PlaceholderFragment.newInstance("PlaceholderFragment"),
+				NetWorkFragment.newInstance("NetWorkFragment")};
+
 		MyPagerAdapter(FragmentManager fm) {
 			super(fm);
 		}
@@ -180,10 +180,6 @@ public class MainActivity extends BaseActivity {
 			return fragment[position];
 		}
 
-		@Override
-		public void destroyItem(ViewGroup container, int position, Object object) {
-//			super.destroyItem(container, position, object);
-		}
 	}
 
 }

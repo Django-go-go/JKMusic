@@ -74,12 +74,7 @@ public class AlbumListFragment extends LazyFragment {
             mContentLoadView.postLoadComplete();
 
             mAlbumLists.addAll(albumLists);
-            if (mAlbumAdapter == null) {
-                mAlbumAdapter = new AlbumAdapter(getContext());
-                mRecyclerView.setAdapter(mAlbumAdapter);
-            } else {
-                mAlbumAdapter.notifyDataSetChanged();
-            }
+            mAlbumAdapter.notifyDataSetChanged();
         }
     };
 
@@ -91,19 +86,31 @@ public class AlbumListFragment extends LazyFragment {
     }
 
     @Override
-    protected void onLazyLoadOnce() {
+    protected boolean onLazyLoadOnce() {
         mAlbumListViewModel.getAlbumList(offset, LIMIT);
+        return true;
+    }
+
+    @Override
+    protected void onVisibleToUser() {
+        if (mAlbumLists.size() > 0) {
+            mContentLoadView.postLoadComplete();
+        } else {
+            mAlbumListViewModel.getAlbumList(offset, LIMIT);
+        }
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.common_root_none, container, false);
         ButterKnife.bind(this, view);
-        StaggeredGridLayoutManager manager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL);
+        StaggeredGridLayoutManager manager =
+                new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(manager);
         mRecyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
             @Override
-            public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+            public void getItemOffsets(Rect outRect, View view,
+                                       RecyclerView parent, RecyclerView.State state) {
                 outRect.bottom = 6;
                 outRect.left = 6;
                 outRect.right = 6;
@@ -113,7 +120,8 @@ public class AlbumListFragment extends LazyFragment {
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                StaggeredGridLayoutManager manager = (StaggeredGridLayoutManager) recyclerView.getLayoutManager();
+                StaggeredGridLayoutManager manager =
+                        (StaggeredGridLayoutManager) recyclerView.getLayoutManager();
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     int[] pos = new int[manager.getSpanCount()];
                     manager.findLastVisibleItemPositions(pos);
@@ -130,6 +138,10 @@ public class AlbumListFragment extends LazyFragment {
                 }
             }
         });
+        if (mAlbumAdapter == null) {
+            mAlbumAdapter = new AlbumAdapter(getContext());
+        }
+        mRecyclerView.setAdapter(mAlbumAdapter);
         mContentLoadView.setLoadRetryListener(() -> mAlbumListViewModel.getAlbumList(offset, LIMIT));
         return view;
     }
@@ -153,7 +165,8 @@ public class AlbumListFragment extends LazyFragment {
         @NonNull
         @Override
         public AlbumViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new AlbumViewHolder(LayoutInflater.from(mContext).inflate(R.layout.item_list_albumlist, parent, false));
+            return new AlbumViewHolder(LayoutInflater.from(mContext)
+                    .inflate(R.layout.item_list_albumlist, parent, false));
         }
 
         @Override
@@ -220,7 +233,8 @@ public class AlbumListFragment extends LazyFragment {
                 super(itemView);
                 ButterKnife.bind(this, itemView);
                 mView.setLayoutParams(new LinearLayout.LayoutParams(mWidth, mWidth));
-                itemView.setLayoutParams(new RecyclerView.LayoutParams(mWidth, RecyclerView.LayoutParams.WRAP_CONTENT));
+                itemView.setLayoutParams(new RecyclerView.LayoutParams(
+                        mWidth, RecyclerView.LayoutParams.WRAP_CONTENT));
             }
         }
     }

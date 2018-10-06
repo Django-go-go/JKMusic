@@ -10,24 +10,11 @@ public final class LogUtils {
 
     private static final String TAG = "JKMusic";
 
-    private static volatile boolean writeDebugLogs = false;
-    private static volatile boolean writeLogs = true;
-
     private LogUtils() {
     }
 
-    public static void writeDebugLogs(boolean writeDebugLogs) {
-        LogUtils.writeDebugLogs = writeDebugLogs;
-    }
-
-    public static void writeLogs(boolean writeLogs) {
-        LogUtils.writeLogs = writeLogs;
-    }
-
     public static void d(String message) {
-        if (writeDebugLogs) {
-            log(Log.DEBUG, null, message);
-        }
+        log(Log.DEBUG, null, message);
     }
 
     public static void i(String message) {
@@ -51,10 +38,6 @@ public final class LogUtils {
     }
 
     private static void log(int priority, Throwable ex, String message) {
-        if (!writeLogs) {
-            return;
-        }
-
         String log;
         if (ex == null) {
             log = message;

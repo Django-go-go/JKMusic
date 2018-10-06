@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,7 +21,6 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
 public class NetWorkFragment extends LazyFragment {
-    private static final String TAG = "NetWorkFragment";
     
     private Unbinder mUnbinder;
 
@@ -38,18 +38,20 @@ public class NetWorkFragment extends LazyFragment {
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_network, container, false);
         mUnbinder = ButterKnife.bind(this, view);
+        adapter = new MyPagerAdapter(getChildFragmentManager());
         return view;
     }
 
     @Override
-    protected void onLazyLoadOnce() {
+    protected boolean onLazyLoadOnce() {
         super.onLazyLoadOnce();
-        adapter = new MyPagerAdapter(getChildFragmentManager()/*, false*/);
         pager.setAdapter(adapter);
         mTabStrip.setViewPager(pager);
+        return true;
     }
 
     @Override
@@ -59,7 +61,6 @@ public class NetWorkFragment extends LazyFragment {
     }
 
     private static class MyPagerAdapter extends FragmentPagerAdapter {
-
         private Fragment[] mFragments = {
                 ArtistListFragment.newInstance("ArtistListFragment"),
                 AlbumListFragment.newInstance("AlbumListFragment"),
@@ -67,8 +68,8 @@ public class NetWorkFragment extends LazyFragment {
                 TopListFragment.newInstance("TopListFragment")};
         private String[] titles = {"歌手", "唱片", "歌单", "排行榜"};
 
-        MyPagerAdapter(FragmentManager fm/*, boolean isVisible*/) {
-            super(fm/*, isVisible*/);
+        MyPagerAdapter(FragmentManager fm) {
+            super(fm);
         }
 
         @Override
@@ -85,11 +86,6 @@ public class NetWorkFragment extends LazyFragment {
         @Override
         public Fragment getItem(int position) {
             return mFragments[position];
-        }
-
-        @Override
-        public void destroyItem(ViewGroup container, int position, Object object) {
-//            super.destroyItem(container, position, object);
         }
 
     }

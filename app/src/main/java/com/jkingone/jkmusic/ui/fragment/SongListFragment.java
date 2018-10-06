@@ -43,9 +43,8 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
 /**
- * Created by Administrator on 2017/8/6.
+ * Created by Jkingone on 2017/8/6.
  */
-
 public class SongListFragment extends LazyFragment implements Observer<List<SongList>> {
 
     @BindView(R.id.recycle_common)
@@ -77,8 +76,19 @@ public class SongListFragment extends LazyFragment implements Observer<List<Song
     }
 
     @Override
-    protected void onLazyLoadOnce() {
+    protected boolean onLazyLoadOnce() {
         mSongListViewModel.getSongList(SIZE, offset);
+        return true;
+    }
+
+    @Override
+    protected void onVisibleToUser() {
+        super.onVisibleToUser();
+        if (mSongLists.size() > 0) {
+            mContentLoadView.postLoadComplete();
+        } else {
+            mSongListViewModel.getSongList(SIZE, offset);
+        }
     }
 
     @Override
@@ -105,6 +115,11 @@ public class SongListFragment extends LazyFragment implements Observer<List<Song
                 }
             }
         });
+
+        if (mRecycleAdapter == null) {
+            mRecycleAdapter = new SongListAdapter(getContext());
+        }
+        mRecyclerView.setAdapter(mRecycleAdapter);
 
         mContentLoadView.setLoadRetryListener(() -> mSongListViewModel.getSongList(SIZE, offset));
 
@@ -148,12 +163,7 @@ public class SongListFragment extends LazyFragment implements Observer<List<Song
 
         mSongLists.addAll(songLists);
 
-        if (offset == 1) {
-            mRecycleAdapter = new SongListAdapter(getContext());
-            mRecyclerView.setAdapter(mRecycleAdapter);
-        } else {
-            mRecycleAdapter.notifyDataSetChanged();
-        }
+        mRecycleAdapter.notifyDataSetChanged();
 
         mRecycleAdapter.mFootLoadView.postLoadComplete();
 

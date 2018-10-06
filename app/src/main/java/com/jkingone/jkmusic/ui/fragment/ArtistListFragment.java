@@ -13,6 +13,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,12 +22,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
-import com.bumptech.glide.request.transition.Transition;
-import com.bumptech.glide.request.transition.TransitionFactory;
-import com.jkingone.glide_transformation.RoundedCornersTransformation;
 import com.jkingone.jkmusic.ui.base.LazyFragment;
 import com.jkingone.jkmusic.viewmodels.ArtistListViewModel;
 import com.jkingone.utils.DensityUtils;
@@ -42,6 +40,8 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
 public class ArtistListFragment extends LazyFragment {
+
+    private static final String TAG = "ArtistListFragment";
 
     public static ArtistListFragment newInstance(String... params) {
         ArtistListFragment fragment = new ArtistListFragment();
@@ -68,7 +68,7 @@ public class ArtistListFragment extends LazyFragment {
             ArtistApi.AREA_OTHER, ArtistApi.AREA_OTHER, ArtistApi.AREA_OTHER
     };
 
-    private static int[] sSexs = {
+    private static int[] sSexes = {
             ArtistApi.SEX_MALE, ArtistApi.SEX_FEMALE, ArtistApi.SEX_GROUP,
             ArtistApi.SEX_MALE, ArtistApi.SEX_FEMALE, ArtistApi.SEX_GROUP,
             ArtistApi.SEX_MALE, ArtistApi.SEX_FEMALE, ArtistApi.SEX_GROUP,
@@ -84,6 +84,7 @@ public class ArtistListFragment extends LazyFragment {
     private Unbinder mUnbinder;
 
     private HotAdapter mHotAdapter;
+    private ContentAdapter mContentAdapter;
 
     private ArtistListViewModel mArtistListViewModel;
     private Observer<PagedList<ArtistList>> mArtistListObserver = artistLists -> {
@@ -98,8 +99,9 @@ public class ArtistListFragment extends LazyFragment {
     }
 
     @Override
-    protected void onLazyLoadOnce() {
+    protected boolean onLazyLoadOnce() {
         mArtistListViewModel.getArtistListLiveData().observe(this, mArtistListObserver);
+        return true;
     }
 
     @Nullable
@@ -120,7 +122,11 @@ public class ArtistListFragment extends LazyFragment {
             }
         });
 
-        mRecyclerViewContent.setAdapter(new ContentAdapter(getContext()));
+        if (mContentAdapter == null) {
+            mContentAdapter = new ContentAdapter(getContext());
+        }
+
+        mRecyclerViewContent.setAdapter(mContentAdapter);
         mContentLoadView.postLoadComplete();
 
         return view;
@@ -184,7 +190,7 @@ public class ArtistListFragment extends LazyFragment {
                     public void onClick(View v) {
                         Intent intent = new Intent(mContext, ArtistListActivity.class);
                         intent.putExtra(ARTIST_AREA, sAreas[position - 1]);
-                        intent.putExtra(ARTIST_SEX, sSexs[position - 1]);
+                        intent.putExtra(ARTIST_SEX, sSexes[position - 1]);
                         ArtistListFragment.this.startActivity(intent);
                     }
                 });
@@ -279,7 +285,7 @@ public class ArtistListFragment extends LazyFragment {
                         .override(w)
                         .load(artistList.avatarBig)
                         .transition(BitmapTransitionOptions.withCrossFade())
-                        .transform(new RoundedCornersTransformation(8, 0))
+                        .transform(new RoundedCorners(8))
                         .into(new BitmapImageViewTarget(holder.mImageView));
             }
 

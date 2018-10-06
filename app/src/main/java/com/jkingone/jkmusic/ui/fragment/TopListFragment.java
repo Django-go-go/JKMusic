@@ -15,6 +15,10 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
+import com.bumptech.glide.request.target.BitmapImageViewTarget;
+import com.jkingone.glide_transformation.RoundedCornersTransformation;
 import com.jkingone.jkmusic.ui.base.LazyFragment;
 import com.jkingone.jkmusic.viewmodels.TopListViewModel;
 import com.jkingone.utils.DensityUtils;
@@ -38,6 +42,9 @@ import butterknife.Unbinder;
 public class TopListFragment extends LazyFragment {
 
     private Unbinder mUnbinder;
+
+    private TopListAdapter mTopListAdapter;
+    private List<TopList> mTopLists = new ArrayList<>();
 
     @BindView(R.id.recycle_common)
     RecyclerView mRecyclerView;
@@ -63,14 +70,12 @@ public class TopListFragment extends LazyFragment {
                 return;
             }
             mContentLoadView.postLoadComplete();
-            List<TopList> mList = new ArrayList<>();
             for (TopList topList : topLists) {
                 if (!topList.getType().equals("105")) {
-                    mList.add(topList);
+                    mTopLists.add(topList);
                 }
             }
-            TopListAdapter listAdapter = new TopListAdapter(getContext(), mList);
-            mRecyclerView.setAdapter(listAdapter);
+            mTopListAdapter.notifyDataSetChanged();
         }
     };
 
@@ -82,20 +87,35 @@ public class TopListFragment extends LazyFragment {
     }
 
     @Override
-    protected void onLazyLoadOnce() {
+    protected boolean onLazyLoadOnce() {
         mTopListViewModel.getTopList();
+        return true;
     }
 
+    @Override
+    protected void onVisibleToUser() {
+        if (mTopLists.size() > 0) {
+            mContentLoadView.postLoadComplete();
+        } else {
+            mTopListViewModel.getTopList();
+        }
+    }
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.common_root_none, container, false);
 
         mUnbinder = ButterKnife.bind(this, view);
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        if (mTopListAdapter == null) {
+            mTopListAdapter = new TopListAdapter(getContext());
+        }
+        mRecyclerView.setAdapter(mTopListAdapter);
 
         mContentLoadView.setLoadRetryListener(() -> mTopListViewModel.getTopList());
 
@@ -108,16 +128,20 @@ public class TopListFragment extends LazyFragment {
         mUnbinder.unbind();
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mTopListViewModel.getTopListLiveData().removeObserver(mTopListObserver);
+    }
+
     class TopListAdapter extends RecyclerView.Adapter<TopListAdapter.VH> {
 
         private LayoutInflater mInflater;
         private Context mContext;
-        private List<TopList> mList;
 
-        TopListAdapter(Context context, List<TopList> list) {
+        TopListAdapter(Context context) {
             mInflater = LayoutInflater.from(context);
             mContext = context;
-            mList = list;
         }
 
         @NonNull
@@ -128,7 +152,7 @@ public class TopListFragment extends LazyFragment {
 
         @Override
         public void onBindViewHolder(@NonNull VH vh, final int position) {
-            TopList topList = mList.get(position);
+            TopList topList = mTopLists.get(position);
             List<TopList.Content> contents = topList.getContent();
             List<String> strings = new ArrayList<>();
             for (TopList.Content content : contents) {
@@ -140,9 +164,9 @@ public class TopListFragment extends LazyFragment {
             vh.textView3.setText(strings.get(2));
             vh.textView4.setText(strings.get(3));
             vh.itemView.setOnClickListener(v -> {
-                if (mList.get(position) != null){
+                if (mTopLists.get(position) != null){
                     Intent intent = new Intent(mContext, DetailActivity.class);
-                    intent.putExtra(DetailActivity.TYPE_TOP_LIST, mList.get(position));
+                    intent.putExtra(DetailActivity.TYPE_TOP_LIST, mTopLists.get(position));
                     startActivity(intent);
                 }
             });
@@ -151,12 +175,14 @@ public class TopListFragment extends LazyFragment {
                     .asBitmap()
                     .load(topList.getPicS260())
                     .override(DensityUtils.dp2px(mContext, 124))
-                    .into(vh.imageView);
+                    .transition(BitmapTransitionOptions.withCrossFade())
+                    .transform(new RoundedCorners(12))
+                    .into(new BitmapImageViewTarget(vh.imageView));
         }
 
         @Override
         public int getItemCount() {
-            return mList.size();
+            return mTopLists.size();
         }
 
         class VH extends RecyclerView.ViewHolder {

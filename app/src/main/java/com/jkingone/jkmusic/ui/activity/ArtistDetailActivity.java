@@ -18,7 +18,7 @@ import com.jkingone.jkmusic.R;
 import com.jkingone.jkmusic.entity.Artist;
 import com.jkingone.jkmusic.entity.ArtistList;
 import com.jkingone.jkmusic.ui.base.BaseActivity;
-import com.jkingone.jkmusic.viewmodels.ArtistVieModel;
+import com.jkingone.jkmusic.viewmodels.ArtistViewModel;
 import com.jkingone.ui.ContentLoadView;
 import com.jkingone.ui.PagerSlidingTabStrip;
 import com.jkingone.utils.ScreenUtils;
@@ -49,7 +49,7 @@ public class ArtistDetailActivity extends BaseActivity {
     @BindView(R.id.iv_cover)
     ImageView mImageViewCover;
 
-    private ArtistVieModel mArtistVieModel;
+    private ArtistViewModel mArtistViewModel;
     private Observer<Artist.ArtistInfo> mArtistInfoObserver = new Observer<Artist.ArtistInfo>() {
         @Override
         public void onChanged(@Nullable Artist.ArtistInfo artistInfo) {
@@ -73,11 +73,11 @@ public class ArtistDetailActivity extends BaseActivity {
 
         ButterKnife.bind(this);
 
-        mArtistVieModel = ViewModelProviders.of(this).get(ArtistVieModel.class);
-        mArtistVieModel.getArtistInfoLiveData().observe(this, mArtistInfoObserver);
-        mArtistVieModel.getArtistSongsLiveData().observe(this, mArtistSongsObserver);
-        mArtistVieModel.getArtistSong(mArtistList.tingUid, mArtistList.artistId, mOffset, LIMIT);
-        mArtistVieModel.getArtistInfo(mArtistList.tingUid, mArtistList.artistId);
+        mArtistViewModel = ViewModelProviders.of(this).get(ArtistViewModel.class);
+        mArtistViewModel.getArtistInfoLiveData().observe(this, mArtistInfoObserver);
+        mArtistViewModel.getArtistSongsLiveData().observe(this, mArtistSongsObserver);
+        mArtistViewModel.getArtistSong(mArtistList.tingUid, mArtistList.artistId, mOffset, LIMIT);
+        mArtistViewModel.getArtistInfo(mArtistList.tingUid, mArtistList.artistId);
         mViewPager.setAdapter(new ViewPagerAdapter());
         mPagerSlidingTabStrip.setViewPager(mViewPager);
     }
@@ -85,8 +85,8 @@ public class ArtistDetailActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mArtistVieModel.getArtistSongsLiveData().removeObserver(mArtistSongsObserver);
-        mArtistVieModel.getArtistInfoLiveData().removeObserver(mArtistInfoObserver);
+        mArtistViewModel.getArtistSongsLiveData().removeObserver(mArtistSongsObserver);
+        mArtistViewModel.getArtistInfoLiveData().removeObserver(mArtistInfoObserver);
     }
 
     class ViewPagerAdapter extends PagerAdapter {

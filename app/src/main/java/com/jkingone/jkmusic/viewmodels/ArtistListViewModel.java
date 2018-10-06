@@ -19,6 +19,7 @@ import com.google.gson.JsonParser;
 import com.jkingone.jkmusic.Constant;
 import com.jkingone.jkmusic.NetWorkState;
 import com.jkingone.jkmusic.api.ArtistApi;
+import com.jkingone.jkmusic.entity.Artist;
 import com.jkingone.jkmusic.entity.ArtistList;
 
 import java.lang.annotation.Annotation;

@@ -56,11 +56,14 @@ public class LazyFragment extends Fragment {
     private void handleOnVisibilityChangedToUser(boolean isVisibleToUser) {
         if (isVisibleToUser && isVisible()) {
             // 对用户可见
+            boolean lazy = false;
             if (!mIsLoadedData) {
                 mIsLoadedData = true;
-                onLazyLoadOnce();
+                lazy = onLazyLoadOnce();
             }
-            onVisibleToUser();
+            if (!lazy) {
+                onVisibleToUser();
+            }
         } else {
             // 对用户不可见
             onInvisibleToUser();
@@ -68,8 +71,9 @@ public class LazyFragment extends Fragment {
     }
 
     /**  懒加载一次。如果只想在对用户可见时才加载数据，并且只加载一次数据，在子类中重写该方法 */
-    protected void onLazyLoadOnce() {
+    protected boolean onLazyLoadOnce() {
         Log.i(PlaceholderFragment.TAG, "onLazyLoadOnce: " + params[0]);
+        return false;
     }
 
     /** 对用户可见时触发该方法。如果只想在对用户可见时才加载数据，在子类中重写该方法 */

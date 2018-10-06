@@ -33,11 +33,11 @@ import retrofit2.Retrofit;
 /**
  * Created by jiangbo03 at 2018/8/31
  */
-public class ArtistVieModel extends AndroidViewModel {
+public class ArtistViewModel extends AndroidViewModel {
     private MutableLiveData<Artist.ArtistInfo> mArtistInfoLiveData;
     private MutableLiveData<List<Artist.Song>> mArtistSongsLiveData;
 
-    public ArtistVieModel(@NonNull Application application) {
+    public ArtistViewModel(@NonNull Application application) {
         super(application);
         mArtistInfoLiveData = new MutableLiveData<>();
         mArtistSongsLiveData = new MutableLiveData<>();
